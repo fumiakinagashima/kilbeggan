@@ -110,6 +110,55 @@ export async function createActivity(
 	};
 }
 
+export async function getActivity(db: Db, id: string) {
+	const act = await db
+		.select({
+			id: activities.id,
+			body: activities.body,
+			isPrivate: activities.isPrivate,
+			createdAt: activities.createdAt,
+			userId: activities.userId,
+			userName: users.name
+		})
+		.from(activities)
+		.leftJoin(users, eq(activities.userId, users.id))
+		.where(eq(activities.id, id))
+		.get();
+
+	if (!act) return null;
+
+	const mentions = await db
+		.select({
+			customerId: activityMentions.customerId,
+			company: customers.company
+		})
+		.from(activityMentions)
+		.leftJoin(customers, eq(activityMentions.customerId, customers.id))
+		.where(eq(activityMentions.activityId, id))
+		.all();
+
+	return { ...act, mentions: mentions.map((m) => ({ customerId: m.customerId, company: m.company ?? '' })) };
+}
+
+export async function updateActivity(
+	db: Db,
+	id: string,
+	data: { body: string; isPrivate: boolean; mentionedCustomerIds: string[] }
+): Promise<void> {
+	await db.update(activities).set({ body: data.body, isPrivate: data.isPrivate }).where(eq(activities.id, id));
+	await db.delete(activityMentions).where(eq(activityMentions.activityId, id));
+	if (data.mentionedCustomerIds.length > 0) {
+		await db.insert(activityMentions).values(
+			data.mentionedCustomerIds.map((customerId) => ({
+				id: crypto.randomUUID(),
+				activityId: id,
+				customerId,
+				createdAt: new Date()
+			}))
+		);
+	}
+}
+
 export async function updateActivityPrivacy(
 	db: Db,
 	id: string,

@@ -18,6 +18,7 @@
 - [x] 活動フィード (タイムライン表示、@メンション青色表示)
 - [x] プライベート投稿 (非公開フラグ、フィードからトグル)
 - [x] スキーマ改訂 (customers: company必須化、users: admin/user権限、activities: 多対多メンション)
+- [x] ルーティング整理 (/ 投稿専用, /fields 活動一覧, /fields/[id] 活動編集, /customers/[id]/edit 顧客編集)
 
 ---
 

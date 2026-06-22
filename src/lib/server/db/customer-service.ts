@@ -10,6 +10,19 @@ export async function getCustomer(db: Db, id: string) {
 	return db.select().from(customers).where(eq(customers.id, id)).get() ?? null;
 }
 
+export async function updateCustomer(
+	db: Db,
+	id: string,
+	data: {
+		company: string;
+		phone?: string | null;
+		email?: string | null;
+		notes?: string | null;
+	}
+) {
+	await db.update(customers).set({ ...data, updatedAt: new Date() }).where(eq(customers.id, id));
+}
+
 export async function createCustomer(
 	db: Db,
 	data: {

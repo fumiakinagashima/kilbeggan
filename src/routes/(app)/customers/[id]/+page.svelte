@@ -8,7 +8,10 @@
 <div class="page">
 	<header class="page-header">
 		<a href="/customers" class="back">← 顧客一覧</a>
-		<h1>{data.customer.company}</h1>
+		<div class="page-title">
+			<h1>{data.customer.company}</h1>
+			<a href="/customers/{data.customer.id}/edit" class="edit-link">編集</a>
+		</div>
 	</header>
 
 	{#if data.customer.phone || data.customer.email}
@@ -83,10 +86,27 @@
 			text-decoration: none;
 			margin-bottom: 0.5rem;
 		}
+	}
+
+	.page-title {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
 
 		h1 {
 			font-size: 1.25rem;
 			font-weight: 700;
+		}
+
+		.edit-link {
+			font-size: 0.875rem;
+			color: var(--color-primary);
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
 		}
 	}
 

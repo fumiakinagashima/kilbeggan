@@ -1,21 +1,19 @@
 <script lang="ts">
+	import { parseBody } from '$lib/body';
 	import { Lock, Globe } from '@lucide/svelte';
 
-	let { data } = $props();
+	let { data, form } = $props();
 
-	type CustomerOption = { id: string; company: string };
-	// compose state
-	let posting = $state(false);
-	let postError = $state('');
-	let hasContent = $state(false);
-	let isPrivate = $state(false);
-
-	// contenteditable editor
+	let isPrivate = $state(data.activity.isPrivate);
+	let hasContent = $state(true);
 	let editorEl: HTMLDivElement | undefined = $state();
 	let isComposing = $state(false);
 	let mentionQuery = $state('');
 	let mentionRange: Range | null = null;
 	let showDropdown = $state(false);
+	let submitting = $state(false);
+
+	type CustomerOption = { id: string; company: string };
 
 	let filteredCustomers: CustomerOption[] = $derived(
 		showDropdown
@@ -27,6 +25,25 @@
 					.slice(0, 6)
 			: []
 	);
+
+	$effect(() => {
+		if (!editorEl) return;
+		const segments = parseBody(data.activity.body);
+		editorEl.innerHTML = '';
+		for (const seg of segments) {
+			if (seg.type === 'text') {
+				editorEl.appendChild(document.createTextNode(seg.text));
+			} else {
+				const span = document.createElement('span');
+				span.className = 'inline-mention';
+				span.contentEditable = 'false';
+				span.dataset.mentionId = seg.id;
+				span.dataset.mentionName = seg.name;
+				span.textContent = `@${seg.name}`;
+				editorEl.appendChild(span);
+			}
+		}
+	});
 
 	function getBodyText(): string {
 		if (!editorEl) return '';
@@ -49,16 +66,10 @@
 
 	function checkMention() {
 		const sel = window.getSelection();
-		if (!sel || !sel.rangeCount) {
-			showDropdown = false;
-			return;
-		}
+		if (!sel || !sel.rangeCount) { showDropdown = false; return; }
 		const range = sel.getRangeAt(0);
 		const node = range.startContainer;
-		if (node.nodeType !== Node.TEXT_NODE) {
-			showDropdown = false;
-			return;
-		}
+		if (node.nodeType !== Node.TEXT_NODE) { showDropdown = false; return; }
 		const before = (node.textContent ?? '').slice(0, range.startOffset);
 		const match = before.match(/@([^@\n]*)$/);
 		if (match && !match[1].startsWith('[')) {
@@ -77,11 +88,6 @@
 	function handleEditorInput() {
 		hasContent = (editorEl?.textContent?.trim().length ?? 0) > 0;
 		if (!isComposing) checkMention();
-	}
-
-	function handleCompositionEnd() {
-		isComposing = false;
-		checkMention();
 	}
 
 	function handlePaste(e: ClipboardEvent) {
@@ -104,7 +110,6 @@
 	function insertMention(c: CustomerOption) {
 		if (!mentionRange) return;
 		mentionRange.deleteContents();
-
 		const span = document.createElement('span');
 		span.className = 'inline-mention';
 		span.contentEditable = 'false';
@@ -112,106 +117,90 @@
 		span.dataset.mentionName = c.company;
 		span.textContent = `@${c.company}`;
 		mentionRange.insertNode(span);
-
-		const space = document.createTextNode(' ');
+		const space = document.createTextNode(' ');
 		(span as any).after(space);
 		const newRange = document.createRange();
 		newRange.setStart(space, 1);
 		newRange.collapse(true);
 		window.getSelection()?.removeAllRanges();
 		window.getSelection()?.addRange(newRange);
-
 		showDropdown = false;
 		mentionQuery = '';
 		mentionRange = null;
 		hasContent = true;
 	}
 
-	function handleEditorBlur() {
-		setTimeout(() => {
-			showDropdown = false;
-		}, 150);
-	}
-
-	async function post(e: SubmitEvent) {
-		e.preventDefault();
-		const bodyText = getBodyText().trim();
-		if (!bodyText) return;
-		postError = '';
-		posting = true;
-		try {
-			const res = await fetch('/api/activities', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ body: bodyText, isPrivate })
-			});
-			const result = (await res.json()) as { error?: string };
-			if (!res.ok) {
-				postError = result.error ?? 'エラーが発生しました';
-				return;
-			}
-			if (editorEl) editorEl.innerHTML = '';
-			hasContent = false;
-			isPrivate = false;
-		} finally {
-			posting = false;
-		}
+	function handleSubmit(e: SubmitEvent) {
+		const formEl = e.target as HTMLFormElement;
+		const bodyInput = formEl.querySelector('input[name="body"]') as HTMLInputElement;
+		bodyInput.value = getBodyText();
+		submitting = true;
 	}
 </script>
 
 <div class="page">
-	<section class="compose">
-		<form onsubmit={post}>
-			{#if postError}
-				<p class="error">{postError}</p>
+	<header class="page-header">
+		<a href="/fields" class="back">← 活動一覧</a>
+		<h1>活動を編集</h1>
+	</header>
+
+	{#if form?.error}
+		<p class="error">{form.error}</p>
+	{/if}
+
+	<form method="POST" onsubmit={handleSubmit}>
+		<input type="hidden" name="body" value="" />
+		<input type="hidden" name="isPrivate" value={isPrivate} />
+
+		<div class="editor-wrap">
+			<div
+				class="editor"
+				contenteditable={submitting ? 'false' : 'true'}
+				role="textbox"
+				aria-multiline="true"
+				bind:this={editorEl}
+				oninput={handleEditorInput}
+				oncompositionstart={() => (isComposing = true)}
+				oncompositionend={() => { isComposing = false; checkMention(); }}
+				onpaste={handlePaste}
+				onblur={() => setTimeout(() => { showDropdown = false; }, 150)}
+			></div>
+			{#if showDropdown && filteredCustomers.length > 0}
+				<ul class="mention-dropdown">
+					{#each filteredCustomers as c (c.id)}
+						<li>
+							<button type="button" onmousedown={() => insertMention(c)}>
+								{c.company}
+							</button>
+						</li>
+					{/each}
+				</ul>
 			{/if}
-			<div class="editor-wrap">
-				<div
-					class="editor"
-					class:empty={!hasContent}
-					contenteditable={posting ? 'false' : 'true'}
-					role="textbox"
-					aria-multiline="true"
-					bind:this={editorEl}
-					oninput={handleEditorInput}
-					oncompositionstart={() => (isComposing = true)}
-					oncompositionend={handleCompositionEnd}
-					onpaste={handlePaste}
-					onblur={handleEditorBlur}
-				></div>
-				{#if showDropdown && filteredCustomers.length > 0}
-					<ul class="mention-dropdown">
-						{#each filteredCustomers as c (c.id)}
-							<li>
-								<button type="button" onmousedown={() => insertMention(c)}>
-									{c.company}
-								</button>
-							</li>
-						{/each}
-					</ul>
+		</div>
+
+		<div class="compose-footer">
+			<button
+				type="button"
+				class="privacy-toggle"
+				class:private={isPrivate}
+				onclick={() => (isPrivate = !isPrivate)}
+			>
+				{#if isPrivate}
+					<Lock size={13} />
+					非公開
+				{:else}
+					<Globe size={13} />
+					全体公開
 				{/if}
-			</div>
-			<div class="compose-footer">
-				<button
-					type="button"
-					class="privacy-toggle"
-					class:private={isPrivate}
-					onclick={() => (isPrivate = !isPrivate)}
-				>
-					{#if isPrivate}
-						<Lock size={13} />
-						非公開
-					{:else}
-						<Globe size={13} />
-						全体公開
-					{/if}
-				</button>
-				<button type="submit" class="btn-post" disabled={posting || !hasContent}>
-					{posting ? '送信中...' : '投稿'}
+			</button>
+			<div class="actions">
+				<a href="/fields" class="btn-cancel">キャンセル</a>
+				<button type="submit" class="btn-save" disabled={submitting || !hasContent}>
+					{submitting ? '保存中...' : '保存'}
 				</button>
 			</div>
-		</form>
-	</section>
+		</div>
+	</form>
 </div>
 
 <style lang="scss">
@@ -219,52 +208,63 @@
 		max-width: 680px;
 		margin: 0 auto;
 		padding: 0 1rem 2rem;
+
 		@media (min-width: 768px) {
 			padding: 0 2rem 2rem;
 		}
 	}
 
-	.compose {
-		padding: 1rem 0;
+	.page-header {
+		padding: 1.25rem 0 1rem;
+		border-bottom: 1px solid var(--color-border);
 		margin-bottom: 1rem;
 
-		form {
-			display: flex;
-			flex-direction: column;
-			gap: 0;
+		.back {
+			display: block;
+			font-size: 0.875rem;
+			color: var(--color-primary);
+			text-decoration: none;
+			margin-bottom: 0.5rem;
 		}
+
+		h1 {
+			font-size: 1.125rem;
+			font-weight: 700;
+		}
+	}
+
+	.error {
+		font-size: 0.875rem;
+		color: var(--color-error);
+		background: var(--color-error-bg);
+		padding: 0.625rem 0.875rem;
+		border-radius: 8px;
+		margin-bottom: 1rem;
 	}
 
 	.editor-wrap {
 		position: relative;
-		border-bottom: 1px solid var(--color-border);
-		margin-bottom: 0.625rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.editor {
-		border: 1px solid #ccc;
-		min-height: 12rem;
-		padding: 0.55rem;
+		border: 1px solid var(--color-border);
+		min-height: 10rem;
+		padding: 0.75rem;
 		font-size: 1rem;
 		font-family: inherit;
 		line-height: 1.47;
 		outline: none;
-		background: transparent;
+		background: var(--color-surface);
 		color: var(--color-text);
 		cursor: text;
 		white-space: pre-wrap;
 		word-break: break-word;
 		text-align: left;
-		border-radius: 6px;
+		border-radius: 8px;
 
 		&[contenteditable='false'] {
 			opacity: 0.6;
-		}
-
-		&.empty::before {
-			content: attr(data-placeholder);
-			color: var(--color-text-muted);
-			pointer-events: none;
 		}
 	}
 
@@ -322,10 +322,7 @@
 		color: var(--color-text-muted);
 		font-size: 0.8125rem;
 		cursor: pointer;
-		transition:
-			color 0.15s,
-			border-color 0.15s,
-			background 0.15s;
+		transition: color 0.15s, border-color 0.15s, background 0.15s;
 
 		&.private {
 			color: var(--color-primary);
@@ -334,15 +331,27 @@
 		}
 	}
 
-	.error {
-		font-size: 0.875rem;
-		color: var(--color-error);
-		background: var(--color-error-bg);
-		padding: 0.625rem 0.875rem;
-		border-radius: 8px;
+	.actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
-	.btn-post {
+	.btn-cancel {
+		padding: 0.5rem 1rem;
+		border: 1px solid var(--color-border);
+		border-radius: 20px;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		text-decoration: none;
+		background: var(--color-surface);
+
+		&:hover {
+			background: var(--color-bg);
+		}
+	}
+
+	.btn-save {
 		padding: 0.5rem 1.25rem;
 		background: var(--color-primary);
 		color: #fff;
@@ -356,79 +365,6 @@
 		&:disabled {
 			opacity: 0.5;
 			cursor: not-allowed;
-		}
-	}
-
-	.empty {
-		color: var(--color-text-muted);
-	}
-
-	.feed {
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.card {
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: 12px;
-		padding: 1rem;
-
-		&.private-card {
-			background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
-			border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
-		}
-	}
-
-	.body {
-		font-size: 0.9375rem;
-		line-height: 1.6;
-		white-space: pre-wrap;
-		word-break: break-word;
-		margin-bottom: 0.5rem;
-	}
-
-	.mention {
-		color: var(--color-primary);
-		font-weight: 500;
-	}
-
-	.meta {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		font-size: 0.8125rem;
-		color: var(--color-text-muted);
-		gap: 0.5rem;
-	}
-
-	.meta-right {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.private-badge {
-		display: flex;
-		align-items: center;
-		gap: 0.2rem;
-		color: var(--color-primary);
-		font-size: 0.75rem;
-	}
-
-	.visibility-btn {
-		background: none;
-		border: none;
-		color: var(--color-text-muted);
-		font-size: 0.75rem;
-		cursor: pointer;
-		padding: 0;
-		text-decoration: underline;
-
-		&:hover {
-			color: var(--color-text);
 		}
 	}
 </style>
