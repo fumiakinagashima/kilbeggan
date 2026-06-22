@@ -5,9 +5,9 @@ import { listCustomers, createCustomer } from '$lib/server/db/customer-service';
 
 const createSchema = z.object({
 	company: z.string().min(1),
-	phone: z.string().optional(),
-	email: z.string().optional(),
-	notes: z.string().optional()
+	phone: z.string().optional().nullable(),
+	email: z.string().optional().nullable(),
+	notes: z.string().optional().nullable()
 });
 
 export async function GET({ platform }) {

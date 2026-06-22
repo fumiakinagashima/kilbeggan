@@ -210,7 +210,6 @@
 					contenteditable={posting ? 'false' : 'true'}
 					role="textbox"
 					aria-multiline="true"
-					data-placeholder="活動を記録..."
 					bind:this={editorEl}
 					oninput={handleEditorInput}
 					oncompositionstart={() => (isComposing = true)}
@@ -320,11 +319,12 @@
 	}
 
 	.editor {
-		min-height: 5rem;
-		padding: 0.75rem 0;
+		border: 1px solid #ccc;
+		min-height: 12rem;
+		padding: 0.55rem;
 		font-size: 1rem;
 		font-family: inherit;
-		line-height: 1.6;
+		line-height: 1.47;
 		outline: none;
 		background: transparent;
 		color: var(--color-text);
@@ -332,6 +332,7 @@
 		white-space: pre-wrap;
 		word-break: break-word;
 		text-align: left;
+		border-radius: 6px;
 
 		&[contenteditable='false'] {
 			opacity: 0.6;
@@ -436,10 +437,7 @@
 	}
 
 	.empty {
-		text-align: center;
 		color: var(--color-text-muted);
-		padding: 3rem 0;
-		font-size: 0.9375rem;
 	}
 
 	.feed {

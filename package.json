@@ -17,13 +17,14 @@
 		"test:e2e": "playwright install && playwright test",
 		"gen": "wrangler types",
 		"db:generate": "drizzle-kit generate",
-		"db:push": "drizzle-kit push",
-		"db:migrate:local": "wrangler d1 execute boann --local --file",
+		"db:push": "drizzle-kit push --config=drizzle.local.config.ts",
+		"db:migrate:local": "wrangler d1 migrations apply boann --local",
 		"db:migrate:remote": "wrangler d1 execute boann --remote --file",
-		"db:studio": "drizzle-kit studio"
+		"db:studio": "drizzle-kit studio --config=drizzle.local.config.ts"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
+		"@libsql/client": "^0.17.4",
 		"@lucide/svelte": "^1.21.0",
 		"@playwright/test": "^1.60.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.8",
