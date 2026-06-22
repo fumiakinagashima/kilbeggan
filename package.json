@@ -1,5 +1,5 @@
 {
-	"name": "boann",
+	"name": "kilbeggan",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
@@ -18,8 +18,8 @@
 		"gen": "wrangler types",
 		"db:generate": "drizzle-kit generate",
 		"db:push": "drizzle-kit push --config=drizzle.local.config.ts",
-		"db:migrate:local": "wrangler d1 migrations apply boann --local",
-		"db:migrate:remote": "wrangler d1 execute boann --remote --file",
+		"db:migrate:local": "wrangler d1 migrations apply kilbeggan --local",
+		"db:migrate:remote": "wrangler d1 execute kilbeggan --remote --file",
 		"db:studio": "drizzle-kit studio --config=drizzle.local.config.ts"
 	},
 	"devDependencies": {

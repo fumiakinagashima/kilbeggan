@@ -1,4 +1,4 @@
-# Boann Roadmap
+# Kilbeggan Roadmap
 
 目標: 「こういうコンセプトの製品がある」と示せるコアを、フェーズを追って実装する。
 

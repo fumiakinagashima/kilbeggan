@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "boann",
+      "name": "kilbeggan",
       "dependencies": {
         "@anthropic-ai/sdk": "^0.105.0",
         "zod": "^4.4.3",

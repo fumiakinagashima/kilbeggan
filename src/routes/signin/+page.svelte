@@ -34,7 +34,7 @@
 
 <div class="page">
 	<div class="card">
-		<h1 class="logo">Boann</h1>
+		<h1 class="logo">Kilbeggan</h1>
 		<p class="tagline">活動記録をもっとシンプルに</p>
 
 		<form onsubmit={submit}>

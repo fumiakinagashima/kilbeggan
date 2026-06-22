@@ -24,7 +24,7 @@
 
 <div class="shell">
 	<aside class="sidebar">
-		<span class="logo">Boann</span>
+		<span class="logo">Kilbeggan</span>
 		<nav class="sidebar-nav">
 			{#each navItems as item (item.href)}
 				<a href={item.href} class="nav-link" class:active={isActive(item.href, item.exact)}>

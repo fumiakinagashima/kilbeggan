@@ -9,8 +9,8 @@ export default defineConfig({
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
 			manifest: {
-				name: 'Boann',
-				short_name: 'Boann',
+				name: 'Kilbeggan',
+				short_name: 'Kilbeggan',
 				description: '活動記録をもっとシンプルに',
 				theme_color: '#2563eb',
 				background_color: '#f8fafc',
