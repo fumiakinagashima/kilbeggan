@@ -16,7 +16,7 @@
 <div class="page">
 	<header class="page-header">
 		<a href="/fields" class="back">← 活動一覧</a>
-		<h1>活動を編集</h1>
+		<h1>活動を修正</h1>
 	</header>
 
 	{#if form?.error}
@@ -121,7 +121,7 @@
 			font-size: 0.875rem;
 			color: var(--color-primary);
 			text-decoration: none;
-			margin-bottom: 0.5rem;
+			margin-bottom: 0.8rem;
 		}
 
 		h1 {

@@ -86,7 +86,7 @@
 
 	.app-title {
 		text-align: center;
-		padding: 0.6rem 0;
+		padding: 1.2rem 0 0.3rem;
 		color: var(--color-primary);
 		font-family: Georgia, 'Times New Roman', Times, serif;
 	}
