@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { PenLine, List, Users, Sun, Moon, Monitor } from '@lucide/svelte';
+	import { PenLine, List, Users, LayoutDashboard, Sun, Moon, Monitor } from '@lucide/svelte';
 	import { themeStore } from '$lib/stores/theme.svelte';
 
 	let { children }: { children: Snippet } = $props();
@@ -10,7 +10,8 @@
 	const navItems = [
 		{ href: '/', label: '投稿', icon: PenLine, exact: true },
 		{ href: '/fields', label: '活動', icon: List, exact: false },
-		{ href: '/customers', label: '顧客', icon: Users, exact: false }
+		{ href: '/customers', label: '顧客', icon: Users, exact: false },
+		{ href: '/dashboard', label: 'ダッシュボード', icon: LayoutDashboard, exact: false }
 	];
 
 	function isActive(href: string, exact: boolean): boolean {
