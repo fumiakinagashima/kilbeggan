@@ -2,9 +2,10 @@
 	import { bodyToEditorHtml } from '$lib/body';
 	import { Lock, Globe } from '@lucide/svelte';
 	import { createActivityEditState } from './index.svelte.ts';
+	import AttachmentArea from '$lib/components/AttachmentArea.svelte';
 
 	let { data, form } = $props();
-	const state = createActivityEditState(() => data);
+	const edit = createActivityEditState(() => data);
 
 	const initialEditorHtml = bodyToEditorHtml(data.activity.body);
 </script>
@@ -19,30 +20,31 @@
 		<p class="error">{form.error}</p>
 	{/if}
 
-	<form method="POST" onsubmit={(e) => state.handleSubmit(e)}>
+	<form method="POST" onsubmit={(e) => edit.handleSubmit(e)}>
 		<input type="hidden" name="body" value="" />
-		<input type="hidden" name="isPrivate" value={state.isPrivate} />
+		<input type="hidden" name="isPrivate" value={edit.isPrivate} />
+		<input type="hidden" name="attachments" value="" />
 
 		<div class="editor-wrap">
 			<div
 				class="editor"
-				contenteditable={state.submitting ? 'false' : 'true'}
+				contenteditable={edit.submitting ? 'false' : 'true'}
 				role="textbox"
 				aria-multiline="true"
-				bind:this={state.editorEl}
-				oninput={() => state.handleEditorInput()}
-				onkeydown={(e) => state.handleKeydown(e)}
-				oncompositionstart={() => state.handleCompositionStart()}
-				oncompositionend={() => state.handleCompositionEnd()}
-				onpaste={(e) => state.handlePaste(e)}
-				onblur={() => state.handleEditorBlur()}
+				bind:this={edit.editorEl}
+				oninput={() => edit.handleEditorInput()}
+				onkeydown={(e) => edit.handleKeydown(e)}
+				oncompositionstart={() => edit.handleCompositionStart()}
+				oncompositionend={() => edit.handleCompositionEnd()}
+				onpaste={(e) => edit.handlePaste(e)}
+				onblur={() => edit.handleEditorBlur()}
 				tabindex="0"
 			>{@html initialEditorHtml}</div>
-			{#if state.showDropdown && state.filteredCustomers.length > 0}
+			{#if edit.showDropdown && edit.filteredCustomers.length > 0}
 				<ul class="mention-dropdown">
-					{#each state.filteredCustomers as c (c.id)}
+					{#each edit.filteredCustomers as c (c.id)}
 						<li>
-							<button type="button" onmousedown={() => state.insertMention(c)}>
+							<button type="button" onmousedown={() => edit.insertMention(c)}>
 								{c.company}
 							</button>
 						</li>
@@ -55,10 +57,10 @@
 			<button
 				type="button"
 				class="privacy-toggle"
-				class:private={state.isPrivate}
-				onclick={() => (state.isPrivate = !state.isPrivate)}
+				class:private={edit.isPrivate}
+				onclick={() => (edit.isPrivate = !edit.isPrivate)}
 			>
-				{#if state.isPrivate}
+				{#if edit.isPrivate}
 					<Lock size={13} />
 					非公開
 				{:else}
@@ -68,11 +70,18 @@
 			</button>
 			<div class="actions">
 				<a href="/fields" class="btn-cancel">キャンセル</a>
-				<button type="submit" class="btn-save" disabled={state.submitting || !state.hasContent}>
-					{state.submitting ? '保存中...' : '保存'}
+				<button type="submit" class="btn-save" disabled={edit.submitting || !edit.hasContent || edit.uploading}>
+					{edit.submitting ? '保存中...' : '保存'}
 				</button>
 			</div>
 		</div>
+
+		<AttachmentArea
+			attachments={edit.attachments}
+			uploading={edit.uploading}
+			onFiles={(files) => edit.handleFiles(files)}
+			onRemove={(key) => edit.removeAttachment(key)}
+		/>
 	</form>
 </div>
 
@@ -182,13 +191,14 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.5rem;
+		margin-bottom: 0.25rem;
 	}
 
 	.privacy-toggle {
 		display: flex;
 		align-items: center;
 		gap: 0.3rem;
-		padding: 0.375rem 0.75rem;
+		padding: 0.575rem 0.75rem;
 		border: 1px solid var(--color-border);
 		border-radius: 20px;
 		background: var(--color-surface);

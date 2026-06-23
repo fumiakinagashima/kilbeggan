@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { Lock, Globe, Paperclip, Camera } from '@lucide/svelte';
+	import { Lock, Globe } from '@lucide/svelte';
 	import { createComposeState } from './index.svelte.ts';
+	import AttachmentArea from '$lib/components/AttachmentArea.svelte';
 
 	let { data } = $props();
 	const state = createComposeState(() => data);
 </script>
 
 <div class="page">
+	<h1 class="app-title">KILBEGGAN</h1>
 	<section class="compose">
 		<form onsubmit={(e) => state.post(e)}>
 			{#if state.postError}
@@ -41,80 +43,32 @@
 				{/if}
 			</div>
 
-			{#if state.attachments.length > 0}
-				<div class="attachments-preview">
-					{#each state.attachments as item (item.key)}
-						<div class="attachment-item">
-							{#if item.mimeType.startsWith('image/')}
-								<img src={item.url} alt={item.name} />
-							{:else}
-								<span class="file-icon">📄</span>
-								<span class="file-name">{item.name}</span>
-							{/if}
-							<button
-								type="button"
-								class="remove-btn"
-								onclick={() => state.removeAttachment(item.key)}
-							>×</button>
-						</div>
-					{/each}
-				</div>
-			{/if}
-
 			<div class="compose-footer">
-				<div class="compose-actions">
-					<button
-						type="button"
-						class="privacy-toggle"
-						class:private={state.isPrivate}
-						onclick={() => (state.isPrivate = !state.isPrivate)}
-					>
-						{#if state.isPrivate}
-							<Lock size={13} />
-							非公開
-						{:else}
-							<Globe size={13} />
-							全体公開
-						{/if}
-					</button>
-					<input
-						bind:this={state.fileInputEl}
-						type="file"
-						multiple
-						style="display:none"
-						onchange={(e) => state.handleFiles((e.target as HTMLInputElement).files)}
-					/>
-					<input
-						bind:this={state.cameraInputEl}
-						type="file"
-						accept="image/*"
-						capture="environment"
-						style="display:none"
-						onchange={(e) => state.handleFiles((e.target as HTMLInputElement).files)}
-					/>
-					<button
-						type="button"
-						class="attach-btn"
-						onclick={() => state.fileInputEl?.click()}
-						disabled={state.uploading}
-						title="ファイルを添付"
-					>
-						<Paperclip size={16} />
-					</button>
-					<button
-						type="button"
-						class="attach-btn"
-						onclick={() => state.cameraInputEl?.click()}
-						disabled={state.uploading}
-						title="写真を撮影"
-					>
-						<Camera size={16} />
-					</button>
-				</div>
+				<button
+					type="button"
+					class="privacy-toggle"
+					class:private={state.isPrivate}
+					onclick={() => (state.isPrivate = !state.isPrivate)}
+				>
+					{#if state.isPrivate}
+						<Lock size={13} />
+						非公開
+					{:else}
+						<Globe size={13} />
+						全体公開
+					{/if}
+				</button>
 				<button type="submit" class="btn-post" disabled={state.posting || !state.hasContent || state.uploading}>
 					{state.posting ? '送信中...' : '投稿'}
 				</button>
 			</div>
+
+			<AttachmentArea
+				attachments={state.attachments}
+				uploading={state.uploading}
+				onFiles={(files) => state.handleFiles(files)}
+				onRemove={(key) => state.removeAttachment(key)}
+			/>
 		</form>
 	</section>
 </div>
@@ -127,6 +81,13 @@
 		@media (min-width: 768px) {
 			padding: 0 2rem 2rem;
 		}
+	}
+
+	.app-title {
+		text-align: center;
+		padding: 0.5rem 0;
+		color: var(--color-primary);
+		font-family: 'Times New Roman', Times, serif;
 	}
 
 	.compose {
@@ -209,81 +170,12 @@
 		}
 	}
 
-	.attachments-preview {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		margin-bottom: 0.625rem;
-	}
-
-	.attachment-item {
-		position: relative;
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		background: var(--color-background);
-		border: 1px solid var(--color-border);
-		border-radius: 8px;
-		padding: 0.25rem;
-		max-width: 120px;
-
-		img {
-			width: 80px;
-			height: 80px;
-			object-fit: cover;
-			border-radius: 6px;
-			display: block;
-		}
-
-		.file-icon {
-			font-size: 1.5rem;
-			padding: 0.25rem;
-		}
-
-		.file-name {
-			font-size: 0.75rem;
-			color: var(--color-text-muted);
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-			max-width: 80px;
-		}
-	}
-
-	.remove-btn {
-		position: absolute;
-		top: -6px;
-		right: -6px;
-		width: 18px;
-		height: 18px;
-		border-radius: 50%;
-		background: var(--color-text-muted);
-		color: var(--color-surface);
-		border: none;
-		cursor: pointer;
-		font-size: 0.75rem;
-		line-height: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0;
-
-		&:hover {
-			background: var(--color-error);
-		}
-	}
-
 	.compose-footer {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.5rem;
-	}
-
-	.compose-actions {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
+		margin-bottom: 0.25rem;
 	}
 
 	.privacy-toggle {
@@ -306,32 +198,6 @@
 			color: var(--color-primary);
 			border-color: var(--color-primary);
 			background: color-mix(in srgb, var(--color-primary) 8%, transparent);
-		}
-	}
-
-	.attach-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 32px;
-		border: 1px solid var(--color-border);
-		border-radius: 50%;
-		background: var(--color-surface);
-		color: var(--color-text-muted);
-		cursor: pointer;
-		transition:
-			color 0.15s,
-			border-color 0.15s;
-
-		&:hover {
-			color: var(--color-text);
-			border-color: var(--color-text-muted);
-		}
-
-		&:disabled {
-			opacity: 0.4;
-			cursor: not-allowed;
 		}
 	}
 

@@ -11,8 +11,6 @@ export function createComposeState(getData: () => PageData) {
 	let attachments = $state<AttachmentItem[]>([]);
 	let uploading = $state(false);
 	let editorEl = $state<HTMLDivElement | undefined>(undefined);
-	let fileInputEl = $state<HTMLInputElement | undefined>(undefined);
-	let cameraInputEl = $state<HTMLInputElement | undefined>(undefined);
 	let isComposing = $state(false);
 	let mentionQuery = $state('');
 	let mentionRange: Range | null = null;
@@ -168,10 +166,10 @@ export function createComposeState(getData: () => PageData) {
 				fd.append('file', file);
 				const res = await fetch('/api/upload', { method: 'POST', body: fd });
 				if (!res.ok) continue;
-				const { key } = (await res.json()) as { key: string };
+				const { key, name: savedName } = (await res.json()) as { key: string; name: string };
 				attachments = [
 					...attachments,
-					{ key, url: `/api/files/${key}`, name: file.name, mimeType: file.type }
+					{ key, url: `/api/files/${key}`, name: savedName ?? file.name, mimeType: file.type }
 				];
 			}
 		} finally {
@@ -196,7 +194,7 @@ export function createComposeState(getData: () => PageData) {
 				body: JSON.stringify({
 					body: bodyText,
 					isPrivate,
-					attachments: attachments.map((a) => a.key)
+					attachments: attachments.map((a) => ({ key: a.key, name: a.name }))
 				})
 			});
 			const result = (await res.json()) as { error?: string };
@@ -240,18 +238,6 @@ export function createComposeState(getData: () => PageData) {
 		},
 		set editorEl(v: HTMLDivElement | undefined) {
 			editorEl = v;
-		},
-		get fileInputEl() {
-			return fileInputEl;
-		},
-		set fileInputEl(v: HTMLInputElement | undefined) {
-			fileInputEl = v;
-		},
-		get cameraInputEl() {
-			return cameraInputEl;
-		},
-		set cameraInputEl(v: HTMLInputElement | undefined) {
-			cameraInputEl = v;
 		},
 		get showDropdown() {
 			return showDropdown;

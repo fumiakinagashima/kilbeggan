@@ -4,10 +4,12 @@ import { getDb } from '$lib/server/db';
 import { createActivity } from '$lib/server/db/activity-service';
 import { parseMentionIds } from '$lib/body';
 
+const attachmentSchema = z.object({ key: z.string(), name: z.string() });
+
 const createSchema = z.object({
 	body: z.string().min(1),
 	isPrivate: z.boolean().optional().default(false),
-	attachments: z.array(z.string()).optional().default([])
+	attachments: z.array(attachmentSchema).optional().default([])
 });
 
 export async function POST({ request, platform, locals }) {

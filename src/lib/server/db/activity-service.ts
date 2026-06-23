@@ -2,6 +2,16 @@ import { eq, desc, inArray, or, and } from 'drizzle-orm';
 import type { Db } from './index';
 import { activities, activityMentions, customers, users } from './schema';
 
+export type Attachment = { key: string; name: string };
+
+function parseAttachments(json: string | null): Attachment[] {
+	if (!json) return [];
+	const parsed = JSON.parse(json) as Array<string | Attachment>;
+	return parsed.map((a) =>
+		typeof a === 'string' ? { key: a, name: a.split('/').pop() ?? a } : a
+	);
+}
+
 export async function listActivities(db: Db, limit = 50, viewingUserId?: string) {
 	const acts = await db
 		.select({
@@ -46,7 +56,7 @@ export async function listActivities(db: Db, limit = 50, viewingUserId?: string)
 
 	return acts.map((a) => ({
 		...a,
-		attachments: a.attachments ? (JSON.parse(a.attachments) as string[]) : [],
+		attachments: parseAttachments(a.attachments),
 		mentions: byActivity.get(a.id) ?? []
 	}));
 }
@@ -85,7 +95,7 @@ export async function listActivitiesByCustomer(db: Db, customerId: string, viewi
 		.all();
 	return rows.map((a) => ({
 		...a,
-		attachments: a.attachments ? (JSON.parse(a.attachments) as string[]) : []
+		attachments: parseAttachments(a.attachments)
 	}));
 }
 
@@ -96,7 +106,7 @@ export async function createActivity(
 		body: string;
 		isPrivate: boolean;
 		mentionedCustomerIds: string[];
-		attachments?: string[];
+		attachments?: Attachment[];
 	}
 ) {
 	const id = crypto.randomUUID();
@@ -128,7 +138,7 @@ export async function createActivity(
 		userId: data.userId,
 		body: data.body,
 		isPrivate: data.isPrivate,
-		attachments: data.attachments ?? [],
+		attachments: data.attachments ?? ([] as Attachment[]),
 		createdAt,
 		mentions: [] as { customerId: string; company: string }[]
 	};
@@ -164,7 +174,7 @@ export async function getActivity(db: Db, id: string) {
 
 	return {
 		...act,
-		attachments: act.attachments ? (JSON.parse(act.attachments) as string[]) : [],
+		attachments: parseAttachments(act.attachments),
 		mentions: mentions.map((m) => ({ customerId: m.customerId, company: m.company ?? '' }))
 	};
 }
@@ -172,9 +182,14 @@ export async function getActivity(db: Db, id: string) {
 export async function updateActivity(
 	db: Db,
 	id: string,
-	data: { body: string; isPrivate: boolean; mentionedCustomerIds: string[] }
+	data: { body: string; isPrivate: boolean; mentionedCustomerIds: string[]; attachments?: Attachment[] }
 ): Promise<void> {
-	await db.update(activities).set({ body: data.body, isPrivate: data.isPrivate }).where(eq(activities.id, id));
+	const attachmentsJson =
+		data.attachments && data.attachments.length > 0 ? JSON.stringify(data.attachments) : null;
+	await db
+		.update(activities)
+		.set({ body: data.body, isPrivate: data.isPrivate, attachments: attachmentsJson })
+		.where(eq(activities.id, id));
 	await db.delete(activityMentions).where(eq(activityMentions.activityId, id));
 	if (data.mentionedCustomerIds.length > 0) {
 		await db.insert(activityMentions).values(

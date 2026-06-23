@@ -11,7 +11,7 @@ const schema = z.object({
 	password: z.string().min(1)
 });
 
-export async function POST({ request, platform, cookies }) {
+export async function POST({ request, platform, cookies, url }) {
 	const body = await request.json();
 	const parsed = schema.safeParse(body);
 
@@ -37,7 +37,7 @@ export async function POST({ request, platform, cookies }) {
 
 	cookies.set(SESSION_COOKIE, sessionId, {
 		httpOnly: true,
-		secure: true,
+		secure: url.protocol === 'https:',
 		sameSite: 'lax',
 		maxAge: SESSION_TTL_SECONDS,
 		path: '/'

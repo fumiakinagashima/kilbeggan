@@ -1,6 +1,17 @@
 import type { PageData } from './$types';
 
 type CustomerOption = { id: string; company: string };
+type AttachmentItem = { key: string; url: string; name: string; mimeType: string };
+
+function mimeFromKey(key: string): string {
+	const ext = key.split('.').pop()?.toLowerCase() ?? '';
+	const imageExts: Record<string, string> = {
+		jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+		gif: 'image/gif', webp: 'image/webp', avif: 'image/avif',
+		heic: 'image/heic', heif: 'image/heif'
+	};
+	return imageExts[ext] ?? 'application/octet-stream';
+}
 
 export function createActivityEditState(getData: () => PageData) {
 	let isPrivate = $state(getData().activity.isPrivate);
@@ -11,6 +22,15 @@ export function createActivityEditState(getData: () => PageData) {
 	let mentionRange: Range | null = null;
 	let showDropdown = $state(false);
 	let submitting = $state(false);
+	let attachments = $state<AttachmentItem[]>(
+		getData().activity.attachments.map((a) => ({
+			key: a.key,
+			url: `/api/files/${a.key}`,
+			name: a.name,
+			mimeType: mimeFromKey(a.key)
+		}))
+	);
+	let uploading = $state(false);
 
 	const filteredCustomers = $derived<CustomerOption[]>(
 		showDropdown
@@ -153,10 +173,38 @@ export function createActivityEditState(getData: () => PageData) {
 		}, 150);
 	}
 
+	async function handleFiles(files: FileList | null) {
+		if (!files || files.length === 0) return;
+		uploading = true;
+		try {
+			for (const file of files) {
+				const fd = new FormData();
+				fd.append('file', file);
+				const res = await fetch('/api/upload', { method: 'POST', body: fd });
+				if (!res.ok) continue;
+				const { key, name: savedName } = (await res.json()) as { key: string; name: string };
+				attachments = [
+					...attachments,
+					{ key, url: `/api/files/${key}`, name: savedName ?? file.name, mimeType: file.type }
+				];
+			}
+		} finally {
+			uploading = false;
+		}
+	}
+
+	function removeAttachment(key: string) {
+		attachments = attachments.filter((a) => a.key !== key);
+	}
+
 	function handleSubmit(e: SubmitEvent) {
 		const formEl = e.target as HTMLFormElement;
 		const bodyInput = formEl.querySelector('input[name="body"]') as HTMLInputElement;
 		bodyInput.value = getBodyText();
+		const attachmentsInput = formEl.querySelector('input[name="attachments"]') as HTMLInputElement | null;
+		if (attachmentsInput) {
+			attachmentsInput.value = JSON.stringify(attachments.map((a) => ({ key: a.key, name: a.name })));
+		}
 		submitting = true;
 	}
 
@@ -185,6 +233,12 @@ export function createActivityEditState(getData: () => PageData) {
 		get filteredCustomers() {
 			return filteredCustomers;
 		},
+		get attachments() {
+			return attachments;
+		},
+		get uploading() {
+			return uploading;
+		},
 		handleEditorInput,
 		handleCompositionStart,
 		handleCompositionEnd,
@@ -192,6 +246,8 @@ export function createActivityEditState(getData: () => PageData) {
 		handlePaste,
 		insertMention,
 		handleEditorBlur,
+		handleFiles,
+		removeAttachment,
 		handleSubmit
 	};
 }

@@ -1,11 +1,21 @@
 <script lang="ts">
 	import { timeAgo } from '$lib/datetime';
 	import { bodyToHtml } from '$lib/body';
-	import { Lock } from '@lucide/svelte';
+	import { Lock, X } from '@lucide/svelte';
 	import { createFieldsState } from './index.svelte.ts';
 
 	let { data } = $props();
-	const state = createFieldsState(() => data);
+	const feed = createFieldsState(() => data);
+
+	let lightboxSrc = $state<string | null>(null);
+
+	function isImage(key: string) {
+		return /\.(jpg|jpeg|png|gif|webp|avif|heic|heif)$/i.test(key);
+	}
+
+	function closeLightbox() {
+		lightboxSrc = null;
+	}
 </script>
 
 <div class="page">
@@ -13,13 +23,39 @@
 		<h1>活動一覧</h1>
 	</header>
 
-	{#if state.allActivities.length === 0}
+	{#if feed.allActivities.length === 0}
 		<p class="empty">まだ活動記録がありません</p>
 	{:else}
 		<ul class="feed">
-			{#each state.allActivities as activity (activity.id)}
+			{#each feed.allActivities as activity (activity.id)}
 				<li class="card" class:private-card={activity.isPrivate}>
 					<p class="body">{@html bodyToHtml(activity.body)}</p>
+
+					{#if activity.attachments && activity.attachments.length > 0}
+						<div class="attachments">
+							{#each activity.attachments as att (att.key)}
+								{#if isImage(att.key)}
+									<button
+										type="button"
+										class="thumb-btn"
+										onclick={() => (lightboxSrc = `/api/files/${att.key}`)}
+									>
+										<img src={`/api/files/${att.key}`} alt={att.name} />
+									</button>
+								{:else}
+									<a
+										href={`/api/files/${att.key}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="file-chip"
+									>
+										📄 {att.name}
+									</a>
+								{/if}
+							{/each}
+						</div>
+					{/if}
+
 					<div class="meta">
 						<span class="author">{activity.userName ?? ''}</span>
 						<div class="meta-right">
@@ -30,7 +66,7 @@
 								<a href="/fields/{activity.id}" class="edit-link">編集</a>
 								<button
 									class="visibility-btn"
-									onclick={() => state.togglePrivacy(activity.id, activity.isPrivate)}
+									onclick={() => feed.togglePrivacy(activity.id, activity.isPrivate)}
 								>
 									{activity.isPrivate ? '公開する' : '非公開にする'}
 								</button>
@@ -43,6 +79,26 @@
 		</ul>
 	{/if}
 </div>
+
+{#if lightboxSrc}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+	<div
+		class="lightbox"
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+		onclick={closeLightbox}
+		onkeydown={(e) => { if (e.key === 'Escape') closeLightbox(); }}
+	>
+		<button class="lightbox-close" onclick={closeLightbox} aria-label="閉じる">
+			<X size={24} />
+		</button>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="lightbox-content" onclick={(e) => e.stopPropagation()}>
+			<img src={lightboxSrc} alt="" />
+		</div>
+	</div>
+{/if}
 
 <style lang="scss">
 	.page {
@@ -105,6 +161,57 @@
 		font-weight: 500;
 	}
 
+	.attachments {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+		margin-bottom: 0.625rem;
+	}
+
+	.thumb-btn {
+		padding: 0;
+		border: none;
+		background: none;
+		cursor: zoom-in;
+		border-radius: 8px;
+		overflow: hidden;
+		flex-shrink: 0;
+
+		img {
+			display: block;
+			width: 80px;
+			height: 80px;
+			object-fit: cover;
+			border-radius: 8px;
+			transition: opacity 0.15s;
+		}
+
+		&:hover img {
+			opacity: 0.85;
+		}
+	}
+
+	.file-chip {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.625rem;
+		background: var(--color-background);
+		border: 1px solid var(--color-border);
+		border-radius: 6px;
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+		text-decoration: none;
+		max-width: 180px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		&:hover {
+			color: var(--color-text);
+		}
+	}
+
 	.meta {
 		display: flex;
 		align-items: center;
@@ -149,6 +256,49 @@
 
 		&:hover {
 			color: var(--color-text);
+		}
+	}
+
+	.lightbox {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.88);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+		cursor: zoom-out;
+	}
+
+	.lightbox-content {
+		cursor: default;
+
+		img {
+			display: block;
+			max-width: min(90vw, 960px);
+			max-height: 90vh;
+			object-fit: contain;
+			border-radius: 4px;
+		}
+	}
+
+	.lightbox-close {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		background: rgba(0, 0, 0, 0.5);
+		border: none;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		cursor: pointer;
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.75);
 		}
 	}
 </style>

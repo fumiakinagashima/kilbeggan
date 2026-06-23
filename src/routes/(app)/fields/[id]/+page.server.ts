@@ -16,9 +16,11 @@ export async function load({ params, platform, locals }) {
 	return { activity, customers };
 }
 
+const attachmentSchema = z.object({ key: z.string(), name: z.string() });
 const updateSchema = z.object({
 	body: z.string().min(1),
-	isPrivate: z.boolean()
+	isPrivate: z.boolean(),
+	attachments: z.array(attachmentSchema).optional().default([])
 });
 
 export const actions = {
@@ -29,9 +31,16 @@ export const actions = {
 		if (activity.userId !== locals.user!.userId) error(403);
 
 		const formData = await request.formData();
+		let attachmentsParsed: unknown = [];
+		try {
+			attachmentsParsed = JSON.parse((formData.get('attachments') as string | null) ?? '[]');
+		} catch {
+			attachmentsParsed = [];
+		}
 		const parsed = updateSchema.safeParse({
 			body: formData.get('body'),
-			isPrivate: formData.get('isPrivate') === 'true'
+			isPrivate: formData.get('isPrivate') === 'true',
+			attachments: attachmentsParsed
 		});
 		if (!parsed.success) return { error: '入力値が不正です' };
 

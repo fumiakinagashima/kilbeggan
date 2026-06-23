@@ -23,6 +23,8 @@
 - [x] 投稿へのファイル添付・写真撮影 (R2アップロード、activities.attachmentsカラム追加)
 - [x] 投稿・表示での改行保持 (bodyToHtml/bodyToEditorHtml、レイアウトシフト対策)
 - [x] ページState管理のリファクタリング (index.svelte.tsにファクトリ関数として切り出し、+page.svelteをtemplate専用に)
+- [x] 添付ファイル改善 (元ファイル名表示、画像はinline/それ以外はdownload、iOSログイン修正)
+- [x] 活動編集での添付ファイル対応 (AttachmentAreaコンポーネント化、編集ページにファイル/カメラボタン追加)
 
 ---
 
