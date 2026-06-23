@@ -12,6 +12,15 @@ function parseAttachments(json: string | null): Attachment[] {
 	);
 }
 
+function parseTags(json: string | null): string[] {
+	if (!json) return [];
+	try {
+		return JSON.parse(json) as string[];
+	} catch {
+		return [];
+	}
+}
+
 export async function listActivities(db: Db, limit = 50, viewingUserId?: string) {
 	const acts = await db
 		.select({
@@ -19,6 +28,7 @@ export async function listActivities(db: Db, limit = 50, viewingUserId?: string)
 			body: activities.body,
 			isPrivate: activities.isPrivate,
 			attachments: activities.attachments,
+			tags: activities.tags,
 			createdAt: activities.createdAt,
 			userId: activities.userId,
 			userName: users.name
@@ -57,6 +67,7 @@ export async function listActivities(db: Db, limit = 50, viewingUserId?: string)
 	return acts.map((a) => ({
 		...a,
 		attachments: parseAttachments(a.attachments),
+		tags: parseTags(a.tags),
 		mentions: byActivity.get(a.id) ?? []
 	}));
 }
@@ -77,6 +88,7 @@ export async function listActivitiesByCustomer(db: Db, customerId: string, viewi
 			body: activities.body,
 			isPrivate: activities.isPrivate,
 			attachments: activities.attachments,
+			tags: activities.tags,
 			createdAt: activities.createdAt,
 			userId: activities.userId,
 			userName: users.name
@@ -95,7 +107,8 @@ export async function listActivitiesByCustomer(db: Db, customerId: string, viewi
 		.all();
 	return rows.map((a) => ({
 		...a,
-		attachments: parseAttachments(a.attachments)
+		attachments: parseAttachments(a.attachments),
+		tags: parseTags(a.tags)
 	}));
 }
 
@@ -151,6 +164,7 @@ export async function getActivity(db: Db, id: string) {
 			body: activities.body,
 			isPrivate: activities.isPrivate,
 			attachments: activities.attachments,
+			tags: activities.tags,
 			createdAt: activities.createdAt,
 			userId: activities.userId,
 			userName: users.name
@@ -175,8 +189,16 @@ export async function getActivity(db: Db, id: string) {
 	return {
 		...act,
 		attachments: parseAttachments(act.attachments),
+		tags: parseTags(act.tags),
 		mentions: mentions.map((m) => ({ customerId: m.customerId, company: m.company ?? '' }))
 	};
+}
+
+export async function updateActivityTags(db: Db, id: string, tags: string[]): Promise<void> {
+	await db
+		.update(activities)
+		.set({ tags: JSON.stringify(tags) })
+		.where(eq(activities.id, id));
 }
 
 export async function updateActivity(

@@ -17,6 +17,8 @@ export const customers = sqliteTable('customers', {
 	phone: text('phone'),
 	email: text('email'),
 	notes: text('notes'),
+	aiSummary: text('ai_summary'),
+	aiSummaryUpdatedAt: integer('ai_summary_updated_at', { mode: 'timestamp' }),
 	createdBy: text('created_by')
 		.notNull()
 		.references(() => users.id),
@@ -32,6 +34,7 @@ export const activities = sqliteTable('activities', {
 	body: text('body').notNull(),
 	isPrivate: integer('is_private', { mode: 'boolean' }).notNull(),
 	attachments: text('attachments'),
+	tags: text('tags'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 });
 
