@@ -28,9 +28,11 @@
 		<div class="editor-wrap">
 			<div
 				class="editor"
+				class:empty={!edit.hasContent}
 				contenteditable={edit.submitting ? 'false' : 'true'}
 				role="textbox"
 				aria-multiline="true"
+				data-placeholder="活動内容を入力してください"
 				bind:this={edit.editorEl}
 				oninput={() => edit.handleEditorInput()}
 				onkeydown={(e) => edit.handleKeydown(e)}
@@ -132,7 +134,7 @@
 	.editor {
 		border: 1px solid var(--color-border);
 		min-height: 10rem;
-		padding: 0.75rem;
+		padding: 0.8rem;
 		font-size: 1rem;
 		font-family: inherit;
 		line-height: 1.47;
@@ -147,6 +149,12 @@
 
 		&[contenteditable='false'] {
 			opacity: 0.6;
+		}
+
+		&.empty:not(:focus)::before {
+			content: attr(data-placeholder);
+			color: var(--color-text-muted);
+			pointer-events: none;
 		}
 	}
 

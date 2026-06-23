@@ -22,6 +22,7 @@
 					role="textbox"
 					aria-multiline="true"
 					tabindex="0"
+					data-placeholder="活動内容を入力してください"
 					bind:this={state.editorEl}
 					oninput={() => state.handleEditorInput()}
 					onkeydown={(e) => state.handleKeydown(e)}
@@ -85,9 +86,9 @@
 
 	.app-title {
 		text-align: center;
-		padding: 0.5rem 0;
+		padding: 0.6rem 0;
 		color: var(--color-primary);
-		font-family: 'Times New Roman', Times, serif;
+		font-family: Georgia, 'Times New Roman', Times, serif;
 	}
 
 	.compose {
@@ -127,7 +128,7 @@
 			opacity: 0.6;
 		}
 
-		&.empty::before {
+		&.empty:not(:focus)::before {
 			content: attr(data-placeholder);
 			color: var(--color-text-muted);
 			pointer-events: none;
