@@ -2,25 +2,39 @@ export type BodySegment =
 	| { type: 'text'; text: string }
 	| { type: 'mention'; name: string; id: string };
 
-export function parseBody(body: string): BodySegment[] {
-	const regex = /@\[([^\]]+)\]\(([^)]+)\)/g;
+// @{id} 形式（新）と @[name](id) 形式（旧・後方互換）の両方にマッチ
+const MENTION_RE = /@\{([^}]+)\}|@\[([^\]]+)\]\(([^)]+)\)/g;
+
+function parseSegments(body: string, mentionMap: Map<string, string>): BodySegment[] {
 	const segments: BodySegment[] = [];
 	let lastIndex = 0;
 	let match;
+	const re = new RegExp(MENTION_RE.source, 'g');
 
-	while ((match = regex.exec(body)) !== null) {
+	while ((match = re.exec(body)) !== null) {
 		if (match.index > lastIndex) {
 			segments.push({ type: 'text', text: body.slice(lastIndex, match.index) });
 		}
-		segments.push({ type: 'mention', name: match[1], id: match[2] });
-		lastIndex = regex.lastIndex;
+		if (match[1] !== undefined) {
+			// 新フォーマット: @{id}
+			const id = match[1];
+			segments.push({ type: 'mention', id, name: mentionMap.get(id) ?? id });
+		} else {
+			// 旧フォーマット: @[name](id)
+			const id = match[3];
+			segments.push({ type: 'mention', id, name: mentionMap.get(id) ?? match[2] });
+		}
+		lastIndex = re.lastIndex;
 	}
 
 	if (lastIndex < body.length) {
 		segments.push({ type: 'text', text: body.slice(lastIndex) });
 	}
-
 	return segments;
+}
+
+export function parseBody(body: string, mentionMap: Map<string, string> = new Map()): BodySegment[] {
+	return parseSegments(body, mentionMap);
 }
 
 function escapeHtml(str: string): string {
@@ -31,60 +45,36 @@ function escapeHtml(str: string): string {
 		.replace(/"/g, '&quot;');
 }
 
-export function bodyToHtml(body: string): string {
-	const regex = /@\[([^\]]+)\]\(([^)]+)\)/g;
-	let result = '';
-	let lastIndex = 0;
-	let match;
-
-	while ((match = regex.exec(body)) !== null) {
-		if (match.index > lastIndex) {
-			result += escapeHtml(body.slice(lastIndex, match.index)).replace(/\n/g, '<br>');
-		}
-		result += `<span class="mention">@${escapeHtml(match[1])}</span>`;
-		lastIndex = regex.lastIndex;
-	}
-
-	if (lastIndex < body.length) {
-		result += escapeHtml(body.slice(lastIndex)).replace(/\n/g, '<br>');
-	}
-
-	return result;
-}
-
 function escapeAttr(str: string): string {
 	return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 }
 
-export function bodyToEditorHtml(body: string): string {
-	const regex = /@\[([^\]]+)\]\(([^)]+)\)/g;
-	let result = '';
-	let lastIndex = 0;
-	let match;
+export function bodyToHtml(body: string, mentionMap: Map<string, string> = new Map()): string {
+	return parseSegments(body, mentionMap)
+		.map((seg) =>
+			seg.type === 'text'
+				? escapeHtml(seg.text).replace(/\n/g, '<br>')
+				: `<span class="mention">@${escapeHtml(seg.name)}</span>`
+		)
+		.join('');
+}
 
-	while ((match = regex.exec(body)) !== null) {
-		if (match.index > lastIndex) {
-			result += escapeHtml(body.slice(lastIndex, match.index)).replace(/\n/g, '<br>');
-		}
-		const name = match[1];
-		const id = match[2];
-		result += `<span class="inline-mention" contenteditable="false" data-mention-id="${escapeAttr(id)}" data-mention-name="${escapeAttr(name)}">@${escapeHtml(name)}</span>`;
-		lastIndex = regex.lastIndex;
-	}
-
-	if (lastIndex < body.length) {
-		result += escapeHtml(body.slice(lastIndex)).replace(/\n/g, '<br>');
-	}
-
-	return result;
+export function bodyToEditorHtml(body: string, mentionMap: Map<string, string> = new Map()): string {
+	return parseSegments(body, mentionMap)
+		.map((seg) =>
+			seg.type === 'text'
+				? escapeHtml(seg.text).replace(/\n/g, '<br>')
+				: `<span class="inline-mention" contenteditable="false" data-mention-id="${escapeAttr(seg.id)}" data-mention-name="${escapeAttr(seg.name)}">@${escapeHtml(seg.name)}</span>`
+		)
+		.join('');
 }
 
 export function parseMentionIds(body: string): string[] {
-	const regex = /@\[([^\]]+)\]\(([^)]+)\)/g;
 	const ids: string[] = [];
+	const re = new RegExp(MENTION_RE.source, 'g');
 	let match;
-	while ((match = regex.exec(body)) !== null) {
-		ids.push(match[2]);
+	while ((match = re.exec(body)) !== null) {
+		ids.push(match[1] ?? match[3]);
 	}
 	return [...new Set(ids)];
 }

@@ -7,6 +7,10 @@
 	let summary = $state(data.customer.aiSummary ?? '');
 	let generating = $state(false);
 
+	function mentionMap(activity: { mentions?: { customerId: string; company: string }[] }) {
+		return new Map((activity.mentions ?? []).map((m) => [m.customerId, m.company]));
+	}
+
 	async function generateSummary() {
 		generating = true;
 		try {
@@ -73,7 +77,7 @@
 			<ul class="activity-list">
 				{#each data.activities as activity (activity.id)}
 					<li class="activity-item">
-						<p class="activity-body">{@html bodyToHtml(activity.body)}</p>
+						<p class="activity-body">{@html bodyToHtml(activity.body, mentionMap(activity))}</p>
 						{#if activity.tags && activity.tags.length > 0}
 							<div class="activity-tags">
 								{#each activity.tags as tag}

@@ -7,7 +7,10 @@
 	let { data, form } = $props();
 	const edit = createActivityEditState(() => data);
 
-	const initialEditorHtml = bodyToEditorHtml(data.activity.body);
+	const initialEditorHtml = bodyToEditorHtml(
+		data.activity.body,
+		new Map(data.activity.mentions.map((m) => [m.customerId, m.company]))
+	);
 </script>
 
 <div class="page">

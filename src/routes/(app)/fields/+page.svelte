@@ -9,6 +9,10 @@
 
 	let lightboxSrc = $state<string | null>(null);
 
+	function mentionMap(activity: { mentions?: { customerId: string; company: string }[] }) {
+		return new Map((activity.mentions ?? []).map((m) => [m.customerId, m.company]));
+	}
+
 	function isImage(key: string) {
 		return /\.(jpg|jpeg|png|gif|webp|avif|heic|heif)$/i.test(key);
 	}
@@ -29,7 +33,7 @@
 		<ul class="feed">
 			{#each feed.allActivities as activity (activity.id)}
 				<li class="card" class:private-card={activity.isPrivate}>
-					<p class="body">{@html bodyToHtml(activity.body)}</p>
+					<p class="body">{@html bodyToHtml(activity.body, mentionMap(activity))}</p>
 
 					{#if activity.tags && activity.tags.length > 0}
 						<div class="tags">

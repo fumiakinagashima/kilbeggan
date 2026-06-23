@@ -73,15 +73,15 @@ export async function listActivities(db: Db, limit = 50, viewingUserId?: string)
 }
 
 export async function listActivitiesByCustomer(db: Db, customerId: string, viewingUserId?: string) {
-	const mentionRows = await db
+	const activityIdRows = await db
 		.select({ activityId: activityMentions.activityId })
 		.from(activityMentions)
 		.where(eq(activityMentions.customerId, customerId))
 		.all();
 
-	if (mentionRows.length === 0) return [];
+	if (activityIdRows.length === 0) return [];
 
-	const actIds = mentionRows.map((m) => m.activityId);
+	const actIds = activityIdRows.map((m) => m.activityId);
 	const rows = await db
 		.select({
 			id: activities.id,
@@ -105,10 +105,31 @@ export async function listActivitiesByCustomer(db: Db, customerId: string, viewi
 		)
 		.orderBy(desc(activities.createdAt))
 		.all();
+	if (rows.length === 0) return [];
+
+	const rowIds = rows.map((a) => a.id);
+	const mentionRows = await db
+		.select({
+			activityId: activityMentions.activityId,
+			customerId: activityMentions.customerId,
+			company: customers.company
+		})
+		.from(activityMentions)
+		.leftJoin(customers, eq(activityMentions.customerId, customers.id))
+		.where(inArray(activityMentions.activityId, rowIds))
+		.all();
+
+	const byActivity = new Map<string, { customerId: string; company: string }[]>();
+	for (const m of mentionRows) {
+		if (!byActivity.has(m.activityId)) byActivity.set(m.activityId, []);
+		byActivity.get(m.activityId)!.push({ customerId: m.customerId, company: m.company ?? '' });
+	}
+
 	return rows.map((a) => ({
 		...a,
 		attachments: parseAttachments(a.attachments),
-		tags: parseTags(a.tags)
+		tags: parseTags(a.tags),
+		mentions: byActivity.get(a.id) ?? []
 	}));
 }
 

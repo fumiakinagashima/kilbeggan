@@ -52,7 +52,7 @@ export function createActivityEditState(getData: () => PageData) {
 				result += child.textContent ?? '';
 			} else if (child instanceof HTMLElement) {
 				if (child.dataset.mentionId) {
-					result += `@[${child.dataset.mentionName}](${child.dataset.mentionId})`;
+					result += `@{${child.dataset.mentionId}}`;
 				} else if (child.tagName === 'BR') {
 					result += '\n';
 				} else if (!isRoot && (child.tagName === 'DIV' || child.tagName === 'P')) {
