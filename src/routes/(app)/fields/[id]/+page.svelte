@@ -1,148 +1,12 @@
 <script lang="ts">
 	import { bodyToEditorHtml } from '$lib/body';
 	import { Lock, Globe } from '@lucide/svelte';
+	import { createActivityEditState } from './index.svelte.ts';
 
 	let { data, form } = $props();
-
-	let isPrivate = $state(data.activity.isPrivate);
-	let hasContent = $state(true);
-	let editorEl: HTMLDivElement | undefined = $state();
-	let isComposing = $state(false);
-	let mentionQuery = $state('');
-	let mentionRange: Range | null = null;
-	let showDropdown = $state(false);
-	let submitting = $state(false);
-
-	type CustomerOption = { id: string; company: string };
-
-	let filteredCustomers: CustomerOption[] = $derived(
-		showDropdown
-			? data.customers
-					.filter(
-						(c: CustomerOption) =>
-							!mentionQuery || c.company.toLowerCase().includes(mentionQuery.toLowerCase())
-					)
-					.slice(0, 6)
-			: []
-	);
+	const state = createActivityEditState(() => data);
 
 	const initialEditorHtml = bodyToEditorHtml(data.activity.body);
-
-	function extractText(node: Node, isRoot: boolean): string {
-		let result = '';
-		for (const child of node.childNodes) {
-			if (child.nodeType === Node.TEXT_NODE) {
-				result += child.textContent ?? '';
-			} else if (child instanceof HTMLElement) {
-				if (child.dataset.mentionId) {
-					result += `@[${child.dataset.mentionName}](${child.dataset.mentionId})`;
-				} else if (child.tagName === 'BR') {
-					result += '\n';
-				} else if (!isRoot && (child.tagName === 'DIV' || child.tagName === 'P')) {
-					result += '\n' + extractText(child, false);
-				} else {
-					result += extractText(child, false);
-				}
-			}
-		}
-		return result;
-	}
-
-	function getBodyText(): string {
-		if (!editorEl) return '';
-		return extractText(editorEl, true);
-	}
-
-	function checkMention() {
-		const sel = window.getSelection();
-		if (!sel || !sel.rangeCount) { showDropdown = false; return; }
-		const range = sel.getRangeAt(0);
-		const node = range.startContainer;
-		if (node.nodeType !== Node.TEXT_NODE) { showDropdown = false; return; }
-		const before = (node.textContent ?? '').slice(0, range.startOffset);
-		const match = before.match(/@([^@\n]*)$/);
-		if (match && !match[1].startsWith('[')) {
-			mentionQuery = match[1];
-			const r = document.createRange();
-			r.setStart(node, range.startOffset - match[0].length);
-			r.setEnd(node, range.startOffset);
-			mentionRange = r;
-			showDropdown = true;
-		} else {
-			showDropdown = false;
-			mentionRange = null;
-		}
-	}
-
-	function handleEditorInput() {
-		hasContent = (editorEl?.textContent?.trim().length ?? 0) > 0;
-		if (!isComposing) checkMention();
-	}
-
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && !isComposing) {
-			e.preventDefault();
-			const sel = window.getSelection();
-			if (!sel?.rangeCount) return;
-			const range = sel.getRangeAt(0);
-			range.deleteContents();
-			const br = document.createElement('br');
-			range.insertNode(br);
-			const newRange = document.createRange();
-			newRange.setStartAfter(br);
-			newRange.collapse(true);
-			sel.removeAllRanges();
-			sel.addRange(newRange);
-			hasContent = true;
-		}
-	}
-
-	function handlePaste(e: ClipboardEvent) {
-		e.preventDefault();
-		const text = e.clipboardData?.getData('text/plain') ?? '';
-		const sel = window.getSelection();
-		if (sel?.rangeCount) {
-			const range = sel.getRangeAt(0);
-			range.deleteContents();
-			const textNode = document.createTextNode(text);
-			range.insertNode(textNode);
-			range.setStartAfter(textNode);
-			range.collapse(true);
-			sel.removeAllRanges();
-			sel.addRange(range);
-		}
-		hasContent = (editorEl?.textContent?.trim().length ?? 0) > 0;
-	}
-
-	function insertMention(c: CustomerOption) {
-		if (!mentionRange) return;
-		mentionRange.deleteContents();
-		const span = document.createElement('span');
-		span.className = 'inline-mention';
-		span.contentEditable = 'false';
-		span.dataset.mentionId = c.id;
-		span.dataset.mentionName = c.company;
-		span.textContent = `@${c.company}`;
-		mentionRange.insertNode(span);
-		const space = document.createTextNode(' ');
-		(span as any).after(space);
-		const newRange = document.createRange();
-		newRange.setStart(space, 1);
-		newRange.collapse(true);
-		window.getSelection()?.removeAllRanges();
-		window.getSelection()?.addRange(newRange);
-		showDropdown = false;
-		mentionQuery = '';
-		mentionRange = null;
-		hasContent = true;
-	}
-
-	function handleSubmit(e: SubmitEvent) {
-		const formEl = e.target as HTMLFormElement;
-		const bodyInput = formEl.querySelector('input[name="body"]') as HTMLInputElement;
-		bodyInput.value = getBodyText();
-		submitting = true;
-	}
 </script>
 
 <div class="page">
@@ -155,30 +19,30 @@
 		<p class="error">{form.error}</p>
 	{/if}
 
-	<form method="POST" onsubmit={handleSubmit}>
+	<form method="POST" onsubmit={(e) => state.handleSubmit(e)}>
 		<input type="hidden" name="body" value="" />
-		<input type="hidden" name="isPrivate" value={isPrivate} />
+		<input type="hidden" name="isPrivate" value={state.isPrivate} />
 
 		<div class="editor-wrap">
 			<div
 				class="editor"
-				contenteditable={submitting ? 'false' : 'true'}
+				contenteditable={state.submitting ? 'false' : 'true'}
 				role="textbox"
 				aria-multiline="true"
-				bind:this={editorEl}
-				oninput={handleEditorInput}
-				onkeydown={handleKeydown}
-				oncompositionstart={() => (isComposing = true)}
-				oncompositionend={() => { isComposing = false; checkMention(); }}
-				onpaste={handlePaste}
-				onblur={() => setTimeout(() => { showDropdown = false; }, 150)}
+				bind:this={state.editorEl}
+				oninput={() => state.handleEditorInput()}
+				onkeydown={(e) => state.handleKeydown(e)}
+				oncompositionstart={() => state.handleCompositionStart()}
+				oncompositionend={() => state.handleCompositionEnd()}
+				onpaste={(e) => state.handlePaste(e)}
+				onblur={() => state.handleEditorBlur()}
 				tabindex="0"
 			>{@html initialEditorHtml}</div>
-			{#if showDropdown && filteredCustomers.length > 0}
+			{#if state.showDropdown && state.filteredCustomers.length > 0}
 				<ul class="mention-dropdown">
-					{#each filteredCustomers as c (c.id)}
+					{#each state.filteredCustomers as c (c.id)}
 						<li>
-							<button type="button" onmousedown={() => insertMention(c)}>
+							<button type="button" onmousedown={() => state.insertMention(c)}>
 								{c.company}
 							</button>
 						</li>
@@ -191,10 +55,10 @@
 			<button
 				type="button"
 				class="privacy-toggle"
-				class:private={isPrivate}
-				onclick={() => (isPrivate = !isPrivate)}
+				class:private={state.isPrivate}
+				onclick={() => (state.isPrivate = !state.isPrivate)}
 			>
-				{#if isPrivate}
+				{#if state.isPrivate}
 					<Lock size={13} />
 					非公開
 				{:else}
@@ -204,8 +68,8 @@
 			</button>
 			<div class="actions">
 				<a href="/fields" class="btn-cancel">キャンセル</a>
-				<button type="submit" class="btn-save" disabled={submitting || !hasContent}>
-					{submitting ? '保存中...' : '保存'}
+				<button type="submit" class="btn-save" disabled={state.submitting || !state.hasContent}>
+					{state.submitting ? '保存中...' : '保存'}
 				</button>
 			</div>
 		</div>

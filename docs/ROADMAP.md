@@ -22,6 +22,7 @@
 - [x] ダークモード/ライトモード切り替え (システムがデフォルト、チラつき防止のインラインスクリプト)
 - [x] 投稿へのファイル添付・写真撮影 (R2アップロード、activities.attachmentsカラム追加)
 - [x] 投稿・表示での改行保持 (bodyToHtml/bodyToEditorHtml、レイアウトシフト対策)
+- [x] ページState管理のリファクタリング (index.svelte.tsにファクトリ関数として切り出し、+page.svelteをtemplate専用に)
 
 ---
 

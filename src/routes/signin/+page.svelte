@@ -1,35 +1,7 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { createSignInState } from './index.svelte.ts';
 
-	let email = $state('');
-	let password = $state('');
-	let error = $state('');
-	let loading = $state(false);
-
-	async function submit(e: SubmitEvent) {
-		e.preventDefault();
-		error = '';
-		loading = true;
-
-		try {
-			const res = await fetch('/api/auth/signin', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email, password })
-			});
-
-			const data = await res.json() as { error?: string };
-
-			if (!res.ok) {
-				error = data.error ?? 'エラーが発生しました';
-				return;
-			}
-
-			await goto('/');
-		} finally {
-			loading = false;
-		}
-	}
+	const state = createSignInState();
 </script>
 
 <div class="page">
@@ -37,9 +9,9 @@
 		<h1 class="logo">Kilbeggan</h1>
 		<p class="tagline">活動記録をもっとシンプルに</p>
 
-		<form onsubmit={submit}>
-			{#if error}
-				<p class="error">{error}</p>
+		<form onsubmit={(e) => state.submit(e)}>
+			{#if state.error}
+				<p class="error">{state.error}</p>
 			{/if}
 
 			<div class="field">
@@ -47,10 +19,10 @@
 				<input
 					id="email"
 					type="email"
-					bind:value={email}
+					bind:value={state.email}
 					autocomplete="email"
 					required
-					disabled={loading}
+					disabled={state.loading}
 				/>
 			</div>
 
@@ -59,15 +31,15 @@
 				<input
 					id="password"
 					type="password"
-					bind:value={password}
+					bind:value={state.password}
 					autocomplete="current-password"
 					required
-					disabled={loading}
+					disabled={state.loading}
 				/>
 			</div>
 
-			<button type="submit" class="btn-primary" disabled={loading}>
-				{loading ? 'ログイン中...' : 'ログイン'}
+			<button type="submit" class="btn-primary" disabled={state.loading}>
+				{state.loading ? 'ログイン中...' : 'ログイン'}
 			</button>
 		</form>
 	</div>

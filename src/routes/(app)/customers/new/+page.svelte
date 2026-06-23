@@ -1,40 +1,7 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { createCustomerNewState } from './index.svelte.ts';
 
-	let company = $state('');
-	let phone = $state('');
-	let email = $state('');
-	let notes = $state('');
-	let error = $state('');
-	let loading = $state(false);
-
-	async function submit(e: SubmitEvent) {
-		e.preventDefault();
-		error = '';
-		loading = true;
-
-		try {
-			const res = await fetch('/api/customers', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					company,
-					phone: phone || null,
-					email: email || null,
-					notes: notes || null
-				})
-			});
-			const data = (await res.json()) as { id?: string; error?: string };
-
-			if (!res.ok) {
-				error = data.error ?? 'エラーが発生しました';
-				return;
-			}
-			goto(`/customers/${data.id}`);
-		} finally {
-			loading = false;
-		}
-	}
+	const state = createCustomerNewState();
 </script>
 
 <div class="page">
@@ -43,33 +10,33 @@
 		<h1>顧客を追加</h1>
 	</header>
 
-	<form onsubmit={submit}>
-		{#if error}
-			<p class="error">{error}</p>
+	<form onsubmit={(e) => state.submit(e)}>
+		{#if state.error}
+			<p class="error">{state.error}</p>
 		{/if}
 
 		<div class="field">
 			<label for="company">会社名 <span class="required">*</span></label>
-			<input id="company" type="text" bind:value={company} required disabled={loading} />
+			<input id="company" type="text" bind:value={state.company} required disabled={state.loading} />
 		</div>
 
 		<div class="field">
 			<label for="phone">電話番号</label>
-			<input id="phone" type="tel" bind:value={phone} disabled={loading} />
+			<input id="phone" type="tel" bind:value={state.phone} disabled={state.loading} />
 		</div>
 
 		<div class="field">
 			<label for="email">メール</label>
-			<input id="email" type="email" bind:value={email} disabled={loading} />
+			<input id="email" type="email" bind:value={state.email} disabled={state.loading} />
 		</div>
 
 		<div class="field">
 			<label for="notes">備考</label>
-			<textarea id="notes" rows="3" bind:value={notes} disabled={loading}></textarea>
+			<textarea id="notes" rows="3" bind:value={state.notes} disabled={state.loading}></textarea>
 		</div>
 
-		<button type="submit" class="btn-primary" disabled={loading}>
-			{loading ? '保存中...' : '保存'}
+		<button type="submit" class="btn-primary" disabled={state.loading}>
+			{state.loading ? '保存中...' : '保存'}
 		</button>
 	</form>
 </div>

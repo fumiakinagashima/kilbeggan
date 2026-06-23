@@ -92,6 +92,62 @@ Claude API・Resendの実装パターンはMidletonを参照する。UI/UXは参
 
 ---
 
+## Coding Rules
+
+### ページのState管理
+
+`$state` / `$derived` などのrunesとコンポーネント内関数は `index.svelte.ts` に切り出してclassベースで管理する。`+page.svelte` は template と `<style>` のみを持つ薄いコンポーネントにする。stateを持たないページは `index.svelte.ts` を作らない。
+
+**ファイル構成**:
+```
+routes/(app)/some-page/
+  ├ index.svelte.ts    ← class-based state (runes + functions)
+  ├ +page.server.ts
+  └ +page.svelte       ← template + style のみ
+```
+
+**パターン**:
+```typescript
+// index.svelte.ts
+import type { PageData } from './$types';
+
+export function createSomePageState(getData: () => PageData) {
+  let value = $state(0);
+
+  // $derived が getData() を直接参照できる（クラスの順序問題なし）
+  const derived = $derived(getData().items.filter(...));
+
+  async function doSomething() { ... }
+
+  return {
+    get value() { return value; },
+    set value(v: number) { value = v; },  // bind:value などで書き込む場合は setter も追加
+    get derived() { return derived; },
+    doSomething,
+  };
+}
+```
+
+```svelte
+<!-- +page.svelte -->
+<script lang="ts">
+  import { createSomePageState } from './index.svelte.ts';
+  let { data } = $props();
+  const state = createSomePageState(() => data);
+</script>
+```
+
+**ルール**:
+- 関数ベース（ファクトリ関数）で実装する。クラスは `$derived` + 外部データの組み合わせで順序問題が生じるため使わない
+- `data` propは `() => data` の形で渡す（Svelte 5のreactivityを保つため）
+- `$derived` はクロージャ内で直接 `getData()` を参照できる
+- 返り値はgetter/setterオブジェクト。外部から書き込む必要があるものだけsetterを追加する
+- `bind:value` や `bind:this` が必要なプロパティはgetter + setterの両方を返す
+- リアクティブ不要な内部変数（例: `mentionRange`）は `$state` をつけない普通の `let` で定義する
+- `goto` など SvelteKit モジュールは `.svelte.ts` ファイル内でインポートして使用できる
+
+---
+
 You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:
 
 ## Available Svelte MCP Tools:

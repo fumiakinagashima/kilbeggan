@@ -1,11 +1,8 @@
 <script lang="ts">
-	let { data, form } = $props();
+	import { createCustomerEditState } from './index.svelte.ts';
 
-	let company = $state(data.customer.company);
-	let phone = $state(data.customer.phone ?? '');
-	let email = $state(data.customer.email ?? '');
-	let notes = $state(data.customer.notes ?? '');
-	let submitting = $state(false);
+	let { data, form } = $props();
+	const state = createCustomerEditState(() => data);
 </script>
 
 <div class="page">
@@ -18,31 +15,31 @@
 		<p class="error">{form.error}</p>
 	{/if}
 
-	<form method="POST" onsubmit={() => (submitting = true)}>
+	<form method="POST" onsubmit={() => state.startSubmitting()}>
 		<div class="field">
 			<label for="company">会社名 <span class="required">*</span></label>
-			<input id="company" name="company" type="text" bind:value={company} required disabled={submitting} />
+			<input id="company" name="company" type="text" bind:value={state.company} required disabled={state.submitting} />
 		</div>
 
 		<div class="field">
 			<label for="phone">電話番号</label>
-			<input id="phone" name="phone" type="tel" bind:value={phone} disabled={submitting} />
+			<input id="phone" name="phone" type="tel" bind:value={state.phone} disabled={state.submitting} />
 		</div>
 
 		<div class="field">
 			<label for="email">メール</label>
-			<input id="email" name="email" type="email" bind:value={email} disabled={submitting} />
+			<input id="email" name="email" type="email" bind:value={state.email} disabled={state.submitting} />
 		</div>
 
 		<div class="field">
 			<label for="notes">備考</label>
-			<textarea id="notes" name="notes" rows="4" bind:value={notes} disabled={submitting}></textarea>
+			<textarea id="notes" name="notes" rows="4" bind:value={state.notes} disabled={state.submitting}></textarea>
 		</div>
 
 		<div class="footer">
 			<a href="/customers/{data.customer.id}" class="btn-cancel">キャンセル</a>
-			<button type="submit" class="btn-primary" disabled={submitting || !company.trim()}>
-				{submitting ? '保存中...' : '保存'}
+			<button type="submit" class="btn-primary" disabled={state.submitting || !state.company.trim()}>
+				{state.submitting ? '保存中...' : '保存'}
 			</button>
 		</div>
 	</form>

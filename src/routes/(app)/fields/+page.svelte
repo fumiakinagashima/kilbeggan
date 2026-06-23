@@ -2,31 +2,10 @@
 	import { timeAgo } from '$lib/datetime';
 	import { bodyToHtml } from '$lib/body';
 	import { Lock } from '@lucide/svelte';
+	import { createFieldsState } from './index.svelte.ts';
 
 	let { data } = $props();
-
-	let privacyMap = $state<Record<string, boolean>>({});
-	let allActivities = $derived(
-		data.activities.map((a) => ({
-			...a,
-			isPrivate: a.id in privacyMap ? privacyMap[a.id] : a.isPrivate
-		}))
-	);
-
-	async function togglePrivacy(activityId: string, current: boolean) {
-		const next = !current;
-		privacyMap = { ...privacyMap, [activityId]: next };
-		const res = await fetch(`/api/activities/${activityId}`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ isPrivate: next })
-		});
-		if (!res.ok) {
-			const copy = { ...privacyMap };
-			delete copy[activityId];
-			privacyMap = copy;
-		}
-	}
+	const state = createFieldsState(() => data);
 </script>
 
 <div class="page">
@@ -34,11 +13,11 @@
 		<h1>活動一覧</h1>
 	</header>
 
-	{#if allActivities.length === 0}
+	{#if state.allActivities.length === 0}
 		<p class="empty">まだ活動記録がありません</p>
 	{:else}
 		<ul class="feed">
-			{#each allActivities as activity (activity.id)}
+			{#each state.allActivities as activity (activity.id)}
 				<li class="card" class:private-card={activity.isPrivate}>
 					<p class="body">{@html bodyToHtml(activity.body)}</p>
 					<div class="meta">
@@ -51,7 +30,7 @@
 								<a href="/fields/{activity.id}" class="edit-link">編集</a>
 								<button
 									class="visibility-btn"
-									onclick={() => togglePrivacy(activity.id, activity.isPrivate)}
+									onclick={() => state.togglePrivacy(activity.id, activity.isPrivate)}
 								>
 									{activity.isPrivate ? '公開する' : '非公開にする'}
 								</button>
