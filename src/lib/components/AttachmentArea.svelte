@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Paperclip, Camera, X } from '@lucide/svelte';
+	import CameraScanner from './CameraScanner.svelte';
 
 	export type AttachmentItem = { key: string; name: string; url: string; mimeType: string };
 
@@ -12,10 +13,28 @@
 	let { attachments, uploading = false, onFiles, onRemove }: Props = $props();
 
 	let fileInputEl: HTMLInputElement;
+	let nativeCameraInputEl: HTMLInputElement;
 	let lightboxSrc = $state<string | null>(null);
+	let showCameraModal = $state(false);
 
 	function isImage(mimeType: string) {
 		return mimeType.startsWith('image/');
+	}
+
+	function handleCameraClick() {
+		if (window.matchMedia('(pointer: fine)').matches) {
+			showCameraModal = true;
+		} else {
+			nativeCameraInputEl?.click();
+		}
+	}
+
+	function handleCapture(blob: Blob) {
+		showCameraModal = false;
+		const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+		const dt = new DataTransfer();
+		dt.items.add(file);
+		onFiles(dt.files);
 	}
 </script>
 
@@ -28,6 +47,14 @@
 			style="display:none"
 			onchange={(e) => onFiles((e.target as HTMLInputElement).files)}
 		/>
+		<input
+			bind:this={nativeCameraInputEl}
+			type="file"
+			accept="image/*"
+			capture="environment"
+			style="display:none"
+			onchange={(e) => onFiles((e.target as HTMLInputElement).files)}
+		/>
 		<button
 			type="button"
 			class="attach-btn"
@@ -37,17 +64,15 @@
 		>
 			<Paperclip size={16} />
 		</button>
-		<label class="attach-btn" class:disabled={uploading} title="写真を撮影" aria-label="写真を撮影">
+		<button
+			type="button"
+			class="attach-btn"
+			onclick={handleCameraClick}
+			disabled={uploading}
+			title="写真を撮影"
+		>
 			<Camera size={16} />
-			<input
-				type="file"
-				accept="image/*"
-				capture="environment"
-				style="display:none"
-				disabled={uploading}
-				onchange={(e) => onFiles((e.target as HTMLInputElement).files)}
-			/>
-		</label>
+		</button>
 	</div>
 
 	{#if attachments.length > 0}
@@ -93,6 +118,25 @@
 	</div>
 {/if}
 
+{#if showCameraModal}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+	<div
+		class="camera-modal"
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+		onclick={() => (showCameraModal = false)}
+		onkeydown={(e) => { if (e.key === 'Escape') showCameraModal = false; }}
+	>
+		<div class="camera-modal-inner" role="document" onclick={(e) => e.stopPropagation()}>
+			<button class="modal-close" onclick={() => (showCameraModal = false)} aria-label="閉じる">
+				<X size={20} />
+			</button>
+			<CameraScanner onCapture={handleCapture} autoStart />
+		</div>
+	</div>
+{/if}
+
 <style lang="scss">
 	.attachment-area {
 		display: flex;
@@ -124,8 +168,7 @@
 			border-color: var(--color-text-muted);
 		}
 
-		&:disabled,
-		&.disabled {
+		&:disabled {
 			opacity: 0.4;
 			cursor: not-allowed;
 		}
@@ -212,14 +255,18 @@
 		}
 	}
 
-	.lightbox {
+	.lightbox,
+	.camera-modal {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.88);
+		background: rgba(0, 0, 0, 0.68);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		z-index: 1000;
+	}
+
+	.lightbox {
 		cursor: zoom-out;
 	}
 
@@ -244,6 +291,35 @@
 		border-radius: 50%;
 		width: 40px;
 		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		cursor: pointer;
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.75);
+		}
+	}
+
+	.camera-modal-inner {
+		position: relative;
+		width: min(620px, 96vw);
+		background: var(--color-surface);
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	.modal-close {
+		position: absolute;
+		top: 0.625rem;
+		right: 0.625rem;
+		z-index: 10;
+		background: rgba(0, 0, 0, 0.5);
+		border: none;
+		border-radius: 50%;
+		width: 36px;
+		height: 36px;
 		display: flex;
 		align-items: center;
 		justify-content: center;

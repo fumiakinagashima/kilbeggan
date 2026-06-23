@@ -5,8 +5,9 @@
 
 	type Props = {
 		onCapture: (blob: Blob) => void;
+		autoStart?: boolean;
 	};
-	let { onCapture }: Props = $props();
+	let { onCapture, autoStart = false }: Props = $props();
 
 	let scanState = $state<ScanState>('init');
 	let errorMsg = $state('');
@@ -80,6 +81,7 @@
 	onMount(() => {
 		window.addEventListener('resize', drawGuide);
 		window.addEventListener('keydown', handleKeydown);
+		if (autoStart) startCamera();
 		return () => {
 			window.removeEventListener('resize', drawGuide);
 			window.removeEventListener('keydown', handleKeydown);
