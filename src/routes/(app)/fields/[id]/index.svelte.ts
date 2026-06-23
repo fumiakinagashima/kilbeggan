@@ -1,4 +1,5 @@
 import type { PageData } from './$types';
+import { compressImage } from '$lib/image';
 
 type CustomerOption = { id: string; company: string };
 type AttachmentItem = { key: string; url: string; name: string; mimeType: string };
@@ -177,7 +178,8 @@ export function createActivityEditState(getData: () => PageData) {
 		if (!files || files.length === 0) return;
 		uploading = true;
 		try {
-			for (const file of files) {
+			for (const raw of files) {
+				const file = await compressImage(raw);
 				const fd = new FormData();
 				fd.append('file', file);
 				const res = await fetch('/api/upload', { method: 'POST', body: fd });
