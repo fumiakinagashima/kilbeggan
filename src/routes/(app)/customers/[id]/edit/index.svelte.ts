@@ -12,6 +12,10 @@ export function createCustomerEditState(getData: () => PageData) {
 		submitting = true;
 	}
 
+	function stopSubmitting() {
+		submitting = false;
+	}
+
 	return {
 		get company() {
 			return company;
@@ -40,6 +44,7 @@ export function createCustomerEditState(getData: () => PageData) {
 		get submitting() {
 			return submitting;
 		},
-		startSubmitting
+		startSubmitting,
+		stopSubmitting
 	};
 }

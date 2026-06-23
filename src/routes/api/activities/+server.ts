@@ -1,8 +1,9 @@
 import { json } from '@sveltejs/kit';
 import { z } from 'zod/v4';
 import { getDb } from '$lib/server/db';
-import { createActivity } from '$lib/server/db/activity-service';
+import { createActivity, updateActivityTags } from '$lib/server/db/activity-service';
 import { parseMentionIds } from '$lib/body';
+import { classifyActivity } from '$lib/server/ai/classify';
 
 const attachmentSchema = z.object({ key: z.string(), name: z.string() });
 
@@ -28,6 +29,17 @@ export async function POST({ request, platform, locals }) {
 		mentionedCustomerIds,
 		attachments: parsed.data.attachments
 	});
+
+	// タグ付けを非同期で実行（レスポンスをブロックしない）
+	const apiKey = platform?.env?.ANTHROPIC_API_KEY;
+	if (apiKey) {
+		const mockAi = platform?.env?.MOCK_AI;
+		platform!.ctx.waitUntil(
+			classifyActivity(apiKey, parsed.data.body, mockAi)
+				.then((tags) => updateActivityTags(db, activity.id, tags))
+				.catch(() => {})
+		);
+	}
 
 	return json({ ...activity, userName: locals.user.name }, { status: 201 });
 }

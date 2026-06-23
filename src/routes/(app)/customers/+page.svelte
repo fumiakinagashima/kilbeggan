@@ -1,7 +1,15 @@
 <script lang="ts">
 	import { Plus, ChevronRight } from '@lucide/svelte';
+	import { timeAgo } from '$lib/datetime';
 
 	let { data } = $props();
+
+	const STALE_MS = 30 * 24 * 60 * 60 * 1000;
+
+	function isStale(date: Date | string | null) {
+		if (!date) return true;
+		return Date.now() - new Date(date).getTime() > STALE_MS;
+	}
 </script>
 
 <div class="page">
@@ -21,7 +29,17 @@
 				<li>
 					<a href="/customers/{customer.id}" class="item">
 						<div class="item-info">
-							<span class="name">{customer.company}</span>
+							<div class="item-name-row">
+								<span class="name">{customer.company}</span>
+								{#if !customer.lastActivityAt || isStale(customer.lastActivityAt)}
+									<span class="alert-badge">要フォロー</span>
+								{/if}
+							</div>
+							<span class="last-contact">
+								{customer.lastActivityAt
+									? `最終接触: ${timeAgo(new Date(customer.lastActivityAt))}`
+									: '接触記録なし'}
+							</span>
 						</div>
 						<ChevronRight size={20} class="chevron" />
 					</a>
@@ -93,18 +111,50 @@
 		text-decoration: none;
 		color: inherit;
 		gap: 0.5rem;
+		transition: background 0.1s;
+
+		&:hover {
+			background: color-mix(in srgb, var(--color-border) 30%, var(--color-surface));
+		}
 	}
 
 	.item-info {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 0.125rem;
+		gap: 0.25rem;
+	}
+
+	.item-name-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.name {
 		font-size: 0.9375rem;
 		font-weight: 600;
+	}
+
+	.alert-badge {
+		display: inline-block;
+		padding: 0.1rem 0.45rem;
+		background: color-mix(in srgb, #f59e0b 15%, transparent);
+		color: #b45309;
+		border: 1px solid color-mix(in srgb, #f59e0b 40%, transparent);
+		border-radius: 20px;
+		font-size: 0.7rem;
+		font-weight: 600;
+
+		:global([data-theme='dark']) & {
+			color: #fbbf24;
+			background: color-mix(in srgb, #f59e0b 20%, transparent);
+		}
+	}
+
+	.last-contact {
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
 	}
 
 	:global(.chevron) {

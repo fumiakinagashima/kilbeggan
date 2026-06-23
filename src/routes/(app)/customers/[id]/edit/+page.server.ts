@@ -31,7 +31,11 @@ export const actions = {
 			notes: (formData.get('notes') as string) || null
 		};
 		const parsed = updateSchema.safeParse(raw);
-		if (!parsed.success) return { error: '入力値が不正です' };
+		if (!parsed.success) {
+			const details = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+			console.error('[customer edit] validation failed:', JSON.stringify(raw), details);
+			return { error: `入力値が不正です (${details})` };
+		}
 
 		await updateCustomer(db, params.id, parsed.data);
 		redirect(302, `/customers/${params.id}`);

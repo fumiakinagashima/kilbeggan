@@ -31,6 +31,14 @@
 				<li class="card" class:private-card={activity.isPrivate}>
 					<p class="body">{@html bodyToHtml(activity.body)}</p>
 
+					{#if activity.tags && activity.tags.length > 0}
+						<div class="tags">
+							{#each activity.tags as tag}
+								<span class="tag">{tag}</span>
+							{/each}
+						</div>
+					{/if}
+
 					{#if activity.attachments && activity.attachments.length > 0}
 						<div class="attachments">
 							{#each activity.attachments as att (att.key)}
@@ -158,6 +166,23 @@
 
 	.mention {
 		color: var(--color-primary);
+		font-weight: 500;
+	}
+
+	.tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.tag {
+		display: inline-block;
+		padding: 0.125rem 0.5rem;
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+		color: var(--color-primary);
+		border-radius: 20px;
+		font-size: 0.75rem;
 		font-weight: 500;
 	}
 
