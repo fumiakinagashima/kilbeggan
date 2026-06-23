@@ -146,7 +146,7 @@
 		background: var(--color-surface);
 
 		&:hover {
-			background: var(--color-bg);
+			background: var(--color-background);
 		}
 	}
 

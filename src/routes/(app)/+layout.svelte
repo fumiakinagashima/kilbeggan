@@ -2,7 +2,8 @@
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { PenLine, List, Users } from '@lucide/svelte';
+	import { PenLine, List, Users, Sun, Moon, Monitor } from '@lucide/svelte';
+	import { themeStore } from '$lib/stores/theme.svelte';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -33,6 +34,23 @@
 				</a>
 			{/each}
 		</nav>
+		<div class="theme-switcher">
+			<button
+				class:active={themeStore.value === 'light'}
+				onclick={() => (themeStore.value = 'light')}
+				title="ライト"
+			><Sun size={15} /></button>
+			<button
+				class:active={themeStore.value === 'system'}
+				onclick={() => (themeStore.value = 'system')}
+				title="システム"
+			><Monitor size={15} /></button>
+			<button
+				class:active={themeStore.value === 'dark'}
+				onclick={() => (themeStore.value = 'dark')}
+				title="ダーク"
+			><Moon size={15} /></button>
+		</div>
 		<button class="signout" onclick={signout}>ログアウト</button>
 	</aside>
 
@@ -65,8 +83,8 @@
 			width: var(--sidebar-width);
 			min-height: 100dvh;
 			padding: 1.5rem 1rem;
-			background: var(--color-surface);
-			border-right: 1px solid var(--color-border);
+			background: var(--sidebar-bg);
+			border-right: 1px solid var(--sidebar-border);
 			position: sticky;
 			top: 0;
 		}
@@ -96,20 +114,51 @@
 		border-radius: 8px;
 		font-size: 0.9375rem;
 		font-weight: 500;
-		color: var(--color-text-muted);
+		color: var(--sidebar-text-muted);
 		text-decoration: none;
 		transition:
 			background 0.1s,
 			color 0.1s;
 
 		&:hover {
-			background: var(--color-bg);
-			color: var(--color-text);
+			background: var(--sidebar-hover);
+			color: var(--sidebar-text);
 		}
 
 		&.active {
-			background: #eff6ff;
+			background: var(--sidebar-active);
 			color: var(--color-primary);
+		}
+	}
+
+	.theme-switcher {
+		display: flex;
+		border: 1px solid var(--sidebar-border);
+		border-radius: 8px;
+		overflow: hidden;
+		margin-bottom: 0.5rem;
+
+		button {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0.4rem;
+			background: none;
+			border: none;
+			cursor: pointer;
+			color: var(--sidebar-text-muted);
+			transition: background 0.1s, color 0.1s;
+
+			&:hover {
+				background: var(--sidebar-hover);
+				color: var(--sidebar-text);
+			}
+
+			&.active {
+				background: var(--sidebar-active);
+				color: var(--color-primary);
+			}
 		}
 	}
 
@@ -119,7 +168,7 @@
 		padding: 0.625rem 0.75rem;
 		border: none;
 		background: none;
-		color: var(--color-text-muted);
+		color: var(--sidebar-text-muted);
 		font-size: 0.875rem;
 		cursor: pointer;
 		border-radius: 8px;
@@ -127,8 +176,8 @@
 		text-align: left;
 
 		&:hover {
-			background: var(--color-bg);
-			color: var(--color-text);
+			background: var(--sidebar-hover);
+			color: var(--sidebar-text);
 		}
 	}
 
@@ -148,8 +197,8 @@
 		left: 0;
 		right: 0;
 		height: var(--nav-height-mobile);
-		background: var(--color-surface);
-		border-top: 1px solid var(--color-border);
+		background: var(--sidebar-bg);
+		border-top: 1px solid var(--sidebar-border);
 		display: flex;
 		z-index: 100;
 
@@ -166,7 +215,7 @@
 		justify-content: center;
 		gap: 0.125rem;
 		text-decoration: none;
-		color: var(--color-text-muted);
+		color: var(--sidebar-text-muted);
 		font-size: 0.6875rem;
 		font-weight: 500;
 

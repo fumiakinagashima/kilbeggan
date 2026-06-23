@@ -31,6 +31,7 @@ export const activities = sqliteTable('activities', {
 		.references(() => users.id),
 	body: text('body').notNull(),
 	isPrivate: integer('is_private', { mode: 'boolean' }).notNull(),
+	attachments: text('attachments'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 });
 

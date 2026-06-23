@@ -6,7 +6,8 @@ import { parseMentionIds } from '$lib/body';
 
 const createSchema = z.object({
 	body: z.string().min(1),
-	isPrivate: z.boolean().optional().default(false)
+	isPrivate: z.boolean().optional().default(false),
+	attachments: z.array(z.string()).optional().default([])
 });
 
 export async function POST({ request, platform, locals }) {
@@ -22,7 +23,8 @@ export async function POST({ request, platform, locals }) {
 		userId: locals.user.userId,
 		body: parsed.data.body,
 		isPrivate: parsed.data.isPrivate,
-		mentionedCustomerIds
+		mentionedCustomerIds,
+		attachments: parsed.data.attachments
 	});
 
 	return json({ ...activity, userName: locals.user.name }, { status: 201 });

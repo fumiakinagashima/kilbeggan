@@ -79,7 +79,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: var(--color-bg);
+		background: var(--color-background);
 		padding: 1.5rem;
 	}
 

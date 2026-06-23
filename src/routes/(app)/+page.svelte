@@ -1,17 +1,23 @@
 <script lang="ts">
-	import { Lock, Globe } from '@lucide/svelte';
+	import { Lock, Globe, Paperclip, Camera } from '@lucide/svelte';
 
 	let { data } = $props();
 
 	type CustomerOption = { id: string; company: string };
+	type AttachmentItem = { key: string; url: string; name: string; mimeType: string };
+
 	// compose state
 	let posting = $state(false);
 	let postError = $state('');
 	let hasContent = $state(false);
 	let isPrivate = $state(false);
+	let attachments = $state<AttachmentItem[]>([]);
+	let uploading = $state(false);
 
 	// contenteditable editor
 	let editorEl: HTMLDivElement | undefined = $state();
+	let fileInputEl: HTMLInputElement | undefined = $state();
+	let cameraInputEl: HTMLInputElement | undefined = $state();
 	let isComposing = $state(false);
 	let mentionQuery = $state('');
 	let mentionRange: Range | null = null;
@@ -28,23 +34,29 @@
 			: []
 	);
 
-	function getBodyText(): string {
-		if (!editorEl) return '';
+	function extractText(node: Node, isRoot: boolean): string {
 		let result = '';
-		for (const node of editorEl.childNodes) {
-			if (node.nodeType === Node.TEXT_NODE) {
-				result += node.textContent ?? '';
-			} else if (node instanceof HTMLElement) {
-				if (node.dataset.mentionId) {
-					result += `@[${node.dataset.mentionName}](${node.dataset.mentionId})`;
-				} else if (node.tagName === 'BR') {
+		for (const child of node.childNodes) {
+			if (child.nodeType === Node.TEXT_NODE) {
+				result += child.textContent ?? '';
+			} else if (child instanceof HTMLElement) {
+				if (child.dataset.mentionId) {
+					result += `@[${child.dataset.mentionName}](${child.dataset.mentionId})`;
+				} else if (child.tagName === 'BR') {
 					result += '\n';
+				} else if (!isRoot && (child.tagName === 'DIV' || child.tagName === 'P')) {
+					result += '\n' + extractText(child, false);
 				} else {
-					result += node.textContent ?? '';
+					result += extractText(child, false);
 				}
 			}
 		}
 		return result;
+	}
+
+	function getBodyText(): string {
+		if (!editorEl) return '';
+		return extractText(editorEl, true);
 	}
 
 	function checkMention() {
@@ -84,6 +96,24 @@
 		checkMention();
 	}
 
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' && !isComposing) {
+			e.preventDefault();
+			const sel = window.getSelection();
+			if (!sel?.rangeCount) return;
+			const range = sel.getRangeAt(0);
+			range.deleteContents();
+			const br = document.createElement('br');
+			range.insertNode(br);
+			const newRange = document.createRange();
+			newRange.setStartAfter(br);
+			newRange.collapse(true);
+			sel.removeAllRanges();
+			sel.addRange(newRange);
+			hasContent = true;
+		}
+	}
+
 	function handlePaste(e: ClipboardEvent) {
 		e.preventDefault();
 		const text = e.clipboardData?.getData('text/plain') ?? '';
@@ -113,10 +143,10 @@
 		span.textContent = `@${c.company}`;
 		mentionRange.insertNode(span);
 
-		const space = document.createTextNode(' ');
-		(span as any).after(space);
+		span.after(' ');
+		const spaceNode = span.nextSibling as Node;
 		const newRange = document.createRange();
-		newRange.setStart(space, 1);
+		newRange.setStart(spaceNode, 1);
 		newRange.collapse(true);
 		window.getSelection()?.removeAllRanges();
 		window.getSelection()?.addRange(newRange);
@@ -133,6 +163,30 @@
 		}, 150);
 	}
 
+	async function handleFiles(files: FileList | null) {
+		if (!files || files.length === 0) return;
+		uploading = true;
+		try {
+			for (const file of files) {
+				const fd = new FormData();
+				fd.append('file', file);
+				const res = await fetch('/api/upload', { method: 'POST', body: fd });
+				if (!res.ok) continue;
+				const { key } = (await res.json()) as { key: string };
+				attachments = [
+					...attachments,
+					{ key, url: `/api/files/${key}`, name: file.name, mimeType: file.type }
+				];
+			}
+		} finally {
+			uploading = false;
+		}
+	}
+
+	function removeAttachment(key: string) {
+		attachments = attachments.filter((a) => a.key !== key);
+	}
+
 	async function post(e: SubmitEvent) {
 		e.preventDefault();
 		const bodyText = getBodyText().trim();
@@ -143,7 +197,11 @@
 			const res = await fetch('/api/activities', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ body: bodyText, isPrivate })
+				body: JSON.stringify({
+					body: bodyText,
+					isPrivate,
+					attachments: attachments.map((a) => a.key)
+				})
 			});
 			const result = (await res.json()) as { error?: string };
 			if (!res.ok) {
@@ -153,6 +211,7 @@
 			if (editorEl) editorEl.innerHTML = '';
 			hasContent = false;
 			isPrivate = false;
+			attachments = [];
 		} finally {
 			posting = false;
 		}
@@ -172,8 +231,10 @@
 					contenteditable={posting ? 'false' : 'true'}
 					role="textbox"
 					aria-multiline="true"
+					tabindex="0"
 					bind:this={editorEl}
 					oninput={handleEditorInput}
+					onkeydown={handleKeydown}
 					oncompositionstart={() => (isComposing = true)}
 					oncompositionend={handleCompositionEnd}
 					onpaste={handlePaste}
@@ -191,22 +252,78 @@
 					</ul>
 				{/if}
 			</div>
+
+			{#if attachments.length > 0}
+				<div class="attachments-preview">
+					{#each attachments as item (item.key)}
+						<div class="attachment-item">
+							{#if item.mimeType.startsWith('image/')}
+								<img src={item.url} alt={item.name} />
+							{:else}
+								<span class="file-icon">📄</span>
+								<span class="file-name">{item.name}</span>
+							{/if}
+							<button
+								type="button"
+								class="remove-btn"
+								onclick={() => removeAttachment(item.key)}
+							>×</button>
+						</div>
+					{/each}
+				</div>
+			{/if}
+
 			<div class="compose-footer">
-				<button
-					type="button"
-					class="privacy-toggle"
-					class:private={isPrivate}
-					onclick={() => (isPrivate = !isPrivate)}
-				>
-					{#if isPrivate}
-						<Lock size={13} />
-						非公開
-					{:else}
-						<Globe size={13} />
-						全体公開
-					{/if}
-				</button>
-				<button type="submit" class="btn-post" disabled={posting || !hasContent}>
+				<div class="compose-actions">
+					<button
+						type="button"
+						class="privacy-toggle"
+						class:private={isPrivate}
+						onclick={() => (isPrivate = !isPrivate)}
+					>
+						{#if isPrivate}
+							<Lock size={13} />
+							非公開
+						{:else}
+							<Globe size={13} />
+							全体公開
+						{/if}
+					</button>
+					<input
+						bind:this={fileInputEl}
+						type="file"
+						multiple
+						style="display:none"
+						onchange={(e) => handleFiles((e.target as HTMLInputElement).files)}
+					/>
+					<input
+						bind:this={cameraInputEl}
+						type="file"
+						accept="image/*"
+						capture="environment"
+						style="display:none"
+						onchange={(e) => handleFiles((e.target as HTMLInputElement).files)}
+					/>
+					<button
+						type="button"
+						class="attach-btn"
+						onclick={() => fileInputEl?.click()}
+						disabled={uploading}
+						title="ファイルを添付"
+					>
+						<Paperclip size={16} />
+					</button>
+					<button
+						type="button"
+						class="attach-btn"
+						onclick={() => cameraInputEl?.click()}
+						disabled={uploading}
+						title="写真を撮影"
+					>
+						<Camera size={16} />
+					</button>
+				</div>
+				<button type="submit" class="btn-post" disabled={posting || !hasContent || uploading}>
 					{posting ? '送信中...' : '投稿'}
 				</button>
 			</div>
@@ -242,7 +359,7 @@
 	}
 
 	.editor {
-		border: 1px solid #ccc;
+		border: 1px solid var(--color-border);
 		min-height: 12rem;
 		padding: 0.55rem;
 		font-size: 1rem;
@@ -299,8 +416,72 @@
 			color: var(--color-text);
 
 			&:hover {
-				background: var(--color-bg);
+				background: var(--color-background);
 			}
+		}
+	}
+
+	.attachments-preview {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: 0.625rem;
+	}
+
+	.attachment-item {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		background: var(--color-background);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		padding: 0.25rem;
+		max-width: 120px;
+
+		img {
+			width: 80px;
+			height: 80px;
+			object-fit: cover;
+			border-radius: 6px;
+			display: block;
+		}
+
+		.file-icon {
+			font-size: 1.5rem;
+			padding: 0.25rem;
+		}
+
+		.file-name {
+			font-size: 0.75rem;
+			color: var(--color-text-muted);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			max-width: 80px;
+		}
+	}
+
+	.remove-btn {
+		position: absolute;
+		top: -6px;
+		right: -6px;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: var(--color-text-muted);
+		color: var(--color-surface);
+		border: none;
+		cursor: pointer;
+		font-size: 0.75rem;
+		line-height: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+
+		&:hover {
+			background: var(--color-error);
 		}
 	}
 
@@ -309,6 +490,12 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.5rem;
+	}
+
+	.compose-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
 	}
 
 	.privacy-toggle {
@@ -334,12 +521,39 @@
 		}
 	}
 
+	.attach-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border: 1px solid var(--color-border);
+		border-radius: 50%;
+		background: var(--color-surface);
+		color: var(--color-text-muted);
+		cursor: pointer;
+		transition:
+			color 0.15s,
+			border-color 0.15s;
+
+		&:hover {
+			color: var(--color-text);
+			border-color: var(--color-text-muted);
+		}
+
+		&:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+	}
+
 	.error {
 		font-size: 0.875rem;
 		color: var(--color-error);
 		background: var(--color-error-bg);
 		padding: 0.625rem 0.875rem;
 		border-radius: 8px;
+		margin-bottom: 0.5rem;
 	}
 
 	.btn-post {
@@ -352,83 +566,11 @@
 		font-weight: 600;
 		cursor: pointer;
 		transition: opacity 0.15s;
+		white-space: nowrap;
 
 		&:disabled {
 			opacity: 0.5;
 			cursor: not-allowed;
-		}
-	}
-
-	.empty {
-		color: var(--color-text-muted);
-	}
-
-	.feed {
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.card {
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: 12px;
-		padding: 1rem;
-
-		&.private-card {
-			background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
-			border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
-		}
-	}
-
-	.body {
-		font-size: 0.9375rem;
-		line-height: 1.6;
-		white-space: pre-wrap;
-		word-break: break-word;
-		margin-bottom: 0.5rem;
-	}
-
-	.mention {
-		color: var(--color-primary);
-		font-weight: 500;
-	}
-
-	.meta {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		font-size: 0.8125rem;
-		color: var(--color-text-muted);
-		gap: 0.5rem;
-	}
-
-	.meta-right {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.private-badge {
-		display: flex;
-		align-items: center;
-		gap: 0.2rem;
-		color: var(--color-primary);
-		font-size: 0.75rem;
-	}
-
-	.visibility-btn {
-		background: none;
-		border: none;
-		color: var(--color-text-muted);
-		font-size: 0.75rem;
-		cursor: pointer;
-		padding: 0;
-		text-decoration: underline;
-
-		&:hover {
-			color: var(--color-text);
 		}
 	}
 </style>

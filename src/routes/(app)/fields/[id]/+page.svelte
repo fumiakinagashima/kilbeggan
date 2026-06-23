@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { parseBody } from '$lib/body';
+	import { bodyToEditorHtml } from '$lib/body';
 	import { Lock, Globe } from '@lucide/svelte';
 
 	let { data, form } = $props();
@@ -26,42 +26,31 @@
 			: []
 	);
 
-	$effect(() => {
-		if (!editorEl) return;
-		const segments = parseBody(data.activity.body);
-		editorEl.innerHTML = '';
-		for (const seg of segments) {
-			if (seg.type === 'text') {
-				editorEl.appendChild(document.createTextNode(seg.text));
-			} else {
-				const span = document.createElement('span');
-				span.className = 'inline-mention';
-				span.contentEditable = 'false';
-				span.dataset.mentionId = seg.id;
-				span.dataset.mentionName = seg.name;
-				span.textContent = `@${seg.name}`;
-				editorEl.appendChild(span);
-			}
-		}
-	});
+	const initialEditorHtml = bodyToEditorHtml(data.activity.body);
 
-	function getBodyText(): string {
-		if (!editorEl) return '';
+	function extractText(node: Node, isRoot: boolean): string {
 		let result = '';
-		for (const node of editorEl.childNodes) {
-			if (node.nodeType === Node.TEXT_NODE) {
-				result += node.textContent ?? '';
-			} else if (node instanceof HTMLElement) {
-				if (node.dataset.mentionId) {
-					result += `@[${node.dataset.mentionName}](${node.dataset.mentionId})`;
-				} else if (node.tagName === 'BR') {
+		for (const child of node.childNodes) {
+			if (child.nodeType === Node.TEXT_NODE) {
+				result += child.textContent ?? '';
+			} else if (child instanceof HTMLElement) {
+				if (child.dataset.mentionId) {
+					result += `@[${child.dataset.mentionName}](${child.dataset.mentionId})`;
+				} else if (child.tagName === 'BR') {
 					result += '\n';
+				} else if (!isRoot && (child.tagName === 'DIV' || child.tagName === 'P')) {
+					result += '\n' + extractText(child, false);
 				} else {
-					result += node.textContent ?? '';
+					result += extractText(child, false);
 				}
 			}
 		}
 		return result;
+	}
+
+	function getBodyText(): string {
+		if (!editorEl) return '';
+		return extractText(editorEl, true);
 	}
 
 	function checkMention() {
@@ -88,6 +77,24 @@
 	function handleEditorInput() {
 		hasContent = (editorEl?.textContent?.trim().length ?? 0) > 0;
 		if (!isComposing) checkMention();
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' && !isComposing) {
+			e.preventDefault();
+			const sel = window.getSelection();
+			if (!sel?.rangeCount) return;
+			const range = sel.getRangeAt(0);
+			range.deleteContents();
+			const br = document.createElement('br');
+			range.insertNode(br);
+			const newRange = document.createRange();
+			newRange.setStartAfter(br);
+			newRange.collapse(true);
+			sel.removeAllRanges();
+			sel.addRange(newRange);
+			hasContent = true;
+		}
 	}
 
 	function handlePaste(e: ClipboardEvent) {
@@ -160,11 +167,13 @@
 				aria-multiline="true"
 				bind:this={editorEl}
 				oninput={handleEditorInput}
+				onkeydown={handleKeydown}
 				oncompositionstart={() => (isComposing = true)}
 				oncompositionend={() => { isComposing = false; checkMention(); }}
 				onpaste={handlePaste}
 				onblur={() => setTimeout(() => { showDropdown = false; }, 150)}
-			></div>
+				tabindex="0"
+			>{@html initialEditorHtml}</div>
 			{#if showDropdown && filteredCustomers.length > 0}
 				<ul class="mention-dropdown">
 					{#each filteredCustomers as c (c.id)}
@@ -299,7 +308,7 @@
 			color: var(--color-text);
 
 			&:hover {
-				background: var(--color-bg);
+				background: var(--color-background);
 			}
 		}
 	}
@@ -347,7 +356,7 @@
 		background: var(--color-surface);
 
 		&:hover {
-			background: var(--color-bg);
+			background: var(--color-background);
 		}
 	}
 

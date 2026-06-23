@@ -8,6 +8,7 @@ export async function listActivities(db: Db, limit = 50, viewingUserId?: string)
 			id: activities.id,
 			body: activities.body,
 			isPrivate: activities.isPrivate,
+			attachments: activities.attachments,
 			createdAt: activities.createdAt,
 			userId: activities.userId,
 			userName: users.name
@@ -43,7 +44,11 @@ export async function listActivities(db: Db, limit = 50, viewingUserId?: string)
 		byActivity.get(m.activityId)!.push({ customerId: m.customerId, company: m.company ?? '' });
 	}
 
-	return acts.map((a) => ({ ...a, mentions: byActivity.get(a.id) ?? [] }));
+	return acts.map((a) => ({
+		...a,
+		attachments: a.attachments ? (JSON.parse(a.attachments) as string[]) : [],
+		mentions: byActivity.get(a.id) ?? []
+	}));
 }
 
 export async function listActivitiesByCustomer(db: Db, customerId: string, viewingUserId?: string) {
@@ -56,11 +61,12 @@ export async function listActivitiesByCustomer(db: Db, customerId: string, viewi
 	if (mentionRows.length === 0) return [];
 
 	const actIds = mentionRows.map((m) => m.activityId);
-	return db
+	const rows = await db
 		.select({
 			id: activities.id,
 			body: activities.body,
 			isPrivate: activities.isPrivate,
+			attachments: activities.attachments,
 			createdAt: activities.createdAt,
 			userId: activities.userId,
 			userName: users.name
@@ -77,17 +83,34 @@ export async function listActivitiesByCustomer(db: Db, customerId: string, viewi
 		)
 		.orderBy(desc(activities.createdAt))
 		.all();
+	return rows.map((a) => ({
+		...a,
+		attachments: a.attachments ? (JSON.parse(a.attachments) as string[]) : []
+	}));
 }
 
 export async function createActivity(
 	db: Db,
-	data: { userId: string; body: string; isPrivate: boolean; mentionedCustomerIds: string[] }
+	data: {
+		userId: string;
+		body: string;
+		isPrivate: boolean;
+		mentionedCustomerIds: string[];
+		attachments?: string[];
+	}
 ) {
 	const id = crypto.randomUUID();
 	const createdAt = new Date();
-	await db
-		.insert(activities)
-		.values({ id, userId: data.userId, body: data.body, isPrivate: data.isPrivate, createdAt });
+	const attachmentsJson =
+		data.attachments && data.attachments.length > 0 ? JSON.stringify(data.attachments) : null;
+	await db.insert(activities).values({
+		id,
+		userId: data.userId,
+		body: data.body,
+		isPrivate: data.isPrivate,
+		attachments: attachmentsJson,
+		createdAt
+	});
 
 	if (data.mentionedCustomerIds.length > 0) {
 		await db.insert(activityMentions).values(
@@ -105,6 +128,7 @@ export async function createActivity(
 		userId: data.userId,
 		body: data.body,
 		isPrivate: data.isPrivate,
+		attachments: data.attachments ?? [],
 		createdAt,
 		mentions: [] as { customerId: string; company: string }[]
 	};
@@ -116,6 +140,7 @@ export async function getActivity(db: Db, id: string) {
 			id: activities.id,
 			body: activities.body,
 			isPrivate: activities.isPrivate,
+			attachments: activities.attachments,
 			createdAt: activities.createdAt,
 			userId: activities.userId,
 			userName: users.name
@@ -137,7 +162,11 @@ export async function getActivity(db: Db, id: string) {
 		.where(eq(activityMentions.activityId, id))
 		.all();
 
-	return { ...act, mentions: mentions.map((m) => ({ customerId: m.customerId, company: m.company ?? '' })) };
+	return {
+		...act,
+		attachments: act.attachments ? (JSON.parse(act.attachments) as string[]) : [],
+		mentions: mentions.map((m) => ({ customerId: m.customerId, company: m.company ?? '' }))
+	};
 }
 
 export async function updateActivity(

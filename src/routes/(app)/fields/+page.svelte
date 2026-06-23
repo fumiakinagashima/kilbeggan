@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { timeAgo } from '$lib/datetime';
-	import { parseBody } from '$lib/body';
+	import { bodyToHtml } from '$lib/body';
 	import { Lock } from '@lucide/svelte';
 
 	let { data } = $props();
@@ -40,15 +40,7 @@
 		<ul class="feed">
 			{#each allActivities as activity (activity.id)}
 				<li class="card" class:private-card={activity.isPrivate}>
-					<p class="body">
-						{#each parseBody(activity.body) as seg, i (i)}
-							{#if seg.type === 'text'}
-								{seg.text}
-							{:else}
-								<span class="mention">@{seg.name}</span>
-							{/if}
-						{/each}
-					</p>
+					<p class="body">{@html bodyToHtml(activity.body)}</p>
 					<div class="meta">
 						<span class="author">{activity.userName ?? ''}</span>
 						<div class="meta-right">

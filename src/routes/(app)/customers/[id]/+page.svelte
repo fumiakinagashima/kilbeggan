@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { timeAgo } from '$lib/datetime';
-	import { parseBody } from '$lib/body';
+	import { bodyToHtml } from '$lib/body';
 
 	let { data } = $props();
 </script>
@@ -43,15 +43,7 @@
 			<ul class="activity-list">
 				{#each data.activities as activity (activity.id)}
 					<li class="activity-item">
-						<p class="activity-body">
-							{#each parseBody(activity.body) as seg, i (i)}
-								{#if seg.type === 'text'}
-									{seg.text}
-								{:else}
-									<span class="mention">@{seg.name}</span>
-								{/if}
-							{/each}
-						</p>
+						<p class="activity-body">{@html bodyToHtml(activity.body)}</p>
 						<div class="activity-meta">
 							<span>{activity.userName ?? ''}</span>
 							<span>{timeAgo(new Date(activity.createdAt))}</span>

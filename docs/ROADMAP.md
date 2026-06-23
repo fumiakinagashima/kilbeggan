@@ -19,6 +19,9 @@
 - [x] プライベート投稿 (非公開フラグ、フィードからトグル)
 - [x] スキーマ改訂 (customers: company必須化、users: admin/user権限、activities: 多対多メンション)
 - [x] ルーティング整理 (/ 投稿専用, /fields 活動一覧, /fields/[id] 活動編集, /customers/[id]/edit 顧客編集)
+- [x] ダークモード/ライトモード切り替え (システムがデフォルト、チラつき防止のインラインスクリプト)
+- [x] 投稿へのファイル添付・写真撮影 (R2アップロード、activities.attachmentsカラム追加)
+- [x] 投稿・表示での改行保持 (bodyToHtml/bodyToEditorHtml、レイアウトシフト対策)
 
 ---
 
