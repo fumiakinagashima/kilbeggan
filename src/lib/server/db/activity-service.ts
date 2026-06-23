@@ -203,6 +203,11 @@ export async function updateActivity(
 	}
 }
 
+export async function deleteActivity(db: Db, id: string): Promise<void> {
+	await db.delete(activityMentions).where(eq(activityMentions.activityId, id));
+	await db.delete(activities).where(eq(activities.id, id));
+}
+
 export async function updateActivityPrivacy(
 	db: Db,
 	id: string,

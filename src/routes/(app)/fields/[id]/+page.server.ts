@@ -1,7 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import { z } from 'zod/v4';
 import { getDb } from '$lib/server/db';
-import { getActivity, updateActivity } from '$lib/server/db/activity-service';
+import { getActivity, updateActivity, deleteActivity } from '$lib/server/db/activity-service';
 import { listCustomers } from '$lib/server/db/customer-service';
 import { parseMentionIds } from '$lib/body';
 
@@ -24,6 +24,14 @@ const updateSchema = z.object({
 });
 
 export const actions = {
+	delete: async ({ platform, locals, params }) => {
+		const db = getDb(platform!.env.DB);
+		const activity = await getActivity(db, params.id);
+		if (!activity) error(404);
+		if (activity.userId !== locals.user!.userId) error(403);
+		await deleteActivity(db, params.id);
+		redirect(302, '/fields');
+	},
 	default: async ({ request, platform, locals, params }) => {
 		const db = getDb(platform!.env.DB);
 		const activity = await getActivity(db, params.id);

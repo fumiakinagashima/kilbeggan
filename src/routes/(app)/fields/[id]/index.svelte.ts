@@ -23,6 +23,7 @@ export function createActivityEditState(getData: () => PageData) {
 	let mentionRange: Range | null = null;
 	let showDropdown = $state(false);
 	let submitting = $state(false);
+	let deleting = $state(false);
 	let attachments = $state<AttachmentItem[]>(
 		getData().activity.attachments.map((a) => ({
 			key: a.key,
@@ -199,6 +200,13 @@ export function createActivityEditState(getData: () => PageData) {
 		attachments = attachments.filter((a) => a.key !== key);
 	}
 
+	function handleDelete() {
+		if (!window.confirm('この活動を削除しますか？削除した活動は元に戻せません。')) return;
+		deleting = true;
+		const form = document.getElementById('delete-form') as HTMLFormElement | null;
+		form?.submit();
+	}
+
 	function handleSubmit(e: SubmitEvent) {
 		const formEl = e.target as HTMLFormElement;
 		const bodyInput = formEl.querySelector('input[name="body"]') as HTMLInputElement;
@@ -232,6 +240,9 @@ export function createActivityEditState(getData: () => PageData) {
 		get submitting() {
 			return submitting;
 		},
+		get deleting() {
+			return deleting;
+		},
 		get filteredCustomers() {
 			return filteredCustomers;
 		},
@@ -250,6 +261,7 @@ export function createActivityEditState(getData: () => PageData) {
 		handleEditorBlur,
 		handleFiles,
 		removeAttachment,
+		handleDelete,
 		handleSubmit
 	};
 }
