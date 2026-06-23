@@ -39,7 +39,7 @@
 
 <div class="page">
 	<header class="page-header">
-		<h1>ダッシュボード</h1>
+		<h1>サマリー</h1>
 	</header>
 
 	<div class="stats-grid">

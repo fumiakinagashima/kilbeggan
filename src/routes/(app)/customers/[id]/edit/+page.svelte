@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { createCustomerEditState } from './index.svelte.ts';
 
 	let { data, form } = $props();
@@ -15,25 +16,31 @@
 		<p class="error">{form.error}</p>
 	{/if}
 
-	<form method="POST" onsubmit={() => state.startSubmitting()}>
+	<form method="POST" use:enhance={() => {
+		state.startSubmitting();
+		return async ({ update }) => {
+			await update();
+			state.stopSubmitting();
+		};
+	}}>
 		<div class="field">
 			<label for="company">会社名 <span class="required">*</span></label>
-			<input id="company" name="company" type="text" bind:value={state.company} required disabled={state.submitting} />
+			<input id="company" name="company" type="text" bind:value={state.company} required />
 		</div>
 
 		<div class="field">
 			<label for="phone">電話番号</label>
-			<input id="phone" name="phone" type="tel" bind:value={state.phone} disabled={state.submitting} />
+			<input id="phone" name="phone" type="tel" bind:value={state.phone} />
 		</div>
 
 		<div class="field">
 			<label for="email">メール</label>
-			<input id="email" name="email" type="email" bind:value={state.email} disabled={state.submitting} />
+			<input id="email" name="email" type="email" bind:value={state.email} />
 		</div>
 
 		<div class="field">
 			<label for="notes">備考</label>
-			<textarea id="notes" name="notes" rows="4" bind:value={state.notes} disabled={state.submitting}></textarea>
+			<textarea id="notes" name="notes" rows="4" bind:value={state.notes}></textarea>
 		</div>
 
 		<div class="footer">
