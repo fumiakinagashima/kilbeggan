@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import type { LayoutData } from '../$types';
 
 export function createSettingsState(getLayoutData: () => LayoutData) {
@@ -67,6 +68,11 @@ export function createSettingsState(getLayoutData: () => LayoutData) {
 		}
 	}
 
+	async function signout() {
+		await fetch('/api/auth/signout', { method: 'POST' });
+		goto('/signin');
+	}
+
 	return {
 		get profileName() { return profileName; },
 		set profileName(v: string) { profileName = v; },
@@ -85,6 +91,7 @@ export function createSettingsState(getLayoutData: () => LayoutData) {
 		get passwordMessage() { return passwordMessage; },
 
 		saveProfile,
-		savePassword
+		savePassword,
+		signout
 	};
 }

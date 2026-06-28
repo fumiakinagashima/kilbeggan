@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { timeAgo, formatDate } from '$lib/datetime';
-	import { bodyToHtml } from '$lib/body';
+	import { formatDate } from '$lib/datetime';
 	import { createCustomerDetailState } from './index.svelte.ts';
 
 	let { data } = $props();
@@ -140,31 +139,6 @@
 		{/if}
 	</section>
 
-	<section class="history">
-		<h2>活動履歴</h2>
-		{#if data.activities.length === 0}
-			<p class="empty">まだ活動記録がありません</p>
-		{:else}
-			<ul class="activity-list">
-				{#each data.activities as activity (activity.id)}
-					<li class="activity-item">
-						<p class="activity-body">{@html bodyToHtml(activity.body, state.mentionMap(activity))}</p>
-						{#if activity.tags && activity.tags.length > 0}
-							<div class="activity-tags">
-								{#each activity.tags as tag (tag)}
-									<span class="tag">{tag}</span>
-								{/each}
-							</div>
-						{/if}
-						<div class="activity-meta">
-							<span>{activity.userName ?? ''}</span>
-							<span>{timeAgo(new Date(activity.createdAt))}</span>
-						</div>
-					</li>
-				{/each}
-			</ul>
-		{/if}
-	</section>
 </div>
 
 <style lang="scss">
@@ -478,68 +452,5 @@
 		line-height: 1.6;
 	}
 
-	.history h2 {
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--color-text-muted);
-		margin-bottom: 0.75rem;
-	}
 
-	.empty {
-		text-align: center;
-		color: var(--color-text-muted);
-		padding: 2rem 0;
-		font-size: 0.875rem;
-	}
-
-	.activity-list {
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: 0.625rem;
-	}
-
-	.activity-item {
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: 10px;
-		padding: 0.875rem 1rem;
-	}
-
-	.activity-body {
-		font-size: 0.9375rem;
-		line-height: 1.6;
-		white-space: pre-wrap;
-		word-break: break-word;
-		margin-bottom: 0.5rem;
-	}
-
-	:global(.mention) {
-		color: var(--color-primary);
-		font-weight: 500;
-	}
-
-	.activity-tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.25rem;
-		margin-bottom: 0.5rem;
-	}
-
-	.tag {
-		display: inline-block;
-		padding: 0.125rem 0.5rem;
-		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-		color: var(--color-primary);
-		border-radius: 20px;
-		font-size: 0.75rem;
-		font-weight: 500;
-	}
-
-	.activity-meta {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.8125rem;
-		color: var(--color-text-muted);
-	}
 </style>

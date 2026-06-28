@@ -101,6 +101,8 @@
 			</button>
 		</div>
 	</section>
+
+	<button class="btn-signout" onclick={state.signout}>ログアウト</button>
 </div>
 
 <style lang="scss">
@@ -250,6 +252,29 @@
 		&:disabled {
 			opacity: 0.6;
 			cursor: not-allowed;
+		}
+	}
+
+	.btn-signout {
+		display: none;
+		width: 100%;
+		padding: 0.875rem;
+		background: none;
+		border: 1px solid var(--color-text-muted);
+		border-radius: 8px;
+		color: var(--color-text-muted);
+		font-size: 0.9375rem;
+		font-weight: 500;
+		cursor: pointer;
+		margin-top: 0.5rem;
+		transition: background 0.15s;
+
+		&:hover {
+			background: color-mix(in srgb, var(--color-text-muted) 8%, transparent);
+		}
+
+		@media (max-width: 767px) {
+			display: block;
 		}
 	}
 </style>

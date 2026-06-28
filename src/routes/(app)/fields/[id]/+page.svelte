@@ -23,8 +23,6 @@
 		<p class="error">{form.error}</p>
 	{/if}
 
-	<form id="delete-form" method="POST" action="?/delete" style="display:none"></form>
-
 	<form method="POST" action="?/update" onsubmit={(e) => edit.handleSubmit(e)}>
 		<input type="hidden" name="body" value="" />
 		<input type="hidden" name="isPrivate" value={edit.isPrivate} />
@@ -76,14 +74,6 @@
 				{/if}
 			</button>
 			<div class="actions">
-				<button
-					type="button"
-					class="btn-delete"
-					onclick={() => edit.handleDelete()}
-					disabled={edit.deleting || edit.submitting}
-				>
-					{edit.deleting ? '削除中...' : '削除'}
-				</button>
 				<a href="/fields" class="btn-cancel">キャンセル</a>
 				<button type="submit" class="btn-save" disabled={edit.submitting || !edit.hasContent || edit.uploading}>
 					保存
@@ -239,27 +229,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-	}
-
-	.btn-delete {
-		padding: 0.4rem 1rem;
-		border: 1px solid var(--color-error);
-		border-radius: 20px;
-		font-size: 0.875rem;
-		color: var(--color-error);
-		background: transparent;
-		cursor: pointer;
-		transition: background 0.15s, color 0.15s;
-
-		&:hover {
-			background: var(--color-error);
-			color: #fff;
-		}
-
-		&:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
 	}
 
 	.btn-cancel {

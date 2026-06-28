@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { timeAgo } from '$lib/datetime';
 	import { bodyToHtml } from '$lib/body';
-	import { Lock, X } from '@lucide/svelte';
+	import { Lock, X, MoreVertical } from '@lucide/svelte';
 	import { createFieldsState } from './index.svelte.ts';
 
 	let { data } = $props();
@@ -22,6 +22,8 @@
 	}
 </script>
 
+<svelte:window onclick={() => feed.closeMenu()} />
+
 <div class="page">
 	<header class="page-header">
 		<h1>活動一覧</h1>
@@ -33,6 +35,34 @@
 		<ul class="feed">
 			{#each feed.allActivities as activity (activity.id)}
 				<li class="card" class:private-card={activity.isPrivate}>
+					{#if data.user?.userId === activity.userId}
+						<div class="menu-wrapper">
+							<button
+								class="kebab-btn"
+								onclick={(e) => { e.stopPropagation(); feed.openMenu(activity.id); }}
+								aria-label="メニュー"
+							>
+								<MoreVertical size={16} />
+							</button>
+							{#if feed.openMenuId === activity.id}
+								<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+								<div class="dropdown" onclick={(e) => e.stopPropagation()}>
+									<a href="/fields/{activity.id}" class="dropdown-item">編集</a>
+									<button
+										class="dropdown-item"
+										onclick={() => feed.togglePrivacy(activity.id, activity.isPrivate)}
+									>
+										{activity.isPrivate ? '公開する' : '非公開にする'}
+									</button>
+									<button
+										class="dropdown-item danger"
+										onclick={() => feed.deleteActivity(activity.id)}
+									>削除</button>
+								</div>
+							{/if}
+						</div>
+					{/if}
+
 					<p class="body">{@html bodyToHtml(activity.body, mentionMap(activity))}</p>
 
 					{#if activity.tags && activity.tags.length > 0}
@@ -73,15 +103,6 @@
 						<div class="meta-right">
 							{#if activity.isPrivate}
 								<span class="private-badge"><Lock size={11} />非公開</span>
-							{/if}
-							{#if data.user?.userId === activity.userId}
-								<a href="/fields/{activity.id}" class="edit-link">編集</a>
-								<button
-									class="visibility-btn"
-									onclick={() => feed.togglePrivacy(activity.id, activity.isPrivate)}
-								>
-									{activity.isPrivate ? '公開する' : '非公開にする'}
-								</button>
 							{/if}
 							<span>{timeAgo(new Date(activity.createdAt))}</span>
 						</div>
@@ -149,6 +170,7 @@
 	}
 
 	.card {
+		position: relative;
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 12px;
@@ -160,12 +182,72 @@
 		}
 	}
 
+	.menu-wrapper {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+	}
+
+	.kebab-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		background: none;
+		border: none;
+		border-radius: 6px;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		padding: 0;
+
+		&:hover {
+			background: var(--color-background);
+			color: var(--color-text);
+		}
+	}
+
+	.dropdown {
+		position: absolute;
+		top: calc(100% + 4px);
+		right: 0;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+		min-width: 140px;
+		z-index: 100;
+		overflow: hidden;
+	}
+
+	.dropdown-item {
+		display: block;
+		width: 100%;
+		padding: 0.625rem 0.875rem;
+		font-size: 0.875rem;
+		color: var(--color-text);
+		text-decoration: none;
+		background: none;
+		border: none;
+		text-align: left;
+		cursor: pointer;
+
+		&:hover {
+			background: var(--color-background);
+		}
+
+		&.danger {
+			color: var(--color-error, #e53e3e);
+		}
+	}
+
 	.body {
 		font-size: 0.9375rem;
 		line-height: 1.6;
 		white-space: pre-wrap;
 		word-break: break-word;
 		margin-bottom: 0.5rem;
+		padding-right: 2rem;
 	}
 
 	.mention {
@@ -262,30 +344,6 @@
 		gap: 0.2rem;
 		color: var(--color-primary);
 		font-size: 0.75rem;
-	}
-
-	.edit-link {
-		font-size: 0.75rem;
-		color: var(--color-primary);
-		text-decoration: none;
-
-		&:hover {
-			text-decoration: underline;
-		}
-	}
-
-	.visibility-btn {
-		background: none;
-		border: none;
-		color: var(--color-text-muted);
-		font-size: 0.75rem;
-		cursor: pointer;
-		padding: 0;
-		text-decoration: underline;
-
-		&:hover {
-			color: var(--color-text);
-		}
 	}
 
 	.lightbox {
