@@ -67,10 +67,10 @@
 			>
 				{#if edit.isPrivate}
 					<Lock size={13} />
-					非公開
+					非対象
 				{:else}
 					<Globe size={13} />
-					全体公開
+					要約対象
 				{/if}
 			</button>
 			<div class="actions">

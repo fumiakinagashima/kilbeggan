@@ -53,10 +53,10 @@
 				>
 					{#if state.isPrivate}
 						<Lock size={13} />
-						非公開
+						非対象
 					{:else}
 						<Globe size={13} />
-						全体公開
+						要約対象
 					{/if}
 				</button>
 				<button type="submit" class="btn-post" disabled={state.posting || !state.hasContent || state.uploading}>

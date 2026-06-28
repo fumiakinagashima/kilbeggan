@@ -52,7 +52,7 @@
 										class="dropdown-item"
 										onclick={() => feed.togglePrivacy(activity.id, activity.isPrivate)}
 									>
-										{activity.isPrivate ? '公開する' : '非公開にする'}
+										{activity.isPrivate ? '要約対象にする' : '非対象にする'}
 									</button>
 									<button
 										class="dropdown-item danger"
@@ -102,7 +102,7 @@
 						<span class="author">{activity.userName ?? ''}</span>
 						<div class="meta-right">
 							{#if activity.isPrivate}
-								<span class="private-badge"><Lock size={11} />非公開</span>
+								<span class="private-badge"><Lock size={11} />非対象</span>
 							{/if}
 							<span>{timeAgo(new Date(activity.createdAt))}</span>
 						</div>
