@@ -68,6 +68,34 @@ export async function updateCustomerSummary(
 		.where(eq(customers.id, id));
 }
 
+export async function editCustomerSummary(
+	db: Db,
+	id: string,
+	summary: string,
+	editorName: string
+): Promise<void> {
+	await db
+		.update(customers)
+		.set({ aiSummary: summary, summaryEditedAt: new Date(), summaryEditedBy: editorName })
+		.where(eq(customers.id, id));
+}
+
+export async function updateManagerComment(
+	db: Db,
+	id: string,
+	comment: string,
+	editorName: string
+): Promise<void> {
+	await db
+		.update(customers)
+		.set({
+			managerComment: comment,
+			managerCommentEditedAt: new Date(),
+			managerCommentEditedBy: editorName
+		})
+		.where(eq(customers.id, id));
+}
+
 export async function updateCustomerScore(
 	db: Db,
 	id: string,

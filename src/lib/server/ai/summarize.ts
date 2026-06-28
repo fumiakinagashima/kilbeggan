@@ -1,11 +1,11 @@
 import { ask } from './client';
 
 const CUSTOMER_SYSTEM = `あなたは営業支援AIです。
-顧客に関する活動記録の一覧を読み、以下の観点で簡潔な要約を作成してください。
+顧客に関する活動記録の一覧を読み、以下の観点で中〜長期的な分析を作成してください。
 
-- 現在の関係状況（良好・課題あり・要注意など）
-- 直近の主なトピックや懸案事項
-- 次のアクションとして推奨されること
+- 顧客の特性・関心・価値観（何を重視するタイプか）
+- 関係性の深さと現在のフェーズ（初期接触・信頼構築中・商談深耕など）
+- 効果的なアプローチ（何が刺さるか、どんな切り口が響くか）
 
 200文字以内の日本語で記述してください。箇条書きは使わず、自然な文章で書いてください。`;
 
@@ -26,7 +26,7 @@ export async function summarizeCustomer(
 	activities: { body: string; createdAt: Date }[],
 	mockAi?: string
 ): Promise<string> {
-	if (mockAi) return `${company}との関係は良好です。直近の活動では情報収集や商談が中心でした。次のステップとして定期的なフォローアップを推奨します。（モック）`;
+	if (mockAi === 'true') return `${company}は品質とコスト削減を重視する実務型の担当者。関係性は信頼構築フェーズで、具体的な数値・事例を示すアプローチが刺さりやすい。（モック）`;
 	if (activities.length === 0) return '';
 	const lines = activities
 		.slice(0, 20)

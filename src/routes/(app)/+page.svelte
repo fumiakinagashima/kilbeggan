@@ -183,7 +183,7 @@
 		display: flex;
 		align-items: center;
 		gap: 0.3rem;
-		padding: 0.375rem 0.75rem;
+		padding: 0.35rem 0.7rem;
 		border: 1px solid var(--color-border);
 		border-radius: 20px;
 		background: var(--color-surface);

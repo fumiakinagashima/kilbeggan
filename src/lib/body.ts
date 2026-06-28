@@ -60,13 +60,18 @@ export function bodyToHtml(body: string, mentionMap: Map<string, string> = new M
 }
 
 export function bodyToEditorHtml(body: string, mentionMap: Map<string, string> = new Map()): string {
-	return parseSegments(body, mentionMap)
-		.map((seg) =>
-			seg.type === 'text'
-				? escapeHtml(seg.text).replace(/\n/g, '<br>')
-				: `<span class="inline-mention" contenteditable="false" data-mention-id="${escapeAttr(seg.id)}" data-mention-name="${escapeAttr(seg.name)}">@${escapeHtml(seg.name)}</span>`
-		)
-		.join('');
+	// Chrome normalizes <br> in contenteditable to <div><br></div>, causing double newlines.
+	// Use <div> per line to match Chrome's native structure.
+	return body.split('\n').map((line) => {
+		const lineHtml = parseSegments(line, mentionMap)
+			.map((seg) =>
+				seg.type === 'text'
+					? escapeHtml(seg.text)
+					: `<span class="inline-mention" contenteditable="false" data-mention-id="${escapeAttr(seg.id)}" data-mention-name="${escapeAttr(seg.name)}">@${escapeHtml(seg.name)}</span>`
+			)
+			.join('');
+		return `<div>${lineHtml || '<br>'}</div>`;
+	}).join('');
 }
 
 export function parseMentionIds(body: string): string[] {

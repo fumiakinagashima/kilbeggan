@@ -1,3 +1,7 @@
+export function formatDate(date: Date): string {
+	return date.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' });
+}
+
 export function timeAgo(date: Date): string {
 	const diff = Date.now() - date.getTime();
 	const minutes = Math.floor(diff / 60_000);

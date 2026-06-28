@@ -19,6 +19,11 @@ export const customers = sqliteTable('customers', {
 	notes: text('notes'),
 	aiSummary: text('ai_summary'),
 	aiSummaryUpdatedAt: integer('ai_summary_updated_at', { mode: 'timestamp' }),
+	summaryEditedAt: integer('summary_edited_at', { mode: 'timestamp' }),
+	summaryEditedBy: text('summary_edited_by'),
+	managerComment: text('manager_comment'),
+	managerCommentEditedAt: integer('manager_comment_edited_at', { mode: 'timestamp' }),
+	managerCommentEditedBy: text('manager_comment_edited_by'),
 	score: integer('score'),
 	scoreUpdatedAt: integer('score_updated_at', { mode: 'timestamp' }),
 	createdBy: text('created_by')

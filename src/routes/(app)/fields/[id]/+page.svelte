@@ -25,7 +25,7 @@
 
 	<form id="delete-form" method="POST" action="?/delete" style="display:none"></form>
 
-	<form method="POST" onsubmit={(e) => edit.handleSubmit(e)}>
+	<form method="POST" action="?/update" onsubmit={(e) => edit.handleSubmit(e)}>
 		<input type="hidden" name="body" value="" />
 		<input type="hidden" name="isPrivate" value={edit.isPrivate} />
 		<input type="hidden" name="attachments" value="" />
@@ -86,7 +86,7 @@
 				</button>
 				<a href="/fields" class="btn-cancel">キャンセル</a>
 				<button type="submit" class="btn-save" disabled={edit.submitting || !edit.hasContent || edit.uploading}>
-					{edit.submitting ? '保存中...' : '保存'}
+					保存
 				</button>
 			</div>
 		</div>
@@ -242,7 +242,7 @@
 	}
 
 	.btn-delete {
-		padding: 0.5rem 1rem;
+		padding: 0.4rem 1rem;
 		border: 1px solid var(--color-error);
 		border-radius: 20px;
 		font-size: 0.875rem;
@@ -263,7 +263,7 @@
 	}
 
 	.btn-cancel {
-		padding: 0.5rem 1rem;
+		padding: 0.4rem 1rem;
 		border: 1px solid var(--color-border);
 		border-radius: 20px;
 		font-size: 0.875rem;
@@ -277,7 +277,7 @@
 	}
 
 	.btn-save {
-		padding: 0.5rem 1.25rem;
+		padding: 0.4rem 1.1rem;
 		background: var(--color-primary);
 		color: #fff;
 		border: none;

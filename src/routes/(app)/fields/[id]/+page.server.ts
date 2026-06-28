@@ -32,7 +32,7 @@ export const actions = {
 		await deleteActivity(db, params.id);
 		redirect(302, '/fields');
 	},
-	default: async ({ request, platform, locals, params }) => {
+	update: async ({ request, platform, locals, params }) => {
 		const db = getDb(platform!.env.DB);
 		const activity = await getActivity(db, params.id);
 		if (!activity) error(404);

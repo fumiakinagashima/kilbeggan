@@ -10,7 +10,7 @@ export async function POST({ params, platform, locals }) {
 	const customer = await getCustomer(db, params.id);
 	if (!customer) return json({ error: 'Not found' }, { status: 404 });
 
-	const acts = await listActivitiesByCustomer(db, params.id, locals.user.id);
+	const acts = await listActivitiesByCustomer(db, params.id, locals.user.userId);
 	const result = await scoreCustomer(
 		platform!.env.ANTHROPIC_API_KEY,
 		acts.map((a) => ({ body: a.body, createdAt: a.createdAt, tags: a.tags })),

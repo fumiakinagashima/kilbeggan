@@ -28,7 +28,7 @@ export function createComposeState(getData: () => PageData) {
 			: []
 	);
 
-	function extractText(node: Node, isRoot: boolean): string {
+	function extractText(node: Node): string {
 		let result = '';
 		for (const child of node.childNodes) {
 			if (child.nodeType === Node.TEXT_NODE) {
@@ -38,10 +38,12 @@ export function createComposeState(getData: () => PageData) {
 					result += `@{${child.dataset.mentionId}}`;
 				} else if (child.tagName === 'BR') {
 					result += '\n';
-				} else if (!isRoot && (child.tagName === 'DIV' || child.tagName === 'P')) {
-					result += '\n' + extractText(child, false);
+				} else if (child.tagName === 'DIV' || child.tagName === 'P') {
+					const inner = extractText(child);
+					if (result.length > 0 && !result.endsWith('\n')) result += '\n';
+					result += inner;
 				} else {
-					result += extractText(child, false);
+					result += extractText(child);
 				}
 			}
 		}
@@ -50,7 +52,7 @@ export function createComposeState(getData: () => PageData) {
 
 	function getBodyText(): string {
 		if (!editorEl) return '';
-		return extractText(editorEl, true);
+		return extractText(editorEl).replace(/\n+$/, '');
 	}
 
 	function checkMention() {
@@ -96,18 +98,7 @@ export function createComposeState(getData: () => PageData) {
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !isComposing) {
-			e.preventDefault();
-			const sel = window.getSelection();
-			if (!sel?.rangeCount) return;
-			const range = sel.getRangeAt(0);
-			range.deleteContents();
-			const br = document.createElement('br');
-			range.insertNode(br);
-			const newRange = document.createRange();
-			newRange.setStartAfter(br);
-			newRange.collapse(true);
-			sel.removeAllRanges();
-			sel.addRange(newRange);
+			// Let Chrome handle Enter natively (creates <div> for new line).
 			hasContent = true;
 		}
 	}
