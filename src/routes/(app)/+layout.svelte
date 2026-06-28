@@ -2,8 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { PenLine, List, Users, LayoutDashboard, Sun, Moon, Monitor } from '@lucide/svelte';
-	import { themeStore } from '$lib/stores/theme.svelte';
+	import { PenLine, List, Users, LayoutDashboard, Settings } from '@lucide/svelte';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -11,7 +10,8 @@
 		{ href: '/', label: '投稿', icon: PenLine, exact: true },
 		{ href: '/fields', label: '活動', icon: List, exact: false },
 		{ href: '/customers', label: '顧客', icon: Users, exact: false },
-		{ href: '/summary', label: 'サマリー', icon: LayoutDashboard, exact: false }
+		{ href: '/summary', label: 'サマリー', icon: LayoutDashboard, exact: false },
+		{ href: '/settings', label: '設定', icon: Settings, exact: false }
 	];
 
 	function isActive(href: string, exact: boolean): boolean {
@@ -35,23 +35,7 @@
 				</a>
 			{/each}
 		</nav>
-		<div class="theme-switcher">
-			<button
-				class:active={themeStore.value === 'light'}
-				onclick={() => (themeStore.value = 'light')}
-				title="ライト"
-			><Sun size={15} /></button>
-			<button
-				class:active={themeStore.value === 'system'}
-				onclick={() => (themeStore.value = 'system')}
-				title="システム"
-			><Monitor size={15} /></button>
-			<button
-				class:active={themeStore.value === 'dark'}
-				onclick={() => (themeStore.value = 'dark')}
-				title="ダーク"
-			><Moon size={15} /></button>
-		</div>
+		
 		<button class="signout" onclick={signout}>ログアウト</button>
 	</aside>
 

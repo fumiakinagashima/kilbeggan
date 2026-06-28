@@ -29,3 +29,15 @@ export async function getSession(kv: KVNamespace, sessionId: string): Promise<Se
 export async function destroySession(kv: KVNamespace, sessionId: string): Promise<void> {
 	await kv.delete(sessionKey(sessionId));
 }
+
+export async function updateSession(
+	kv: KVNamespace,
+	sessionId: string,
+	updates: Partial<SessionUser>
+): Promise<void> {
+	const current = await getSession(kv, sessionId);
+	if (!current) return;
+	await kv.put(sessionKey(sessionId), JSON.stringify({ ...current, ...updates }), {
+		expirationTtl: SESSION_TTL_SECONDS
+	});
+}
