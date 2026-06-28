@@ -29,6 +29,13 @@
       "when": 1782369600000,
       "tag": "0003_rename_users_to_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1782456000000,
+      "tag": "0004_add_customer_score",
+      "breakpoints": true
     }
   ]
 }

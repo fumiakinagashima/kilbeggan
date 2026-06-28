@@ -19,6 +19,8 @@ export const customers = sqliteTable('customers', {
 	notes: text('notes'),
 	aiSummary: text('ai_summary'),
 	aiSummaryUpdatedAt: integer('ai_summary_updated_at', { mode: 'timestamp' }),
+	score: integer('score'),
+	scoreUpdatedAt: integer('score_updated_at', { mode: 'timestamp' }),
 	createdBy: text('created_by')
 		.notNull()
 		.references(() => accounts.id),

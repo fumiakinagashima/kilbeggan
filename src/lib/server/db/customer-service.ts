@@ -68,6 +68,17 @@ export async function updateCustomerSummary(
 		.where(eq(customers.id, id));
 }
 
+export async function updateCustomerScore(
+	db: Db,
+	id: string,
+	score: number
+): Promise<void> {
+	await db
+		.update(customers)
+		.set({ score, scoreUpdatedAt: new Date() })
+		.where(eq(customers.id, id));
+}
+
 export async function createCustomer(
 	db: Db,
 	data: {

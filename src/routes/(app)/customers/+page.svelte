@@ -10,6 +10,14 @@
 		if (!date) return true;
 		return Date.now() - new Date(date).getTime() > STALE_MS;
 	}
+
+	function scoreLabel(score: number | null): string {
+		if (score === null) return '';
+		if (score >= 80) return 'hot';
+		if (score >= 60) return 'warm';
+		if (score >= 40) return 'neutral';
+		return 'cold';
+	}
 </script>
 
 <div class="page">
@@ -31,6 +39,9 @@
 						<div class="item-info">
 							<div class="item-name-row">
 								<span class="name">{customer.company}</span>
+								{#if customer.score !== null && customer.score !== undefined}
+									<span class="score-badge {scoreLabel(customer.score)}">{customer.score}</span>
+								{/if}
 								{#if !customer.lastActivityAt || isStale(customer.lastActivityAt)}
 									<span class="alert-badge">要フォロー</span>
 								{/if}
@@ -134,6 +145,40 @@
 	.name {
 		font-size: 0.9375rem;
 		font-weight: 600;
+	}
+
+	.score-badge {
+		display: inline-block;
+		padding: 0.1rem 0.45rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		border: 1px solid;
+
+		&.hot {
+			background: color-mix(in srgb, #22c55e 12%, transparent);
+			color: #15803d;
+			border-color: color-mix(in srgb, #22c55e 35%, transparent);
+			:global([data-theme='dark']) & { color: #4ade80; }
+		}
+		&.warm {
+			background: color-mix(in srgb, #3b82f6 10%, transparent);
+			color: #1d4ed8;
+			border-color: color-mix(in srgb, #3b82f6 30%, transparent);
+			:global([data-theme='dark']) & { color: #60a5fa; }
+		}
+		&.neutral {
+			background: color-mix(in srgb, #f59e0b 10%, transparent);
+			color: #b45309;
+			border-color: color-mix(in srgb, #f59e0b 30%, transparent);
+			:global([data-theme='dark']) & { color: #fbbf24; }
+		}
+		&.cold {
+			background: color-mix(in srgb, #6b7280 10%, transparent);
+			color: #4b5563;
+			border-color: color-mix(in srgb, #6b7280 25%, transparent);
+			:global([data-theme='dark']) & { color: #9ca3af; }
+		}
 	}
 
 	.alert-badge {
