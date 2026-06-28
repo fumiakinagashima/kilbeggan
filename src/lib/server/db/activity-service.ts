@@ -1,6 +1,6 @@
 import { eq, desc, inArray, or, and } from 'drizzle-orm';
 import type { Db } from './index';
-import { activities, activityMentions, customers, users } from './schema';
+import { activities, activityMentions, customers, accounts } from './schema';
 
 export type Attachment = { key: string; name: string };
 
@@ -31,10 +31,10 @@ export async function listActivities(db: Db, limit = 50, viewingUserId?: string)
 			tags: activities.tags,
 			createdAt: activities.createdAt,
 			userId: activities.userId,
-			userName: users.name
+			userName: accounts.name
 		})
 		.from(activities)
-		.leftJoin(users, eq(activities.userId, users.id))
+		.leftJoin(accounts, eq(activities.userId, accounts.id))
 		.where(
 			viewingUserId
 				? or(eq(activities.isPrivate, false), eq(activities.userId, viewingUserId))
@@ -91,10 +91,10 @@ export async function listActivitiesByCustomer(db: Db, customerId: string, viewi
 			tags: activities.tags,
 			createdAt: activities.createdAt,
 			userId: activities.userId,
-			userName: users.name
+			userName: accounts.name
 		})
 		.from(activities)
-		.leftJoin(users, eq(activities.userId, users.id))
+		.leftJoin(accounts, eq(activities.userId, accounts.id))
 		.where(
 			and(
 				inArray(activities.id, actIds),
@@ -188,10 +188,10 @@ export async function getActivity(db: Db, id: string) {
 			tags: activities.tags,
 			createdAt: activities.createdAt,
 			userId: activities.userId,
-			userName: users.name
+			userName: accounts.name
 		})
 		.from(activities)
-		.leftJoin(users, eq(activities.userId, users.id))
+		.leftJoin(accounts, eq(activities.userId, accounts.id))
 		.where(eq(activities.id, id))
 		.get();
 

@@ -15,6 +15,20 @@
       "when": 1782196800000,
       "tag": "0001_add_attachments",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782283200000,
+      "tag": "0002_add_ai_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1782369600000,
+      "tag": "0003_rename_users_to_accounts",
+      "breakpoints": true
     }
   ]
 }

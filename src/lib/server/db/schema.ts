@@ -1,6 +1,6 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
-export const users = sqliteTable('users', {
+export const accounts = sqliteTable('accounts', {
 	id: text('id').primaryKey(),
 	email: text('email').notNull().unique(),
 	passwordHash: text('password_hash').notNull(),
@@ -21,7 +21,7 @@ export const customers = sqliteTable('customers', {
 	aiSummaryUpdatedAt: integer('ai_summary_updated_at', { mode: 'timestamp' }),
 	createdBy: text('created_by')
 		.notNull()
-		.references(() => users.id),
+		.references(() => accounts.id),
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 });
@@ -30,7 +30,7 @@ export const activities = sqliteTable('activities', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
-		.references(() => users.id),
+		.references(() => accounts.id),
 	body: text('body').notNull(),
 	isPrivate: integer('is_private', { mode: 'boolean' }).notNull(),
 	attachments: text('attachments'),
@@ -49,7 +49,7 @@ export const activityMentions = sqliteTable('activity_mentions', {
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 });
 
-export type User = typeof users.$inferSelect;
+export type User = typeof accounts.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
 export type ActivityMention = typeof activityMentions.$inferSelect;

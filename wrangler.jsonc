@@ -14,7 +14,8 @@
 		{
 			"binding": "DB",
 			"database_name": "kilbeggan",
-			"database_id": "fe23d201-b6ad-4077-949d-275ff2be582d"
+			"database_id": "fe23d201-b6ad-4077-949d-275ff2be582d",
+			"migrations_dir": "drizzle"
 		}
 	],
 	"kv_namespaces": [

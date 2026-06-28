@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import { z } from 'zod/v4';
 import { eq } from 'drizzle-orm';
 import { getDb } from '$lib/server/db';
-import { users } from '$lib/server/db/schema';
+import { accounts } from '$lib/server/db/schema';
 import { verifyPassword } from '$lib/server/auth/password';
 import { createSession, SESSION_COOKIE, SESSION_TTL_SECONDS } from '$lib/server/auth/session';
 
@@ -22,7 +22,7 @@ export async function POST({ request, platform, cookies, url }) {
 	const { email, password } = parsed.data;
 	const db = getDb(platform!.env.DB);
 
-	const user = await db.select().from(users).where(eq(users.email, email)).get();
+	const user = await db.select().from(accounts).where(eq(accounts.email, email)).get();
 
 	if (!user || !(await verifyPassword(password, user.passwordHash))) {
 		return json({ error: 'メールアドレスまたはパスワードが正しくありません' }, { status: 401 });
