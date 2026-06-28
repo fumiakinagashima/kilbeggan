@@ -53,7 +53,7 @@ export function bodyToHtml(body: string, mentionMap: Map<string, string> = new M
 	return parseSegments(body, mentionMap)
 		.map((seg) =>
 			seg.type === 'text'
-				? escapeHtml(seg.text).replace(/\n/g, '<br>')
+				? escapeHtml(seg.text)
 				: `<span class="mention">@${escapeHtml(seg.name)}</span>`
 		)
 		.join('');
