@@ -10,12 +10,12 @@
 	},
 	"workers_dev": true,
 	"preview_urls": true,
-	"d1_databases": [
+	"d1_databases": [		
 		{
-			"binding": "DB",
+			"binding": "kilbeggan",
 			"database_name": "kilbeggan",
-			"database_id": "fe23d201-b6ad-4077-949d-275ff2be582d",
-			"migrations_dir": "drizzle"
+			"database_id": "e436547d-8090-4c75-b911-e40c5830a525",
+			"remote": true
 		}
 	],
 	"kv_namespaces": [
