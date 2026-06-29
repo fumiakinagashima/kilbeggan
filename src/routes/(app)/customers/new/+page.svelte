@@ -32,7 +32,7 @@
 
 		<div class="field">
 			<label for="notes">備考</label>
-			<textarea id="notes" rows="3" bind:value={state.notes} disabled={state.loading}></textarea>
+			<textarea id="notes" rows="6" bind:value={state.notes} disabled={state.loading}></textarea>
 		</div>
 
 		<button type="submit" class="btn-primary" disabled={state.loading}>

@@ -102,6 +102,42 @@
 		</div>
 	</section>
 
+	{#if state.isAdmin}
+		<section class="card">
+			<h2>管理者設定</h2>
+
+			{#if state.followUpMessage}
+				<p class="message" class:success={state.followUpMessage.type === 'success'} class:error={state.followUpMessage.type === 'error'}>
+					{state.followUpMessage.text}
+				</p>
+			{/if}
+
+			<div class="field">
+				<label for="follow-up-days">要フォローの未接触日数</label>
+				<div class="input-with-unit">
+					<input
+						id="follow-up-days"
+						type="number"
+						min="1"
+						max="365"
+						bind:value={state.followUpDays}
+					/>
+					<span class="unit">日</span>
+				</div>
+				<p class="field-hint">この日数以上接触がない顧客を「要フォロー」として表示します</p>
+			</div>
+			<div class="footer">
+				<button
+					class="btn-primary"
+					onclick={state.saveFollowUpDays}
+					disabled={state.followUpSubmitting || !state.followUpDays}
+				>
+					{state.followUpSubmitting ? '保存中...' : '保存'}
+				</button>
+			</div>
+		</section>
+	{/if}
+
 	<button class="btn-signout" onclick={state.signout}>ログアウト</button>
 </div>
 
@@ -230,6 +266,27 @@
 		font-size: 0.8125rem;
 		color: var(--color-text-muted);
 		font-weight: 400;
+	}
+
+	.input-with-unit {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+
+		input {
+			width: 6rem;
+		}
+	}
+
+	.unit {
+		font-size: 0.9375rem;
+		color: var(--color-text-muted);
+	}
+
+	.field-hint {
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+		margin-top: 0.25rem;
 	}
 
 	.footer {

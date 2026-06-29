@@ -56,7 +56,15 @@ export const activityMentions = sqliteTable('activity_mentions', {
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 });
 
+export const orgSettings = sqliteTable('org_settings', {
+	key: text('key').primaryKey(),
+	value: text('value').notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+	updatedBy: text('updated_by').references(() => accounts.id)
+});
+
 export type User = typeof accounts.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
 export type ActivityMention = typeof activityMentions.$inferSelect;
+export type OrgSetting = typeof orgSettings.$inferSelect;

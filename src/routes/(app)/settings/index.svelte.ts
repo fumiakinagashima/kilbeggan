@@ -1,8 +1,8 @@
 import { goto } from '$app/navigation';
-import type { LayoutData } from '../$types';
+import type { PageData } from './$types';
 
-export function createSettingsState(getLayoutData: () => LayoutData) {
-	const user = getLayoutData().user!;
+export function createSettingsState(getData: () => PageData) {
+	const user = getData().user!;
 
 	// profile
 	let profileName = $state(user.name);
@@ -16,6 +16,11 @@ export function createSettingsState(getLayoutData: () => LayoutData) {
 	let confirmPassword = $state('');
 	let passwordSubmitting = $state(false);
 	let passwordMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
+
+	// org settings (admin only)
+	let followUpDays = $state(getData().followUpDays);
+	let followUpSubmitting = $state(false);
+	let followUpMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
 	async function saveProfile() {
 		profileSubmitting = true;
@@ -68,12 +73,40 @@ export function createSettingsState(getLayoutData: () => LayoutData) {
 		}
 	}
 
+	async function saveFollowUpDays() {
+		if (!followUpDays || followUpDays < 1) {
+			followUpMessage = { type: 'error', text: '1以上の数値を入力してください' };
+			return;
+		}
+		followUpSubmitting = true;
+		followUpMessage = null;
+		try {
+			const res = await fetch('/api/settings/org', {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ key: 'follow_up_days', value: String(followUpDays) })
+			});
+			const data = await res.json() as { ok?: boolean; error?: string };
+			if (res.ok) {
+				followUpMessage = { type: 'success', text: '保存しました' };
+			} else {
+				followUpMessage = { type: 'error', text: data.error ?? 'エラーが発生しました' };
+			}
+		} catch {
+			followUpMessage = { type: 'error', text: 'エラーが発生しました' };
+		} finally {
+			followUpSubmitting = false;
+		}
+	}
+
 	async function signout() {
 		await fetch('/api/auth/signout', { method: 'POST' });
 		goto('/signin');
 	}
 
 	return {
+		get isAdmin() { return user.role === 'admin'; },
+
 		get profileName() { return profileName; },
 		set profileName(v: string) { profileName = v; },
 		get profileEmail() { return profileEmail; },
@@ -90,8 +123,14 @@ export function createSettingsState(getLayoutData: () => LayoutData) {
 		get passwordSubmitting() { return passwordSubmitting; },
 		get passwordMessage() { return passwordMessage; },
 
+		get followUpDays() { return followUpDays; },
+		set followUpDays(v: number) { followUpDays = v; },
+		get followUpSubmitting() { return followUpSubmitting; },
+		get followUpMessage() { return followUpMessage; },
+
 		saveProfile,
 		savePassword,
+		saveFollowUpDays,
 		signout
 	};
 }

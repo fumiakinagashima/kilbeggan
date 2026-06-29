@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { PenLine, List, Users, LayoutDashboard, Settings } from '@lucide/svelte';
+	import { PenLine, List, Users, Settings } from '@lucide/svelte';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -10,7 +10,6 @@
 		{ href: '/', label: '投稿', icon: PenLine, exact: true },
 		{ href: '/fields', label: '活動', icon: List, exact: false },
 		{ href: '/customers', label: '顧客', icon: Users, exact: false },
-		{ href: '/summary', label: 'サマリー', icon: LayoutDashboard, exact: false },
 		{ href: '/settings', label: '設定', icon: Settings, exact: false }
 	];
 

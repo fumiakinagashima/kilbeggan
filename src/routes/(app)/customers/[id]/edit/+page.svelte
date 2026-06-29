@@ -40,7 +40,7 @@
 
 		<div class="field">
 			<label for="notes">備考</label>
-			<textarea id="notes" name="notes" rows="4" bind:value={state.notes}></textarea>
+			<textarea id="notes" name="notes" rows="6" bind:value={state.notes}></textarea>
 		</div>
 
 		<div class="footer">

@@ -4,11 +4,10 @@
 
 	let { data } = $props();
 
-	const STALE_MS = 30 * 24 * 60 * 60 * 1000;
-
 	function isStale(date: Date | string | null) {
 		if (!date) return true;
-		return Date.now() - new Date(date).getTime() > STALE_MS;
+		const staleMs = data.followUpDays * 24 * 60 * 60 * 1000;
+		return Date.now() - new Date(date).getTime() > staleMs;
 	}
 
 	function scoreLabel(score: number | null): string {
