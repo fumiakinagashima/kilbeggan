@@ -7,7 +7,7 @@
 <div class="page">
 	<div class="card">
 		<h1 class="logo">Kilbeggan</h1>
-		<p class="tagline">活動記録をもっとシンプルに</p>
+		<p class="tagline">サインイン</p>
 
 		<form onsubmit={(e) => state.submit(e)}>
 			{#if state.error}
@@ -62,9 +62,10 @@
 
 	.logo {
 		font-size: 2rem;
+		color: var(--color-primary);
+		font-family: Georgia, 'Times New Roman', Times, serif;
 		font-weight: 700;
 		letter-spacing: -0.03em;
-		color: var(--color-text);
 		margin: 0 0 0.25rem;
 	}
 
