@@ -1,4 +1,4 @@
-import { eq, desc, max } from 'drizzle-orm';
+import { eq, desc, max, and } from 'drizzle-orm';
 import type { Db } from './index';
 import { customers, activityMentions, activities } from './schema';
 import type { Customer } from './schema';
@@ -18,7 +18,10 @@ export async function listCustomersWithLastActivity(
 				lastAt: max(activities.createdAt)
 			})
 			.from(activityMentions)
-			.innerJoin(activities, eq(activityMentions.activityId, activities.id))
+			.innerJoin(
+				activities,
+				and(eq(activityMentions.activityId, activities.id), eq(activities.isPrivate, false))
+			)
 			.groupBy(activityMentions.customerId)
 			.all()
 	]);
