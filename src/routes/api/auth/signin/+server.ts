@@ -28,7 +28,7 @@ export async function POST({ request, platform, cookies, url }) {
 		return json({ error: 'メールアドレスまたはパスワードが正しくありません' }, { status: 401 });
 	}
 
-	const sessionId = await createSession(platform!.env.KV, {
+	const sessionId = await createSession(platform!.env.kilbeggan, {
 		userId: user.id,
 		name: user.name,
 		email: user.email,

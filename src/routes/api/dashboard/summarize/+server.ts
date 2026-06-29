@@ -15,6 +15,6 @@ export async function POST({ platform, locals }) {
 		platform?.env?.MOCK_AI
 	);
 	const updatedAt = new Date().toISOString();
-	await platform!.env.KV.put('dashboard:team_summary', JSON.stringify({ summary, updatedAt }));
+	await platform!.env.kilbeggan.put('dashboard:team_summary', JSON.stringify({ summary, updatedAt }));
 	return json({ summary, updatedAt });
 }

@@ -30,7 +30,7 @@ export async function PATCH({ request, platform, locals, cookies }) {
 
 	const sessionId = cookies.get(SESSION_COOKIE);
 	if (sessionId) {
-		await updateSession(platform!.env.KV, sessionId, { name, email });
+		await updateSession(platform!.env.kilbeggan, sessionId, { name, email });
 	}
 
 	return json({ ok: true });
