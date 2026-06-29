@@ -23,12 +23,7 @@
 	"kv_namespaces": [
 		{
 			"binding": "kilbeggan",
-			"id": "52027a62679c403cabcd5b7f15faf001"
-		},
-		{
-			"binding": "kilbeggan",
-			"id": "d85bc1306743468a9380a3292e7245f4",
-			"remote": true
+			"id": "d85bc1306743468a9380a3292e7245f4"
 		}
 	],
 	"r2_buckets": [
