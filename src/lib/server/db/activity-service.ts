@@ -1,6 +1,8 @@
-import { eq, desc, inArray, or, and } from 'drizzle-orm';
+import { eq, desc, inArray, or, and, lt } from 'drizzle-orm';
 import type { Db } from './index';
 import { activities, activityMentions, customers, accounts } from './schema';
+import { ACTIVITIES_PAGE_SIZE } from '$lib/constants';
+export { ACTIVITIES_PAGE_SIZE };
 
 export type Attachment = { key: string; name: string };
 
@@ -21,7 +23,20 @@ function parseTags(json: string | null): string[] {
 	}
 }
 
-export async function listActivities(db: Db, limit = 50, viewingUserId?: string) {
+export async function listActivities(
+	db: Db,
+	limit = ACTIVITIES_PAGE_SIZE,
+	viewingUserId?: string,
+	cursor?: Date
+) {
+	const visibilityFilter = viewingUserId
+		? or(eq(activities.isPrivate, false), eq(activities.userId, viewingUserId))
+		: eq(activities.isPrivate, false);
+
+	const whereClause = cursor
+		? and(visibilityFilter, lt(activities.createdAt, cursor))
+		: visibilityFilter;
+
 	const acts = await db
 		.select({
 			id: activities.id,
@@ -35,11 +50,7 @@ export async function listActivities(db: Db, limit = 50, viewingUserId?: string)
 		})
 		.from(activities)
 		.leftJoin(accounts, eq(activities.userId, accounts.id))
-		.where(
-			viewingUserId
-				? or(eq(activities.isPrivate, false), eq(activities.userId, viewingUserId))
-				: eq(activities.isPrivate, false)
-		)
+		.where(whereClause)
 		.orderBy(desc(activities.createdAt))
 		.limit(limit)
 		.all();

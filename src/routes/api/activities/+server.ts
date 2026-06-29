@@ -1,11 +1,32 @@
 import { json } from '@sveltejs/kit';
 import { z } from 'zod/v4';
 import { getDb } from '$lib/server/db';
-import { createActivity, updateActivityTags, listActivitiesByCustomer } from '$lib/server/db/activity-service';
+import {
+	createActivity,
+	updateActivityTags,
+	listActivitiesByCustomer,
+	listActivities,
+	ACTIVITIES_PAGE_SIZE
+} from '$lib/server/db/activity-service';
 import { parseMentionIds } from '$lib/body';
 import { classifyActivity } from '$lib/server/ai/classify';
 import { scoreCustomer } from '$lib/server/ai/score';
 import { updateCustomerScore } from '$lib/server/db/customer-service';
+
+export async function GET({ url, platform, locals }) {
+	if (!locals.user) return json({ error: 'Unauthorized' }, { status: 401 });
+
+	const cursorParam = url.searchParams.get('cursor');
+	const cursor = cursorParam ? new Date(parseInt(cursorParam)) : undefined;
+
+	const db = getDb(platform!.env.DB);
+	const items = await listActivities(db, ACTIVITIES_PAGE_SIZE, locals.user.userId, cursor);
+
+	return json({
+		activities: items,
+		hasMore: items.length === ACTIVITIES_PAGE_SIZE
+	});
+}
 
 const attachmentSchema = z.object({ key: z.string(), name: z.string() });
 

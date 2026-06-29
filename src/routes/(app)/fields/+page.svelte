@@ -8,6 +8,18 @@
 	const feed = createFieldsState(() => data);
 
 	let lightboxSrc = $state<string | null>(null);
+	let sentinel = $state<HTMLElement | null>(null);
+
+	$effect(() => {
+		const el = sentinel;
+		if (!el) return;
+		const observer = new IntersectionObserver(
+			(entries) => { if (entries[0].isIntersecting) feed.loadMore(); },
+			{ rootMargin: '0px 0px 300px 0px' }
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	});
 
 	function mentionMap(activity: { mentions?: { customerId: string; company: string }[] }) {
 		return new Map((activity.mentions ?? []).map((m) => [m.customerId, m.company]));
@@ -32,7 +44,7 @@
 	{#if feed.allActivities.length === 0}
 		<p class="empty">まだ活動記録がありません</p>
 	{:else}
-		<ul class="feed">
+		<ul class="feed" id="activity-feed">
 			{#each feed.allActivities as activity (activity.id)}
 				<li class="card" class:private-card={activity.isPrivate}>
 					{#if data.user?.userId === activity.userId}
@@ -110,6 +122,13 @@
 				</li>
 			{/each}
 		</ul>
+	{/if}
+
+	{#if feed.hasMore}
+		<div bind:this={sentinel} class="sentinel" aria-hidden="true"></div>
+	{/if}
+	{#if feed.loading}
+		<p class="loading-more">読み込み中...</p>
 	{/if}
 </div>
 
@@ -344,6 +363,17 @@
 		gap: 0.2rem;
 		color: var(--color-primary);
 		font-size: 0.75rem;
+	}
+
+	.sentinel {
+		height: 1px;
+	}
+
+	.loading-more {
+		text-align: center;
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		padding: 1.25rem 0;
 	}
 
 	.lightbox {
