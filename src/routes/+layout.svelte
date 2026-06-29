@@ -13,11 +13,14 @@
 		} else {
 			root.setAttribute('data-theme', themeStore.value);
 		}
-		localStorage.setItem('theme', themeStore.value);
+		try {
+			localStorage.setItem('theme', themeStore.value);
+		} catch (_) {}
 	});
 </script>
 
 <svelte:head>
+	<title>Kilbeggan</title>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 

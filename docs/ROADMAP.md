@@ -55,6 +55,7 @@
 - [x] 非対象活動を最終接触から除外 (isPrivate=trueは要フォロー判定に含めない)
 - [x] 顧客フォームコンポーネント化 (new/editで共通のCustomerFormFieldsコンポーネント)
 - [x] 活動フィード無限スクロール (30件単位、IntersectionObserverでセンチネル監視、カーソルベースページネーション)
+- [x] セキュリティ修正 (Safari Cookie無効時のlocalStorage SecurityError対策、titleタグをsvelte:headに移動)
 - [ ] プッシュ通知 (OneSignal)
 
 ---

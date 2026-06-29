@@ -7,13 +7,14 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 		<meta name="apple-mobile-web-app-title" content="Kilbeggan" />
-		<title>Kilbeggan</title>
 		<script>
 			(function () {
-				var t = localStorage.getItem('theme');
-				if (t === 'light' || t === 'dark') {
-					document.documentElement.setAttribute('data-theme', t);
-				}
+				try {
+					var t = localStorage.getItem('theme');
+					if (t === 'light' || t === 'dark') {
+						document.documentElement.setAttribute('data-theme', t);
+					}
+				} catch (_) {}
 			})();
 		</script>
 		%sveltekit.head%
