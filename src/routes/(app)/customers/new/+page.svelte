@@ -1,4 +1,5 @@
 <script lang="ts">
+	import CustomerFormFields from '$lib/components/CustomerFormFields.svelte';
 	import { createCustomerNewState } from './index.svelte.ts';
 
 	const state = createCustomerNewState();
@@ -15,25 +16,13 @@
 			<p class="error">{state.error}</p>
 		{/if}
 
-		<div class="field">
-			<label for="company">会社名 <span class="required">*</span></label>
-			<input id="company" type="text" bind:value={state.company} required disabled={state.loading} />
-		</div>
-
-		<div class="field">
-			<label for="phone">電話番号</label>
-			<input id="phone" type="tel" bind:value={state.phone} disabled={state.loading} />
-		</div>
-
-		<div class="field">
-			<label for="email">メール</label>
-			<input id="email" type="email" bind:value={state.email} disabled={state.loading} />
-		</div>
-
-		<div class="field">
-			<label for="notes">備考</label>
-			<textarea id="notes" rows="6" bind:value={state.notes} disabled={state.loading}></textarea>
-		</div>
+		<CustomerFormFields
+			bind:company={state.company}
+			bind:phone={state.phone}
+			bind:email={state.email}
+			bind:notes={state.notes}
+			disabled={state.loading}
+		/>
 
 		<button type="submit" class="btn-primary" disabled={state.loading}>
 			{state.loading ? '保存中...' : '保存'}
@@ -78,48 +67,6 @@
 		padding: 0.75rem 1rem;
 		border-radius: 8px;
 		margin-bottom: 1rem;
-	}
-
-	.field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-		margin-bottom: 1rem;
-
-		label {
-			font-size: 0.875rem;
-			font-weight: 500;
-		}
-
-		input,
-		textarea {
-			padding: 0.75rem 1rem;
-			border: 1px solid var(--color-border);
-			border-radius: 8px;
-			font-size: 1rem;
-			background: var(--color-surface);
-			color: var(--color-text);
-			outline: none;
-			font-family: inherit;
-			width: 100%;
-			transition: border-color 0.15s;
-
-			&:focus {
-				border-color: var(--color-primary);
-			}
-
-			&:disabled {
-				opacity: 0.6;
-			}
-		}
-
-		textarea {
-			resize: vertical;
-		}
-	}
-
-	.required {
-		color: var(--color-error);
 	}
 
 	.btn-primary {

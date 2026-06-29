@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import CustomerFormFields from '$lib/components/CustomerFormFields.svelte';
 	import { createCustomerEditState } from './index.svelte.ts';
 
 	let { data, form } = $props();
@@ -23,25 +24,12 @@
 			state.stopSubmitting();
 		};
 	}}>
-		<div class="field">
-			<label for="company">会社名 <span class="required">*</span></label>
-			<input id="company" name="company" type="text" bind:value={state.company} required />
-		</div>
-
-		<div class="field">
-			<label for="phone">電話番号</label>
-			<input id="phone" name="phone" type="tel" bind:value={state.phone} />
-		</div>
-
-		<div class="field">
-			<label for="email">メール</label>
-			<input id="email" name="email" type="email" bind:value={state.email} />
-		</div>
-
-		<div class="field">
-			<label for="notes">備考</label>
-			<textarea id="notes" name="notes" rows="6" bind:value={state.notes}></textarea>
-		</div>
+		<CustomerFormFields
+			bind:company={state.company}
+			bind:phone={state.phone}
+			bind:email={state.email}
+			bind:notes={state.notes}
+		/>
 
 		<div class="footer">
 			<a href="/customers/{data.customer.id}" class="btn-cancel">キャンセル</a>
@@ -89,48 +77,6 @@
 		padding: 0.75rem 1rem;
 		border-radius: 8px;
 		margin-bottom: 1rem;
-	}
-
-	.field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-		margin-bottom: 1rem;
-
-		label {
-			font-size: 0.875rem;
-			font-weight: 500;
-		}
-
-		input,
-		textarea {
-			padding: 0.75rem 1rem;
-			border: 1px solid var(--color-border);
-			border-radius: 8px;
-			font-size: 1rem;
-			background: var(--color-surface);
-			color: var(--color-text);
-			outline: none;
-			font-family: inherit;
-			width: 100%;
-			transition: border-color 0.15s;
-
-			&:focus {
-				border-color: var(--color-primary);
-			}
-
-			&:disabled {
-				opacity: 0.6;
-			}
-		}
-
-		textarea {
-			resize: vertical;
-		}
-	}
-
-	.required {
-		color: var(--color-error);
 	}
 
 	.footer {
