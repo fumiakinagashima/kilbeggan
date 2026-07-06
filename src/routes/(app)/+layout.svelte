@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { LayoutData } from './$types';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { PenLine, List, Users, Settings } from '@lucide/svelte';
+	import { PenLine, List, Users, Settings, LogOut } from '@lucide/svelte';
 
-	let { children }: { children: Snippet } = $props();
+	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	const navItems = [
 		{ href: '/', label: '投稿', icon: PenLine, exact: true },
@@ -25,17 +26,34 @@
 
 <div class="shell">
 	<aside class="sidebar">
-		<span class="logo">Kilbeggan</span>
-		<nav class="sidebar-nav">
+		<div class="sidebar-header">
+			<span class="logo">KILBEGGAN</span>
+		</div>
+
+		<nav class="nav">
 			{#each navItems as item (item.href)}
-				<a href={item.href} class="nav-link" class:active={isActive(item.href, item.exact)}>
-					<item.icon size={20} />
+				<a href={item.href} class="nav-item" class:active={isActive(item.href, item.exact)}>
+					<item.icon size={16} />
 					{item.label}
 				</a>
 			{/each}
 		</nav>
-		
-		<button class="signout" onclick={signout}>ログアウト</button>
+
+		<div class="sidebar-footer">
+			{#if data.user}
+				<div class="account-row">
+					<span class="account-name">{data.user.name}</span>
+					<button
+						class="signout-btn"
+						onclick={signout}
+						title="ログアウト"
+						aria-label="ログアウト"
+					>
+						<LogOut size={15} />
+					</button>
+				</div>
+			{/if}
+		</div>
 	</aside>
 
 	<main class="content">
@@ -66,37 +84,43 @@
 			flex-direction: column;
 			width: var(--sidebar-width);
 			min-height: 100dvh;
-			padding: 1.5rem 1rem;
 			background: var(--sidebar-bg);
 			border-right: 1px solid var(--sidebar-border);
 			position: sticky;
 			top: 0;
+			overflow: hidden;
 		}
 	}
 
-	.logo {
-		font-size: 1.25rem;
-		font-weight: 700;
-		letter-spacing: -0.03em;
-		color: var(--color-primary);
-		padding: 0 0.5rem;
-		margin-bottom: 1.5rem;
+	.sidebar-header {
+		padding: 14px 12px 10px;
 	}
 
-	.sidebar-nav {
+	.logo {
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		padding: 0 4px;
+		letter-spacing: -0.01em;
+		font-family: Georgia, 'Times New Roman', Times, serif;
+	}
+
+	.nav {
+		flex: 1;
+		overflow-y: auto;
+		padding: 4px 8px;
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
-		flex: 1;
+		gap: 2px;
 	}
 
-	.nav-link {
+	.nav-item {
 		display: flex;
 		align-items: center;
-		gap: 0.625rem;
-		padding: 0.625rem 0.75rem;
+		gap: 8px;
+		padding: 8px 10px;
 		border-radius: 8px;
-		font-size: 0.9375rem;
+		font-size: 0.875rem;
 		font-weight: 500;
 		color: var(--sidebar-text-muted);
 		text-decoration: none;
@@ -115,49 +139,43 @@
 		}
 	}
 
-	.theme-switcher {
-		display: flex;
-		border: 1px solid var(--sidebar-border);
-		border-radius: 8px;
-		overflow: hidden;
-		margin-bottom: 0.5rem;
-
-		button {
-			flex: 1;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 0.4rem;
-			background: none;
-			border: none;
-			cursor: pointer;
-			color: var(--sidebar-text-muted);
-			transition: background 0.1s, color 0.1s;
-
-			&:hover {
-				background: var(--sidebar-hover);
-				color: var(--sidebar-text);
-			}
-
-			&.active {
-				background: var(--sidebar-active);
-				color: var(--color-primary);
-			}
-		}
+	.sidebar-footer {
+		padding: 8px;
+		border-top: 1px solid var(--sidebar-border);
 	}
 
-	.signout {
+	.account-row {
 		display: flex;
 		align-items: center;
-		padding: 0.625rem 0.75rem;
-		border: none;
-		background: none;
+		gap: 8px;
+		padding: 8px 10px;
+	}
+
+	.account-name {
+		flex: 1;
+		min-width: 0;
+		font-size: 0.8125rem;
 		color: var(--sidebar-text-muted);
-		font-size: 0.875rem;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.signout-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		flex-shrink: 0;
+		border: none;
+		border-radius: 6px;
+		background: transparent;
+		color: var(--sidebar-text-muted);
 		cursor: pointer;
-		border-radius: 8px;
-		width: 100%;
-		text-align: left;
+		transition:
+			background 0.15s,
+			color 0.15s;
 
 		&:hover {
 			background: var(--sidebar-hover);

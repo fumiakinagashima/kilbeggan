@@ -56,6 +56,7 @@
 - [x] 顧客フォームコンポーネント化 (new/editで共通のCustomerFormFieldsコンポーネント)
 - [x] 活動フィード無限スクロール (30件単位、IntersectionObserverでセンチネル監視、カーソルベースページネーション)
 - [x] セキュリティ修正 (Safari Cookie無効時のlocalStorage SecurityError対策、titleタグをsvelte:headに移動)
+- [x] サインイン画面・サイドバーのデザイン統一 (Midleton/Boannに合わせたカードUI・タイポグラフィ・アカウント行、レスポンシブ構造は維持)
 - [ ] プッシュ通知 (OneSignal)
 
 ---
