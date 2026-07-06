@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
-import { getCustomer, updateCustomerScore } from '$lib/server/db/customer-service';
-import { listActivitiesByCustomer } from '$lib/server/db/activity-service';
+import { getCustomer, updateCustomerScore } from '$lib/services/customer';
+import { listActivitiesByCustomer } from '$lib/services/activity';
 import { scoreCustomer } from '$lib/server/ai/score';
 
 export async function POST({ params, platform, locals }) {

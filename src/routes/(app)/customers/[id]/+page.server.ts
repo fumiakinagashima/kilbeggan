@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
-import { getCustomer } from '$lib/server/db/customer-service';
-import { listActivitiesByCustomer } from '$lib/server/db/activity-service';
+import { getCustomer } from '$lib/services/customer';
+import { listActivitiesByCustomer } from '$lib/services/activity';
 
 export async function load({ params, platform, locals }) {
 	const db = getDb(platform!.env.DB);

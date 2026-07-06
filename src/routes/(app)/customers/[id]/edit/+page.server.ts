@@ -1,7 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import { z } from 'zod/v4';
 import { getDb } from '$lib/server/db';
-import { getCustomer, updateCustomer } from '$lib/server/db/customer-service';
+import { getCustomer, updateCustomer } from '$lib/services/customer';
 
 export async function load({ params, platform }) {
 	const db = getDb(platform!.env.DB);

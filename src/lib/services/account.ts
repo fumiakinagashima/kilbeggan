@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
-import type { Db } from './index';
-import { accounts } from './schema';
+import type { Db } from '$lib/server/db';
+import { accounts } from '$lib/server/db/schema';
 
 export async function getAccountById(db: Db, id: string) {
 	return db.select().from(accounts).where(eq(accounts.id, id)).get() ?? null;

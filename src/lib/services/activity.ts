@@ -1,6 +1,6 @@
 import { eq, desc, inArray, or, and, lt } from 'drizzle-orm';
-import type { Db } from './index';
-import { activities, activityMentions, customers, accounts } from './schema';
+import type { Db } from '$lib/server/db';
+import { activities, activityMentions, customers, accounts } from '$lib/server/db/schema';
 import { ACTIVITIES_PAGE_SIZE } from '$lib/constants';
 export { ACTIVITIES_PAGE_SIZE };
 

@@ -1,8 +1,8 @@
 import { error, redirect } from '@sveltejs/kit';
 import { z } from 'zod/v4';
 import { getDb } from '$lib/server/db';
-import { getActivity, updateActivity, deleteActivity } from '$lib/server/db/activity-service';
-import { listCustomers } from '$lib/server/db/customer-service';
+import { getActivity, updateActivity, deleteActivity } from '$lib/services/activity';
+import { listCustomers } from '$lib/services/customer';
 import { parseMentionIds } from '$lib/body';
 
 export async function load({ params, platform, locals }) {

@@ -3,7 +3,7 @@ import { z } from 'zod/v4';
 import { eq } from 'drizzle-orm';
 import { getDb } from '$lib/server/db';
 import { accounts } from '$lib/server/db/schema';
-import { updateAccountProfile } from '$lib/server/db/account-service';
+import { updateAccountProfile } from '$lib/services/account';
 import { SESSION_COOKIE, updateSession } from '$lib/server/auth/session';
 
 const schema = z.object({

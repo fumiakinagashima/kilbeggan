@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { z } from 'zod/v4';
 import { getDb } from '$lib/server/db';
-import { setOrgSetting } from '$lib/server/db/settings-service';
+import { setOrgSetting } from '$lib/services/settings';
 
 const schema = z.object({
 	key: z.string().min(1),

@@ -1,7 +1,7 @@
 import { eq, desc, max, and } from 'drizzle-orm';
-import type { Db } from './index';
-import { customers, activityMentions, activities } from './schema';
-import type { Customer } from './schema';
+import type { Db } from '$lib/server/db';
+import { customers, activityMentions, activities } from '$lib/server/db/schema';
+import type { Customer } from '$lib/server/db/schema';
 
 export async function listCustomers(db: Db) {
 	return db.select().from(customers).orderBy(desc(customers.createdAt)).all();

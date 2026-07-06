@@ -3,7 +3,7 @@ import { z } from 'zod/v4';
 import { eq } from 'drizzle-orm';
 import { getDb } from '$lib/server/db';
 import { activities } from '$lib/server/db/schema';
-import { updateActivityPrivacy, deleteActivity } from '$lib/server/db/activity-service';
+import { updateActivityPrivacy, deleteActivity } from '$lib/services/activity';
 
 const patchSchema = z.object({
 	isPrivate: z.boolean()

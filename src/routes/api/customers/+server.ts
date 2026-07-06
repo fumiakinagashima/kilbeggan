@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { z } from 'zod/v4';
 import { getDb } from '$lib/server/db';
-import { listCustomers, createCustomer } from '$lib/server/db/customer-service';
+import { listCustomers, createCustomer } from '$lib/services/customer';
 
 const createSchema = z.object({
 	company: z.string().min(1),

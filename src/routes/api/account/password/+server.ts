@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { z } from 'zod/v4';
 import { getDb } from '$lib/server/db';
-import { getAccountById, updateAccountPassword } from '$lib/server/db/account-service';
+import { getAccountById, updateAccountPassword } from '$lib/services/account';
 import { verifyPassword, hashPassword } from '$lib/server/auth/password';
 
 const schema = z.object({

@@ -7,11 +7,11 @@ import {
 	listActivitiesByCustomer,
 	listActivities,
 	ACTIVITIES_PAGE_SIZE
-} from '$lib/server/db/activity-service';
+} from '$lib/services/activity';
 import { parseMentionIds } from '$lib/body';
 import { classifyActivity } from '$lib/server/ai/classify';
 import { scoreCustomer } from '$lib/server/ai/score';
-import { updateCustomerScore } from '$lib/server/db/customer-service';
+import { updateCustomerScore } from '$lib/services/customer';
 
 export async function GET({ url, platform, locals }) {
 	if (!locals.user) return json({ error: 'Unauthorized' }, { status: 401 });

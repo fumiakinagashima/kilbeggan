@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
-import { getCustomer, updateManagerComment } from '$lib/server/db/customer-service';
+import { getCustomer, updateManagerComment } from '$lib/services/customer';
 
 export async function POST({ params, platform, locals, request }) {
 	if (!locals.user) return json({ error: 'Unauthorized' }, { status: 401 });

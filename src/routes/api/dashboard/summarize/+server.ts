@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { getDb } from '$lib/server/db';
-import { listActivities } from '$lib/server/db/activity-service';
+import { listActivities } from '$lib/services/activity';
 import { summarizeTeam } from '$lib/server/ai/summarize';
 
 export async function POST({ platform, locals }) {

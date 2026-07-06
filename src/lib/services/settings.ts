@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
-import type { Db } from './index';
-import { orgSettings } from './schema';
+import type { Db } from '$lib/server/db';
+import { orgSettings } from '$lib/server/db/schema';
 
 export async function getOrgSetting(db: Db, key: string): Promise<string | null> {
 	const row = await db.select().from(orgSettings).where(eq(orgSettings.key, key)).get();

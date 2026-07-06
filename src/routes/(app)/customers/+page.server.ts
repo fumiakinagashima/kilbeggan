@@ -1,6 +1,6 @@
 import { getDb } from '$lib/server/db';
-import { listCustomersWithLastActivity } from '$lib/server/db/customer-service';
-import { getOrgSetting } from '$lib/server/db/settings-service';
+import { listCustomersWithLastActivity } from '$lib/services/customer';
+import { getOrgSetting } from '$lib/services/settings';
 
 export async function load({ platform }) {
 	const db = getDb(platform!.env.DB);
