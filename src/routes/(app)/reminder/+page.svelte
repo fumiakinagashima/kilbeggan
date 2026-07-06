@@ -38,6 +38,7 @@
 				<label for="remind-at">日時</label>
 				<input
 					id="remind-at"
+					class="input-date"
 					type="datetime-local"
 					bind:value={state.remindAt}
 					required
@@ -137,7 +138,7 @@
 			font-weight: 700;
 		}
 	}
-
+	
 	.btn-secondary {
 		display: flex;
 		align-items: center;
@@ -211,7 +212,6 @@
 			font-family: inherit;
 			resize: vertical;
 			transition: border-color 0.15s;
-
 			&:focus {
 				border-color: var(--color-primary);
 			}
@@ -220,6 +220,13 @@
 				opacity: 0.6;
 			}
 		}
+	}
+
+	.input-date {
+		// iOS Safariはdatetime-localのネイティブUIに必要な幅をwidth指定より優先し、
+		// flexコンテナからはみ出すことがあるため明示的に制約する
+		min-width: 0;
+		max-width: 100%;
 	}
 
 	.channel-options {
