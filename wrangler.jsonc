@@ -5,13 +5,17 @@
 	"compatibility_flags": [
 		"nodejs_als"
 	],
-	"main": ".svelte-kit/cloudflare/_worker.js",
+	"main": "worker.ts",
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
 	},
 	"workers_dev": true,
 	"preview_urls": true,
+	// リマインダー配信: pending なリマインダーを1分ごとにチェックし、remind_atに達したものを送信する
+	"triggers": {
+		"crons": ["* * * * *"]
+	},
 	"d1_databases": [
 		{
 			"binding": "DB",

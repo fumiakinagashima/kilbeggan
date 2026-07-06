@@ -24,7 +24,7 @@
 | インフラ | Cloudflare (Workers, D1, R2, KV) |
 | AI | Claude API (`@anthropic-ai/sdk`) |
 | メール | Resend (fetch直呼び、SDKなし) |
-| プッシュ通知 | OneSignal |
+| プッシュ通知 | Web Push API (VAPID、PWA Service Worker経由。OneSignal等の外部サービスは使わない) |
 | モバイル | PWA (vite-plugin-pwa + @vite-pwa/sveltekit) |
 | パッケージマネージャー | bun |
 

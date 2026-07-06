@@ -1,0 +1,15 @@
+// Build-time only wrangler config for @sveltejs/adapter-cloudflare.
+// The adapter writes the generated SvelteKit worker to `main` during `vite build`.
+// Keeping this separate from wrangler.jsonc lets `main` there point at our custom
+// worker.ts (which wraps the generated worker and adds a `scheduled` handler for
+// reminder delivery) without the adapter overwriting it on every build.
+{
+	"name": "kilbeggan",
+	"compatibility_date": "2026-06-22",
+	"compatibility_flags": ["nodejs_als"],
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	}
+}

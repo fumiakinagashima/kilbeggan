@@ -1,8 +1,61 @@
 import { goto } from '$app/navigation';
+import {
+	isPushSupported,
+	getPushSubscription,
+	subscribeToPush,
+	unsubscribeFromPush
+} from '$lib/push';
 import type { PageData } from './$types';
 
 export function createSettingsState(getData: () => PageData) {
 	const user = getData().user!;
+
+	// push notifications
+	let pushSupported = $state(false);
+	let pushSubscribed = $state(false);
+	let pushSubmitting = $state(false);
+	let pushMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
+
+	$effect(() => {
+		pushSupported = isPushSupported();
+		if (pushSupported) {
+			getPushSubscription().then((sub) => {
+				pushSubscribed = !!sub;
+			});
+		}
+	});
+
+	async function togglePush() {
+		const vapidPublicKey = getData().vapidPublicKey;
+		if (!vapidPublicKey) {
+			pushMessage = { type: 'error', text: 'プッシュ通知が設定されていません' };
+			return;
+		}
+		pushSubmitting = true;
+		pushMessage = null;
+		try {
+			if (pushSubscribed) {
+				await unsubscribeFromPush();
+				pushSubscribed = false;
+				pushMessage = { type: 'success', text: 'プッシュ通知を無効にしました' };
+			} else {
+				if (Notification.permission === 'denied') {
+					pushMessage = {
+						type: 'error',
+						text: 'ブラウザの通知が拒否されています。ブラウザの設定から許可してください'
+					};
+					return;
+				}
+				await subscribeToPush(vapidPublicKey);
+				pushSubscribed = true;
+				pushMessage = { type: 'success', text: 'プッシュ通知を有効にしました' };
+			}
+		} catch {
+			pushMessage = { type: 'error', text: 'エラーが発生しました' };
+		} finally {
+			pushSubmitting = false;
+		}
+	}
 
 	// profile
 	let profileName = $state(user.name);
@@ -31,7 +84,7 @@ export function createSettingsState(getData: () => PageData) {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name: profileName, email: profileEmail })
 			});
-			const data = await res.json() as { ok?: boolean; error?: string };
+			const data = (await res.json()) as { ok?: boolean; error?: string };
 			if (res.ok) {
 				profileMessage = { type: 'success', text: 'プロフィールを保存しました' };
 			} else {
@@ -57,7 +110,7 @@ export function createSettingsState(getData: () => PageData) {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
 			});
-			const data = await res.json() as { ok?: boolean; error?: string };
+			const data = (await res.json()) as { ok?: boolean; error?: string };
 			if (res.ok) {
 				passwordMessage = { type: 'success', text: 'パスワードを変更しました' };
 				currentPassword = '';
@@ -86,7 +139,7 @@ export function createSettingsState(getData: () => PageData) {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ key: 'follow_up_days', value: String(followUpDays) })
 			});
-			const data = await res.json() as { ok?: boolean; error?: string };
+			const data = (await res.json()) as { ok?: boolean; error?: string };
 			if (res.ok) {
 				followUpMessage = { type: 'success', text: '保存しました' };
 			} else {
@@ -105,28 +158,80 @@ export function createSettingsState(getData: () => PageData) {
 	}
 
 	return {
-		get isAdmin() { return user.role === 'admin'; },
+		get isAdmin() {
+			return user.role === 'admin';
+		},
 
-		get profileName() { return profileName; },
-		set profileName(v: string) { profileName = v; },
-		get profileEmail() { return profileEmail; },
-		set profileEmail(v: string) { profileEmail = v; },
-		get profileSubmitting() { return profileSubmitting; },
-		get profileMessage() { return profileMessage; },
+		get pushSupported() {
+			return pushSupported;
+		},
+		get pushSubscribed() {
+			return pushSubscribed;
+		},
+		get pushSubmitting() {
+			return pushSubmitting;
+		},
+		get pushMessage() {
+			return pushMessage;
+		},
+		togglePush,
 
-		get currentPassword() { return currentPassword; },
-		set currentPassword(v: string) { currentPassword = v; },
-		get newPassword() { return newPassword; },
-		set newPassword(v: string) { newPassword = v; },
-		get confirmPassword() { return confirmPassword; },
-		set confirmPassword(v: string) { confirmPassword = v; },
-		get passwordSubmitting() { return passwordSubmitting; },
-		get passwordMessage() { return passwordMessage; },
+		get profileName() {
+			return profileName;
+		},
+		set profileName(v: string) {
+			profileName = v;
+		},
+		get profileEmail() {
+			return profileEmail;
+		},
+		set profileEmail(v: string) {
+			profileEmail = v;
+		},
+		get profileSubmitting() {
+			return profileSubmitting;
+		},
+		get profileMessage() {
+			return profileMessage;
+		},
 
-		get followUpDays() { return followUpDays; },
-		set followUpDays(v: number) { followUpDays = v; },
-		get followUpSubmitting() { return followUpSubmitting; },
-		get followUpMessage() { return followUpMessage; },
+		get currentPassword() {
+			return currentPassword;
+		},
+		set currentPassword(v: string) {
+			currentPassword = v;
+		},
+		get newPassword() {
+			return newPassword;
+		},
+		set newPassword(v: string) {
+			newPassword = v;
+		},
+		get confirmPassword() {
+			return confirmPassword;
+		},
+		set confirmPassword(v: string) {
+			confirmPassword = v;
+		},
+		get passwordSubmitting() {
+			return passwordSubmitting;
+		},
+		get passwordMessage() {
+			return passwordMessage;
+		},
+
+		get followUpDays() {
+			return followUpDays;
+		},
+		set followUpDays(v: number) {
+			followUpDays = v;
+		},
+		get followUpSubmitting() {
+			return followUpSubmitting;
+		},
+		get followUpMessage() {
+			return followUpMessage;
+		},
 
 		saveProfile,
 		savePassword,
