@@ -2,35 +2,9 @@ import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import adapter from '@sveltejs/adapter-cloudflare';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
 export default defineConfig({
 	plugins: [
-		SvelteKitPWA({
-			registerType: 'autoUpdate',
-			strategies: 'injectManifest',
-			srcDir: 'src',
-			filename: 'service-worker.ts',
-			manifest: {
-				name: 'Kilbeggan',
-				short_name: 'Kilbeggan',
-				description: '活動記録をもっとシンプルに',
-				theme_color: '#2563eb',
-				background_color: '#f8fafc',
-				display: 'standalone',
-				orientation: 'portrait',
-				start_url: '/',
-				icons: [
-					{ src: '/icon-192.svg', sizes: '192x192', type: 'image/svg+xml' },
-					{ src: '/icon-512.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' }
-				]
-			},
-			workbox: {
-				globPatterns: ['**/*.{js,css,html,svg}'],
-				navigateFallback: null
-			},
-			devOptions: { enabled: false }
-		}),
 		sveltekit({
 			compilerOptions: {
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.

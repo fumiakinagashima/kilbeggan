@@ -1,17 +1,20 @@
+/// <reference no-default-lib="true" />
+/// <reference lib="esnext" />
 /// <reference lib="webworker" />
 
-import { clientsClaim } from 'workbox-core';
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-
-declare const self: ServiceWorkerGlobalScope & {
-	__WB_MANIFEST: Array<{ url: string; revision: string | null }>;
-};
+// SvelteKitがsrc/service-worker.tsを自動検出しビルド・登録する（vite-plugin-pwaは使わない。
+// @vite-pwa/sveltekitのinjectManifestはVite 8のclient/ssr環境分離ビルドと競合し
+// 本番ビルドが失敗するため: https://github.com/vite-pwa/sveltekit/issues/101）
+declare const self: ServiceWorkerGlobalScope;
 
 self.skipWaiting();
-clientsClaim();
+self.addEventListener('activate', (event) => {
+	event.waitUntil(self.clients.claim());
+});
 
-precacheAndRoute(self.__WB_MANIFEST);
-cleanupOutdatedCaches();
+// オフラインキャッシュ対応は後フェーズ。fetchハンドラはPWAインストール条件を満たすための
+// pass-through（respondWithを呼ばないのでリクエストは通常通りネットワークに流れる）
+self.addEventListener('fetch', () => {});
 
 type PushPayload = { title: string; body: string; url?: string };
 

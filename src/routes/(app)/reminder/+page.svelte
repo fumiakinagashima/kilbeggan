@@ -50,7 +50,7 @@
 				<label for="content">内容</label>
 				<textarea
 					id="content"
-					rows="3"
+					rows="6"
 					bind:value={state.content}
 					required
 					disabled={state.submitting}></textarea>
@@ -223,10 +223,9 @@
 	}
 
 	.input-date {
-		// iOS Safariはdatetime-localのネイティブUIに必要な幅をwidth指定より優先し、
-		// flexコンテナからはみ出すことがあるため明示的に制約する
 		min-width: 0;
-		max-width: 100%;
+		width: auto;
+		max-width: max-content;
 	}
 
 	.channel-options {

@@ -59,8 +59,8 @@
 - [x] サインイン画面・サイドバーのデザイン統一 (Midleton/Boannに合わせたカードUI・タイポグラフィ・アカウント行、レスポンシブ構造は維持)
 - [x] リマインダー機能 (Midletonを参考にUI/機能を実装。日時・内容・通知先を指定して登録、一覧編集削除、Cron Trigger(1分毎)+手動実行での配信。通知先はメール(Resend)とアプリ内通知センターのみ対応、Slack連携は対象外)
 - [x] アプリ内通知センター (サイドバーのベルアイコン+未読バッジ+ドロワー、モバイルは設定画面から アクセス)
-- [x] プッシュ通知 (PWA + Web Push API。OneSignalから変更。VAPID鍵、injectManifest方式のService Workerでpush/notificationclick処理、push_subscriptionsテーブル、リマインダーの通知先に「プッシュ通知」を追加。送信は@block65/webcrypto-web-push（Web Crypto APIのみで動作しCloudflare Workers互換）。実際のブラウザへの配信確認はローカル環境の制約（Push APIはシークレットモード非対応、サンドボックス内からFCMへの到達性なし）により未検証。設定画面から有効/無効を切り替え可能
-- [x] PWAマニフェストリンク修正 (本番デプロイ後に発覚: @vite-pwa/sveltekitはService Worker登録は自動注入するが`<link rel="manifest">`は注入しないため、`virtual:pwa-info`経由で手動追加。iOS Safariで`datetime-local`入力がカード幅からはみ出す不具合も修正)
+- [x] プッシュ通知 (PWA + Web Push API。OneSignalから変更。VAPID鍵、Service Workerでpush/notificationclick処理、push_subscriptionsテーブル、リマインダーの通知先に「プッシュ通知」を追加。送信は@block65/webcrypto-web-push（Web Crypto APIのみで動作しCloudflare Workers互換）。実際のブラウザへの配信確認はローカル環境の制約（Push APIはシークレットモード非対応、サンドボックス内からFCMへの到達性なし）により未検証。設定画面から有効/無効を切り替え可能
+- [x] @vite-pwa/sveltekit撤去、SvelteKit標準のService Worker機能に移行 (本番ビルドが `injectManifest` とVite 8のclient/ssr分離ビルドの競合で失敗する既知の未解決バグ[vite-pwa/sveltekit#101]を踏み、`src/service-worker.ts`をSvelteKit標準機能に切り替え。manifest.webmanifestは`static/`に静的配置し`app.html`に直接リンク。オフラインキャッシュは未実装のまま(後フェーズ)、push/notificationclickのみ実装。iOS Safariで`datetime-local`入力がカード幅からはみ出す不具合も修正
 
 ---
 
