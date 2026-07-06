@@ -1,1 +1,2 @@
 export const ACTIVITIES_PAGE_SIZE = 30;
+export const NOTIFICATION_POLL_INTERVAL_MS = 60_000;

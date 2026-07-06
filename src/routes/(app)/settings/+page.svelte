@@ -1,16 +1,31 @@
 <script lang="ts">
-	import { Sun, Moon, Monitor } from '@lucide/svelte';
+	import { Sun, Moon, Monitor, Bell } from '@lucide/svelte';
 	import { themeStore } from '$lib/stores/theme.svelte';
+	import { notificationCenter } from '$lib/stores/notifications.svelte';
 	import { createSettingsState } from './index.svelte.ts';
 
 	let { data } = $props();
 	const state = createSettingsState(() => data);
+
+	function formatBadgeCount(count: number): string {
+		return count > 99 ? '99+' : String(count);
+	}
 </script>
 
 <div class="page">
 	<header class="page-header">
 		<h1>設定</h1>
 	</header>
+
+	<nav class="mobile-links">
+		<button class="mobile-link" onclick={() => notificationCenter.toggle()}>
+			<Bell size={18} />
+			通知
+			{#if notificationCenter.unreadCount > 0}
+				<span class="badge">{formatBadgeCount(notificationCenter.unreadCount)}</span>
+			{/if}
+		</button>
+	</nav>
 
 	<section class="card">
 		<h2>テーマ</h2>
@@ -46,7 +61,11 @@
 		<h2>プロフィール</h2>
 
 		{#if state.profileMessage}
-			<p class="message" class:success={state.profileMessage.type === 'success'} class:error={state.profileMessage.type === 'error'}>
+			<p
+				class="message"
+				class:success={state.profileMessage.type === 'success'}
+				class:error={state.profileMessage.type === 'error'}
+			>
 				{state.profileMessage.text}
 			</p>
 		{/if}
@@ -63,7 +82,9 @@
 			<button
 				class="btn-primary"
 				onclick={state.saveProfile}
-				disabled={state.profileSubmitting || !state.profileName.trim() || !state.profileEmail.trim()}
+				disabled={state.profileSubmitting ||
+					!state.profileName.trim() ||
+					!state.profileEmail.trim()}
 			>
 				{state.profileSubmitting ? '保存中...' : '保存'}
 			</button>
@@ -74,7 +95,11 @@
 		<h2>パスワード変更</h2>
 
 		{#if state.passwordMessage}
-			<p class="message" class:success={state.passwordMessage.type === 'success'} class:error={state.passwordMessage.type === 'error'}>
+			<p
+				class="message"
+				class:success={state.passwordMessage.type === 'success'}
+				class:error={state.passwordMessage.type === 'error'}
+			>
 				{state.passwordMessage.text}
 			</p>
 		{/if}
@@ -95,7 +120,10 @@
 			<button
 				class="btn-primary"
 				onclick={state.savePassword}
-				disabled={state.passwordSubmitting || !state.currentPassword || !state.newPassword || !state.confirmPassword}
+				disabled={state.passwordSubmitting ||
+					!state.currentPassword ||
+					!state.newPassword ||
+					!state.confirmPassword}
 			>
 				{state.passwordSubmitting ? '変更中...' : '変更'}
 			</button>
@@ -107,7 +135,11 @@
 			<h2>管理者設定</h2>
 
 			{#if state.followUpMessage}
-				<p class="message" class:success={state.followUpMessage.type === 'success'} class:error={state.followUpMessage.type === 'error'}>
+				<p
+					class="message"
+					class:success={state.followUpMessage.type === 'success'}
+					class:error={state.followUpMessage.type === 'error'}
+				>
 					{state.followUpMessage.text}
 				</p>
 			{/if}
@@ -150,6 +182,47 @@
 		@media (min-width: 768px) {
 			padding: 0 2rem 2rem;
 		}
+	}
+
+	.mobile-links {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+
+		@media (min-width: 768px) {
+			display: none;
+		}
+	}
+
+	.mobile-link {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		padding: 0.875rem 1rem;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 12px;
+		color: var(--color-text);
+		font-size: 0.9375rem;
+		font-weight: 500;
+		text-decoration: none;
+		cursor: pointer;
+		width: 100%;
+		text-align: left;
+		font-family: inherit;
+	}
+
+	.badge {
+		margin-left: auto;
+		min-width: 20px;
+		padding: 1px 6px;
+		border-radius: 999px;
+		background: var(--color-primary);
+		color: #fff;
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-align: center;
 	}
 
 	.page-header {
@@ -196,7 +269,10 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		cursor: pointer;
-		transition: background 0.1s, color 0.1s, border-color 0.1s;
+		transition:
+			background 0.1s,
+			color 0.1s,
+			border-color 0.1s;
 
 		&:hover {
 			background: var(--color-surface);

@@ -35,6 +35,10 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 			adapter: adapter({
+				// wrangler.jsonc's `main` points at our custom worker.ts (adds the
+				// `scheduled` handler), so use a separate config for the adapter's
+				// build step to avoid it overwriting that file.
+				config: 'wrangler.build.jsonc',
 				platformProxy: {
 					configPath: 'wrangler.jsonc',
 					persist: { path: '.wrangler/state/v3' }

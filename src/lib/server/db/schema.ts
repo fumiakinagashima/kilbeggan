@@ -63,8 +63,36 @@ export const orgSettings = sqliteTable('org_settings', {
 	updatedBy: text('updated_by').references(() => accounts.id)
 });
 
+export const reminders = sqliteTable('reminders', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => accounts.id),
+	remindAt: integer('remind_at', { mode: 'timestamp' }).notNull(),
+	content: text('content').notNull(),
+	// JSON配列: 'notification' | 'email'
+	channels: text('channels').notNull().default('[]'),
+	status: text('status', { enum: ['pending', 'sent', 'failed'] })
+		.notNull()
+		.default('pending'),
+	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
+});
+
+export const notifications = sqliteTable('notifications', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => accounts.id),
+	title: text('title').notNull(),
+	body: text('body').notNull().default(''),
+	isRead: integer('is_read', { mode: 'boolean' }).notNull().default(false),
+	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
+});
+
 export type User = typeof accounts.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
 export type ActivityMention = typeof activityMentions.$inferSelect;
 export type OrgSetting = typeof orgSettings.$inferSelect;
+export type Reminder = typeof reminders.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
