@@ -2,6 +2,7 @@ import { eq, desc } from 'drizzle-orm';
 import type { Db } from '$lib/server/db';
 import { reminders, type Reminder } from '$lib/server/db/schema';
 import { getEmailSetupFromEnv, type EmailEnv } from '$lib/server/email';
+import type { PushEnv } from '$lib/server/push/send';
 
 export type ReminderListRow = {
 	id: string;
@@ -28,6 +29,7 @@ export function resolveChannelLabels(channels: string[]): string[] {
 	return channels.map((c) => {
 		if (c === 'notification') return '通知センター';
 		if (c === 'email') return 'メール';
+		if (c === 'push') return 'プッシュ通知';
 		return c;
 	});
 }
@@ -96,8 +98,11 @@ export async function deleteReminder(db: Db, id: string): Promise<void> {
 	await db.delete(reminders).where(eq(reminders.id, id));
 }
 
-export function getReminderChannelOptions(env?: EmailEnv): ChannelOption[] {
+export function getReminderChannelOptions(env?: EmailEnv & PushEnv): ChannelOption[] {
 	const options: ChannelOption[] = [{ label: '通知センター', value: 'notification' }];
 	if (getEmailSetupFromEnv(env ?? {})) options.push({ label: 'メール', value: 'email' });
+	if (env?.VAPID_PUBLIC_KEY && env?.VAPID_PRIVATE_KEY) {
+		options.push({ label: 'プッシュ通知', value: 'push' });
+	}
 	return options;
 }

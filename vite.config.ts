@@ -8,6 +8,9 @@ export default defineConfig({
 	plugins: [
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
+			strategies: 'injectManifest',
+			srcDir: 'src',
+			filename: 'service-worker.ts',
 			manifest: {
 				name: 'Kilbeggan',
 				short_name: 'Kilbeggan',

@@ -4,7 +4,15 @@ import { reminders, type Reminder } from '$lib/server/db/schema';
 import { parseChannels } from '$lib/services/reminder';
 import { createNotification } from '$lib/services/notification';
 import { getAccountById } from '$lib/services/account';
+import { listPushSubscriptions, deletePushSubscription } from '$lib/services/push-subscription';
 import { getEmailSetupFromEnv, sendEmail, type EmailEnv } from '$lib/server/email';
+import {
+	sendPushNotification,
+	PushSubscriptionExpiredError,
+	type PushEnv
+} from '$lib/server/push/send';
+
+type DeliveryEnv = EmailEnv & PushEnv;
 
 export type ReminderDeliveryResult = {
 	id: string;
@@ -24,7 +32,7 @@ async function deliverToChannel(
 	db: Db,
 	channel: string,
 	reminder: Reminder,
-	env?: EmailEnv
+	env?: DeliveryEnv
 ): Promise<void> {
 	if (channel === 'notification') {
 		await createNotification(db, {
@@ -37,7 +45,10 @@ async function deliverToChannel(
 
 	if (channel === 'email') {
 		const setup = getEmailSetupFromEnv(env ?? {});
-		if (!setup) throw new Error('メール送信が設定されていません（EMAIL_PROVIDER等の環境変数を確認してください）');
+		if (!setup)
+			throw new Error(
+				'メール送信が設定されていません（EMAIL_PROVIDER等の環境変数を確認してください）'
+			);
 		const account = await getAccountById(db, reminder.userId);
 		if (!account) throw new Error('アカウントが見つかりません');
 		await sendEmail(setup.providerConfig, {
@@ -50,13 +61,33 @@ async function deliverToChannel(
 		return;
 	}
 
+	if (channel === 'push') {
+		const subscriptions = await listPushSubscriptions(db, reminder.userId);
+		for (const subscription of subscriptions) {
+			try {
+				await sendPushNotification(
+					subscription,
+					{ title: 'リマインダー', body: reminder.content, url: '/reminder' },
+					env ?? {}
+				);
+			} catch (e) {
+				if (e instanceof PushSubscriptionExpiredError) {
+					await deletePushSubscription(db, subscription.endpoint);
+					continue;
+				}
+				throw e;
+			}
+		}
+		return;
+	}
+
 	throw new Error(`未対応の通知先です: ${channel}`);
 }
 
 export async function deliverReminder(
 	db: Db,
 	reminder: Reminder,
-	env?: EmailEnv
+	env?: DeliveryEnv
 ): Promise<ReminderDeliveryResult> {
 	const channels = parseChannels(reminder.channels);
 	const deliveryErrors: string[] = [];
@@ -75,7 +106,7 @@ export async function deliverReminder(
 
 export async function processDueReminders(
 	db: Db,
-	env?: EmailEnv,
+	env?: DeliveryEnv,
 	now: Date = new Date()
 ): Promise<ReminderDeliveryResult[]> {
 	const due = await getDueReminders(db, now);

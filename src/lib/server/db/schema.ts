@@ -89,6 +89,17 @@ export const notifications = sqliteTable('notifications', {
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 });
 
+export const pushSubscriptions = sqliteTable('push_subscriptions', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => accounts.id),
+	endpoint: text('endpoint').notNull().unique(),
+	p256dh: text('p256dh').notNull(),
+	auth: text('auth').notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
+});
+
 export type User = typeof accounts.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
@@ -96,3 +107,4 @@ export type ActivityMention = typeof activityMentions.$inferSelect;
 export type OrgSetting = typeof orgSettings.$inferSelect;
 export type Reminder = typeof reminders.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;

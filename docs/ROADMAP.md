@@ -59,7 +59,7 @@
 - [x] サインイン画面・サイドバーのデザイン統一 (Midleton/Boannに合わせたカードUI・タイポグラフィ・アカウント行、レスポンシブ構造は維持)
 - [x] リマインダー機能 (Midletonを参考にUI/機能を実装。日時・内容・通知先を指定して登録、一覧編集削除、Cron Trigger(1分毎)+手動実行での配信。通知先はメール(Resend)とアプリ内通知センターのみ対応、Slack連携は対象外)
 - [x] アプリ内通知センター (サイドバーのベルアイコン+未読バッジ+ドロワー、モバイルは設定画面から アクセス)
-- [ ] プッシュ通知 (OneSignal)
+- [x] プッシュ通知 (PWA + Web Push API。OneSignalから変更。VAPID鍵、injectManifest方式のService Workerでpush/notificationclick処理、push_subscriptionsテーブル、リマインダーの通知先に「プッシュ通知」を追加。送信は@block65/webcrypto-web-push（Web Crypto APIのみで動作しCloudflare Workers互換）。実際のブラウザへの配信確認はローカル環境の制約（Push APIはシークレットモード非対応、サンドボックス内からFCMへの到達性なし）により未検証。設定画面から有効/無効を切り替え可能
 
 ---
 

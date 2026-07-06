@@ -57,6 +57,38 @@
 		</div>
 	</section>
 
+	{#if state.pushSupported}
+		<section class="card">
+			<h2>プッシュ通知</h2>
+
+			{#if state.pushMessage}
+				<p
+					class="message"
+					class:success={state.pushMessage.type === 'success'}
+					class:error={state.pushMessage.type === 'error'}
+				>
+					{state.pushMessage.text}
+				</p>
+			{/if}
+
+			<p class="field-hint">リマインダーなどの通知をこの端末にプッシュ通知として届けます。</p>
+			<div class="footer">
+				<button
+					class="btn-primary"
+					class:btn-outline={state.pushSubscribed}
+					onclick={state.togglePush}
+					disabled={state.pushSubmitting}
+				>
+					{state.pushSubmitting
+						? '処理中...'
+						: state.pushSubscribed
+							? 'プッシュ通知を無効にする'
+							: 'プッシュ通知を有効にする'}
+				</button>
+			</div>
+		</section>
+	{/if}
+
 	<section class="card">
 		<h2>プロフィール</h2>
 
@@ -381,6 +413,12 @@
 		font-weight: 600;
 		cursor: pointer;
 		transition: opacity 0.15s;
+
+		&.btn-outline {
+			background: none;
+			border: 1px solid var(--color-border);
+			color: var(--color-text);
+		}
 
 		&:disabled {
 			opacity: 0.6;
