@@ -1,6 +1,8 @@
 import type { PageData } from './$types';
 import { goto } from '$app/navigation';
 import { compressImage } from '$lib/image';
+import { bodyToEditorHtml } from '$lib/body';
+import { composeDraft } from '$lib/stores/composeDraft.svelte';
 
 type CustomerOption = { id: string; company: string };
 type AttachmentItem = { key: string; url: string; name: string; mimeType: string };
@@ -8,9 +10,9 @@ type AttachmentItem = { key: string; url: string; name: string; mimeType: string
 export function createComposeState(getData: () => PageData) {
 	let posting = $state(false);
 	let postError = $state('');
-	let hasContent = $state(false);
-	let isPrivate = $state(false);
-	let attachments = $state<AttachmentItem[]>([]);
+	let hasContent = $state(composeDraft.body.trim().length > 0);
+	let isPrivate = $state(composeDraft.isPrivate);
+	let attachments = $state<AttachmentItem[]>(composeDraft.attachments);
 	let uploading = $state(false);
 	let editorEl = $state<HTMLDivElement | undefined>(undefined);
 	let isComposing = $state(false);
@@ -56,6 +58,12 @@ export function createComposeState(getData: () => PageData) {
 		return extractText(editorEl).replace(/\n+$/, '');
 	}
 
+	function persistDraft() {
+		composeDraft.body = getBodyText();
+		composeDraft.isPrivate = isPrivate;
+		composeDraft.attachments = attachments;
+	}
+
 	function checkMention() {
 		const sel = window.getSelection();
 		if (!sel || !sel.rangeCount) {
@@ -86,6 +94,7 @@ export function createComposeState(getData: () => PageData) {
 	function handleEditorInput() {
 		hasContent = (editorEl?.textContent?.trim().length ?? 0) > 0;
 		if (!isComposing) checkMention();
+		persistDraft();
 	}
 
 	function handleCompositionStart() {
@@ -119,6 +128,7 @@ export function createComposeState(getData: () => PageData) {
 			sel.addRange(range);
 		}
 		hasContent = (editorEl?.textContent?.trim().length ?? 0) > 0;
+		persistDraft();
 	}
 
 	function insertMention(c: CustomerOption) {
@@ -142,6 +152,7 @@ export function createComposeState(getData: () => PageData) {
 		mentionQuery = '';
 		mentionRange = null;
 		hasContent = true;
+		persistDraft();
 	}
 
 	function handleEditorBlur() {
@@ -168,11 +179,13 @@ export function createComposeState(getData: () => PageData) {
 			}
 		} finally {
 			uploading = false;
+			persistDraft();
 		}
 	}
 
 	function removeAttachment(key: string) {
 		attachments = attachments.filter((a) => a.key !== key);
+		persistDraft();
 	}
 
 	async function post(e: SubmitEvent) {
@@ -200,6 +213,7 @@ export function createComposeState(getData: () => PageData) {
 			hasContent = false;
 			isPrivate = false;
 			attachments = [];
+			composeDraft.clear();
 			await goto('/');
 		} finally {
 			posting = false;
@@ -221,6 +235,7 @@ export function createComposeState(getData: () => PageData) {
 		},
 		set isPrivate(v: boolean) {
 			isPrivate = v;
+			persistDraft();
 		},
 		get attachments() {
 			return attachments;
@@ -233,6 +248,10 @@ export function createComposeState(getData: () => PageData) {
 		},
 		set editorEl(v: HTMLDivElement | undefined) {
 			editorEl = v;
+			if (v && !v.innerHTML && composeDraft.body) {
+				const mentionMap = new Map(getData().customers.map((c) => [c.id, c.company]));
+				v.innerHTML = bodyToEditorHtml(composeDraft.body, mentionMap);
+			}
 		},
 		get showDropdown() {
 			return showDropdown;

@@ -65,6 +65,7 @@
 - [x] @vite-pwa/sveltekit撤去、SvelteKit標準のService Worker機能に移行 (本番ビルドが `injectManifest` とVite 8のclient/ssr分離ビルドの競合で失敗する既知の未解決バグ[vite-pwa/sveltekit#101]を踏み、`src/service-worker.ts`をSvelteKit標準機能に切り替え。manifest.webmanifestは`static/`に静的配置し`app.html`に直接リンク。オフラインキャッシュは未実装のまま(後フェーズ)、push/notificationclickのみ実装。iOS Safariで`datetime-local`入力がカード幅からはみ出す不具合も修正
 - [x] トップ画面を活動一覧に変更 (`/`が旧`/fields`の活動一覧、投稿画面は`/post`に移動。投稿画面ヘッダーの「KILBEGGAN」ロゴを他画面と同じページタイトル「投稿」表示に統一。活動編集(`/fields/[id]`)のURLは維持しつつ戻り先を`/`に修正)
 - [x] ナビゲーション再編 (投稿はフッター/サイドバーのメニュー項目から撤去し、活動一覧ページ上部の「投稿」ボタンから`/post`へ遷移する方式に変更。投稿完了後は活動一覧に自動遷移。通知は設定画面経由のモバイル導線を廃止し、ボトムナビ/サイドバーに常時表示する項目として昇格(未読バッジ付き))
+- [x] 投稿下書きの保持 (投稿画面の入力内容(本文・メンション・非対象フラグ・添付ファイル)を`$lib/stores/composeDraft.svelte.ts`にモジュール単位で保持。他ページへ遷移して`/post`に戻っても入力内容が復元される。投稿成功時のみ下書きをクリア。ブラウザのリロード/タブ閉じまでは保持されない(メモリ上のみ))
 
 ---
 
