@@ -59,6 +59,7 @@
 - [x] サインイン画面・サイドバーのデザイン統一 (Midleton/Boannに合わせたカードUI・タイポグラフィ・アカウント行、レスポンシブ構造は維持)
 - [x] リマインダー機能 (Midletonを参考にUI/機能を実装。日時・内容・通知先を指定して登録、一覧編集削除、Cron Trigger(1分毎)+手動実行での配信。通知先はメール(Resend)とアプリ内通知センターのみ対応、Slack連携は対象外)
 - [x] アプリ内通知センター (サイドバーのベルアイコン+未読バッジ+ドロワー、モバイルは設定画面から アクセス)
+- [x] 通知センターをドロワーからページ化 (`/notifications`、活動一覧と同じカードUI。クリックで背景色が反転する挙動を廃止し、通知ごとに削除ボタンを追加。`NotificationDrawer`コンポーネントは削除)
 - [x] プッシュ通知 (PWA + Web Push API。OneSignalから変更。VAPID鍵、Service Workerでpush/notificationclick処理、push_subscriptionsテーブル、リマインダーの通知先に「プッシュ通知」を追加。送信は@block65/webcrypto-web-push（Web Crypto APIのみで動作しCloudflare Workers互換）。本番にVAPID secrets登録済み、iPhone実機で配信確認済み。設定画面から有効/無効を切り替え可能
 - [x] 通知アイコンをPNG化 (showNotification/manifestのicon/badgeがSVG指定で一部ブラウザで非表示になる問題を修正。icon-192/512とapple-touch-iconをSVGソースからPNG再生成、Kの文字をserif体+ベージュ寄りの配色に変更)
 - [x] @vite-pwa/sveltekit撤去、SvelteKit標準のService Worker機能に移行 (本番ビルドが `injectManifest` とVite 8のclient/ssr分離ビルドの競合で失敗する既知の未解決バグ[vite-pwa/sveltekit#101]を踏み、`src/service-worker.ts`をSvelteKit標準機能に切り替え。manifest.webmanifestは`static/`に静的配置し`app.html`に直接リンク。オフラインキャッシュは未実装のまま(後フェーズ)、push/notificationclickのみ実装。iOS Safariで`datetime-local`入力がカード幅からはみ出す不具合も修正

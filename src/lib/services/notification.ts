@@ -40,6 +40,10 @@ export async function markNotificationRead(db: Db, id: string): Promise<void> {
 	await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id));
 }
 
+export async function deleteNotification(db: Db, id: string): Promise<void> {
+	await db.delete(notifications).where(eq(notifications.id, id));
+}
+
 export async function countUnreadNotifications(db: Db, userId: string): Promise<number> {
 	const row = await db
 		.select({ count: sql<number>`count(*)` })

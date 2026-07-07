@@ -4,7 +4,6 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { PenLine, List, Users, Settings, LogOut, Bell, Clock } from '@lucide/svelte';
-	import NotificationDrawer from '$lib/components/NotificationDrawer.svelte';
 	import { notificationCenter } from '$lib/stores/notifications.svelte';
 	import { NOTIFICATION_POLL_INTERVAL_MS } from '$lib/constants';
 
@@ -63,15 +62,23 @@
 		</nav>
 
 		<div class="sidebar-footer">
-			<button class="footer-item notification-toggle" onclick={() => notificationCenter.toggle()}>
+			<a
+				href="/notifications"
+				class="footer-item"
+				class:active={isActive({ href: '/notifications', exact: false })}
+			>
 				<Bell size={15} />
 				通知
 				{#if notificationCenter.unreadCount > 0}
 					<span class="notification-badge">{formatBadgeCount(notificationCenter.unreadCount)}</span>
 				{/if}
-			</button>
+			</a>
 
-			<a href="/reminder" class="footer-item" class:active={isActive({ href: '/reminder', exact: false })}>
+			<a
+				href="/reminder"
+				class="footer-item"
+				class:active={isActive({ href: '/reminder', exact: false })}
+			>
 				<Clock size={15} />
 				リマインダー
 			</a>
@@ -79,12 +86,7 @@
 			{#if data.user}
 				<div class="account-row">
 					<span class="account-name">{data.user.name}</span>
-					<button
-						class="signout-btn"
-						onclick={signout}
-						title="ログアウト"
-						aria-label="ログアウト"
-					>
+					<button class="signout-btn" onclick={signout} title="ログアウト" aria-label="ログアウト">
 						<LogOut size={15} />
 					</button>
 				</div>
@@ -105,8 +107,6 @@
 		{/each}
 	</nav>
 </div>
-
-<NotificationDrawer open={notificationCenter.open} onclose={() => notificationCenter.close()} />
 
 <style lang="scss">
 	.shell {
@@ -207,16 +207,6 @@
 		&.active {
 			color: var(--color-primary);
 		}
-	}
-
-	button.footer-item {
-		width: 100%;
-		border: none;
-		background: transparent;
-		font: inherit;
-		font-size: 0.875rem;
-		text-align: left;
-		cursor: pointer;
 	}
 
 	.notification-badge {

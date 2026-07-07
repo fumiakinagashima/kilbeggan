@@ -9,16 +9,6 @@ export type NotificationItem = {
 class NotificationCenterStore {
 	unreadCount = $state(0);
 	items = $state<NotificationItem[]>([]);
-	open = $state(false);
-
-	toggle() {
-		this.open = !this.open;
-		if (this.open) this.loadItems();
-	}
-
-	close() {
-		this.open = false;
-	}
 
 	async loadItems() {
 		try {
@@ -51,6 +41,19 @@ class NotificationCenterStore {
 		}
 		try {
 			await fetch(`/api/notifications/${id}`, { method: 'PATCH' });
+		} catch {
+			// best-effort, ignore errors
+		}
+	}
+
+	async deleteNotification(id: string) {
+		const item = this.items.find((n) => n.id === id);
+		this.items = this.items.filter((n) => n.id !== id);
+		if (item && !item.isRead) {
+			this.unreadCount = Math.max(0, this.unreadCount - 1);
+		}
+		try {
+			await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
 		} catch {
 			// best-effort, ignore errors
 		}

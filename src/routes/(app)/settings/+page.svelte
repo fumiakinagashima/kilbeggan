@@ -18,13 +18,13 @@
 	</header>
 
 	<nav class="mobile-links">
-		<button class="mobile-link" onclick={() => notificationCenter.toggle()}>
+		<a href="/notifications" class="mobile-link">
 			<Bell size={18} />
 			通知
 			{#if notificationCenter.unreadCount > 0}
 				<span class="badge">{formatBadgeCount(notificationCenter.unreadCount)}</span>
 			{/if}
-		</button>
+		</a>
 	</nav>
 
 	<section class="card">
