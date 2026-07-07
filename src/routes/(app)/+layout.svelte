@@ -9,28 +9,13 @@
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	const baseNavItems = [
+	// デスクトップ・モバイル共通のメインナビ
+	const navItems = [
 		{ href: '/', label: '活動', icon: List, exact: true, prefixes: ['/fields'] },
 		{ href: '/customers', label: '顧客', icon: Users, exact: false },
-		{ href: '/settings', label: '設定', icon: Settings, exact: false }
-	];
-
-	// 管理者権限かつデスクトップ表示のみ。モバイルのボトムナビには出さない
-	const desktopNavItems = $derived(
-		data.user?.role === 'admin'
-			? [
-					...baseNavItems,
-					{ href: '/accounts', label: 'アカウント管理', icon: UserCog, exact: false }
-				]
-			: baseNavItems
-	);
-
-	const bottomNavItems = [
-		baseNavItems[0],
-		baseNavItems[1],
-		{ href: '/notifications', label: '通知', icon: Bell, exact: false },
 		{ href: '/reminder', label: 'リマインダー', icon: Clock, exact: false },
-		baseNavItems[2]
+		{ href: '/notifications', label: '通知', icon: Bell, exact: false },
+		{ href: '/settings', label: '設定', icon: Settings, exact: false }
 	];
 
 	function isActive(item: { href: string; exact: boolean; prefixes?: string[] }): boolean {
@@ -64,35 +49,30 @@
 		</div>
 
 		<nav class="nav">
-			{#each desktopNavItems as item (item.href)}
+			{#each navItems as item (item.href)}
 				<a href={item.href} class="nav-item" class:active={isActive(item)}>
 					<item.icon size={16} />
 					{item.label}
+					{#if item.href === '/notifications' && notificationCenter.unreadCount > 0}
+						<span class="notification-badge"
+							>{formatBadgeCount(notificationCenter.unreadCount)}</span
+						>
+					{/if}
 				</a>
 			{/each}
 		</nav>
 
 		<div class="sidebar-footer">
-			<a
-				href="/notifications"
-				class="footer-item"
-				class:active={isActive({ href: '/notifications', exact: false })}
-			>
-				<Bell size={15} />
-				通知
-				{#if notificationCenter.unreadCount > 0}
-					<span class="notification-badge">{formatBadgeCount(notificationCenter.unreadCount)}</span>
-				{/if}
-			</a>
-
-			<a
-				href="/reminder"
-				class="footer-item"
-				class:active={isActive({ href: '/reminder', exact: false })}
-			>
-				<Clock size={15} />
-				リマインダー
-			</a>
+			{#if data.user?.role === 'admin'}
+				<a
+					href="/accounts"
+					class="nav-item"
+					class:active={isActive({ href: '/accounts', exact: false })}
+				>
+					<UserCog size={16} />
+					アカウント管理
+				</a>
+			{/if}
 
 			{#if data.user}
 				<div class="account-row">
@@ -110,7 +90,7 @@
 	</main>
 
 	<nav class="bottom-nav">
-		{#each bottomNavItems as item (item.href)}
+		{#each navItems as item (item.href)}
 			<a href={item.href} class="bottom-nav-item" class:active={isActive(item)}>
 				<span class="icon-wrap">
 					<item.icon size={22} />
@@ -200,29 +180,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
-	}
-
-	.footer-item {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 10px;
-		border-radius: 8px;
-		font-size: 0.875rem;
-		color: var(--sidebar-text-muted);
-		text-decoration: none;
-		transition:
-			background 0.15s,
-			color 0.15s;
-
-		&:hover {
-			background: var(--sidebar-hover);
-			color: var(--sidebar-text);
-		}
-
-		&.active {
-			color: var(--color-primary);
-		}
 	}
 
 	.notification-badge {
