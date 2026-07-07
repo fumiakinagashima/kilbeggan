@@ -57,7 +57,10 @@
 	{/if}
 
 	{#if data.customer.notes}
+	<section class="contact-info">
+		<p class="contact-label">備考</p>
 		<p class="notes">{data.customer.notes}</p>
+	</section>
 	{/if}
 
 	<section class="ai-summary" class:generating={state.generating}>
@@ -303,7 +306,6 @@
 		font-size: 0.9375rem;
 		color: var(--color-text-muted);
 		line-height: 1.6;
-		padding: 0 0 1rem;
 		white-space: pre-wrap;
 	}
 
