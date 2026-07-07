@@ -3,24 +3,34 @@
 	import type { LayoutData } from './$types';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { List, Users, Settings, LogOut, Bell, Clock } from '@lucide/svelte';
+	import { List, Users, Settings, LogOut, Bell, Clock, UserCog } from '@lucide/svelte';
 	import { notificationCenter } from '$lib/stores/notifications.svelte';
 	import { NOTIFICATION_POLL_INTERVAL_MS } from '$lib/constants';
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	const navItems = [
+	const baseNavItems = [
 		{ href: '/', label: '活動', icon: List, exact: true, prefixes: ['/fields'] },
 		{ href: '/customers', label: '顧客', icon: Users, exact: false },
 		{ href: '/settings', label: '設定', icon: Settings, exact: false }
 	];
 
+	// 管理者権限かつデスクトップ表示のみ。モバイルのボトムナビには出さない
+	const desktopNavItems = $derived(
+		data.user?.role === 'admin'
+			? [
+					...baseNavItems,
+					{ href: '/accounts', label: 'アカウント管理', icon: UserCog, exact: false }
+				]
+			: baseNavItems
+	);
+
 	const bottomNavItems = [
-		navItems[0],
-		navItems[1],
+		baseNavItems[0],
+		baseNavItems[1],
 		{ href: '/notifications', label: '通知', icon: Bell, exact: false },
 		{ href: '/reminder', label: 'リマインダー', icon: Clock, exact: false },
-		navItems[2]
+		baseNavItems[2]
 	];
 
 	function isActive(item: { href: string; exact: boolean; prefixes?: string[] }): boolean {
@@ -54,7 +64,7 @@
 		</div>
 
 		<nav class="nav">
-			{#each navItems as item (item.href)}
+			{#each desktopNavItems as item (item.href)}
 				<a href={item.href} class="nav-item" class:active={isActive(item)}>
 					<item.icon size={16} />
 					{item.label}
@@ -128,7 +138,7 @@
 			display: flex;
 			flex-direction: column;
 			width: var(--sidebar-width);
-			min-height: 100dvh;
+			height: 100vh;
 			background: var(--sidebar-bg);
 			border-right: 1px solid var(--sidebar-border);
 			position: sticky;
