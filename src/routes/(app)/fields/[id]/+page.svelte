@@ -15,7 +15,7 @@
 
 <div class="page">
 	<header class="page-header">
-		<a href="/fields" class="back">← 活動一覧</a>
+		<a href="/" class="back">← 活動一覧</a>
 		<h1>活動を修正</h1>
 	</header>
 
@@ -74,7 +74,7 @@
 				{/if}
 			</button>
 			<div class="actions">
-				<a href="/fields" class="btn-cancel">キャンセル</a>
+				<a href="/" class="btn-cancel">キャンセル</a>
 				<button type="submit" class="btn-save" disabled={edit.submitting || !edit.hasContent || edit.uploading}>
 					保存
 				</button>

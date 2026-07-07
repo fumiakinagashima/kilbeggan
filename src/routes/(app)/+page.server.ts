@@ -1,8 +1,9 @@
 import { getDb } from '$lib/server/db';
-import { listCustomers } from '$lib/services/customer';
+import { listActivities } from '$lib/services/activity';
+import { ACTIVITIES_PAGE_SIZE } from '$lib/constants';
 
-export async function load({ platform }) {
+export async function load({ platform, locals }) {
 	const db = getDb(platform!.env.DB);
-	const customers = await listCustomers(db);
-	return { customers };
+	const activities = await listActivities(db, ACTIVITIES_PAGE_SIZE, locals.user?.userId);
+	return { activities };
 }

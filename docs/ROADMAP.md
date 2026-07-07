@@ -62,6 +62,7 @@
 - [x] プッシュ通知 (PWA + Web Push API。OneSignalから変更。VAPID鍵、Service Workerでpush/notificationclick処理、push_subscriptionsテーブル、リマインダーの通知先に「プッシュ通知」を追加。送信は@block65/webcrypto-web-push（Web Crypto APIのみで動作しCloudflare Workers互換）。本番にVAPID secrets登録済み、iPhone実機で配信確認済み。設定画面から有効/無効を切り替え可能
 - [x] 通知アイコンをPNG化 (showNotification/manifestのicon/badgeがSVG指定で一部ブラウザで非表示になる問題を修正。icon-192/512とapple-touch-iconをSVGソースからPNG再生成、Kの文字をserif体+ベージュ寄りの配色に変更)
 - [x] @vite-pwa/sveltekit撤去、SvelteKit標準のService Worker機能に移行 (本番ビルドが `injectManifest` とVite 8のclient/ssr分離ビルドの競合で失敗する既知の未解決バグ[vite-pwa/sveltekit#101]を踏み、`src/service-worker.ts`をSvelteKit標準機能に切り替え。manifest.webmanifestは`static/`に静的配置し`app.html`に直接リンク。オフラインキャッシュは未実装のまま(後フェーズ)、push/notificationclickのみ実装。iOS Safariで`datetime-local`入力がカード幅からはみ出す不具合も修正
+- [x] トップ画面を活動一覧に変更 (`/`が旧`/fields`の活動一覧、投稿画面は`/post`に移動。投稿画面ヘッダーの「KILBEGGAN」ロゴを他画面と同じページタイトル「投稿」表示に統一。活動編集(`/fields/[id]`)のURLは維持しつつ戻り先を`/`に修正)
 
 ---
 

@@ -1,252 +1,107 @@
 import type { PageData } from './$types';
-import { compressImage } from '$lib/image';
+import { ACTIVITIES_PAGE_SIZE } from '$lib/constants';
 
-type CustomerOption = { id: string; company: string };
-type AttachmentItem = { key: string; url: string; name: string; mimeType: string };
+type ActivityItem = {
+	id: string;
+	body: string;
+	isPrivate: boolean;
+	attachments: { key: string; name: string }[];
+	tags: string[];
+	createdAt: Date | string;
+	userId: string;
+	userName: string | null;
+	mentions: { customerId: string; company: string }[];
+};
 
-export function createComposeState(getData: () => PageData) {
-	let posting = $state(false);
-	let postError = $state('');
-	let hasContent = $state(false);
-	let isPrivate = $state(false);
-	let attachments = $state<AttachmentItem[]>([]);
-	let uploading = $state(false);
-	let editorEl = $state<HTMLDivElement | undefined>(undefined);
-	let isComposing = $state(false);
-	let mentionQuery = $state('');
-	let mentionRange: Range | null = null;
-	let showDropdown = $state(false);
+type FetchResult = { activities: ActivityItem[]; hasMore: boolean };
 
-	const filteredCustomers = $derived<CustomerOption[]>(
-		showDropdown
-			? getData()
-					.customers.filter(
-						(c: CustomerOption) =>
-							!mentionQuery || c.company.toLowerCase().includes(mentionQuery.toLowerCase())
-					)
-					.slice(0, 6)
-			: []
+export function createFieldsState(getData: () => PageData) {
+	let extraPages = $state<ActivityItem[][]>([]);
+	let loading = $state(false);
+	let hasMore = $state(getData().activities.length === ACTIVITIES_PAGE_SIZE);
+	let privacyMap = $state<Record<string, boolean>>({});
+	let deletedIds = $state<Set<string>>(new Set());
+	let openMenuId = $state<string | null>(null);
+
+	const allActivities = $derived(
+		[...(getData().activities as ActivityItem[]), ...extraPages.flat()]
+			.filter((a) => !deletedIds.has(a.id))
+			.map((a) => ({
+				...a,
+				isPrivate: a.id in privacyMap ? privacyMap[a.id] : a.isPrivate
+			}))
 	);
 
-	function extractText(node: Node): string {
-		let result = '';
-		for (const child of node.childNodes) {
-			if (child.nodeType === Node.TEXT_NODE) {
-				result += child.textContent ?? '';
-			} else if (child instanceof HTMLElement) {
-				if (child.dataset.mentionId) {
-					result += `@{${child.dataset.mentionId}}`;
-				} else if (child.tagName === 'BR') {
-					result += '\n';
-				} else if (child.tagName === 'DIV' || child.tagName === 'P') {
-					const inner = extractText(child);
-					if (result.length > 0 && !result.endsWith('\n')) result += '\n';
-					result += inner;
-				} else {
-					result += extractText(child);
-				}
-			}
-		}
-		return result;
+	function openMenu(id: string) {
+		openMenuId = openMenuId === id ? null : id;
 	}
 
-	function getBodyText(): string {
-		if (!editorEl) return '';
-		return extractText(editorEl).replace(/\n+$/, '');
+	function closeMenu() {
+		openMenuId = null;
 	}
 
-	function checkMention() {
-		const sel = window.getSelection();
-		if (!sel || !sel.rangeCount) {
-			showDropdown = false;
-			return;
-		}
-		const range = sel.getRangeAt(0);
-		const node = range.startContainer;
-		if (node.nodeType !== Node.TEXT_NODE) {
-			showDropdown = false;
-			return;
-		}
-		const before = (node.textContent ?? '').slice(0, range.startOffset);
-		const match = before.match(/@([^@\n]*)$/);
-		if (match && !match[1].startsWith('[')) {
-			mentionQuery = match[1];
-			const r = document.createRange();
-			r.setStart(node, range.startOffset - match[0].length);
-			r.setEnd(node, range.startOffset);
-			mentionRange = r;
-			showDropdown = true;
-		} else {
-			showDropdown = false;
-			mentionRange = null;
-		}
-	}
+	async function loadMore() {
+		if (loading || !hasMore) return;
 
-	function handleEditorInput() {
-		hasContent = (editorEl?.textContent?.trim().length ?? 0) > 0;
-		if (!isComposing) checkMention();
-	}
+		const allRaw = [...(getData().activities as ActivityItem[]), ...extraPages.flat()];
+		const last = allRaw[allRaw.length - 1];
+		if (!last) return;
 
-	function handleCompositionStart() {
-		isComposing = true;
-	}
+		const cursor = (last.createdAt instanceof Date
+			? last.createdAt
+			: new Date(last.createdAt)
+		).getTime();
 
-	function handleCompositionEnd() {
-		isComposing = false;
-		checkMention();
-	}
-
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && !isComposing) {
-			// Let Chrome handle Enter natively (creates <div> for new line).
-			hasContent = true;
-		}
-	}
-
-	function handlePaste(e: ClipboardEvent) {
-		e.preventDefault();
-		const text = e.clipboardData?.getData('text/plain') ?? '';
-		const sel = window.getSelection();
-		if (sel?.rangeCount) {
-			const range = sel.getRangeAt(0);
-			range.deleteContents();
-			const textNode = document.createTextNode(text);
-			range.insertNode(textNode);
-			range.setStartAfter(textNode);
-			range.collapse(true);
-			sel.removeAllRanges();
-			sel.addRange(range);
-		}
-		hasContent = (editorEl?.textContent?.trim().length ?? 0) > 0;
-	}
-
-	function insertMention(c: CustomerOption) {
-		if (!mentionRange) return;
-		mentionRange.deleteContents();
-		const span = document.createElement('span');
-		span.className = 'inline-mention';
-		span.contentEditable = 'false';
-		span.dataset.mentionId = c.id;
-		span.dataset.mentionName = c.company;
-		span.textContent = `@${c.company}`;
-		mentionRange.insertNode(span);
-		span.after(' ');
-		const spaceNode = span.nextSibling as Node;
-		const newRange = document.createRange();
-		newRange.setStart(spaceNode, 1);
-		newRange.collapse(true);
-		window.getSelection()?.removeAllRanges();
-		window.getSelection()?.addRange(newRange);
-		showDropdown = false;
-		mentionQuery = '';
-		mentionRange = null;
-		hasContent = true;
-	}
-
-	function handleEditorBlur() {
-		setTimeout(() => {
-			showDropdown = false;
-		}, 150);
-	}
-
-	async function handleFiles(files: FileList | null) {
-		if (!files || files.length === 0) return;
-		uploading = true;
+		loading = true;
 		try {
-			for (const raw of files) {
-				const file = await compressImage(raw);
-				const fd = new FormData();
-				fd.append('file', file);
-				const res = await fetch('/api/upload', { method: 'POST', body: fd });
-				if (!res.ok) continue;
-				const { key, name: savedName } = (await res.json()) as { key: string; name: string };
-				attachments = [
-					...attachments,
-					{ key, url: `/api/files/${key}`, name: savedName ?? file.name, mimeType: file.type }
-				];
+			const res = await fetch(`/api/activities?cursor=${cursor}`);
+			if (!res.ok) return;
+			const data = (await res.json()) as FetchResult;
+			if (data.activities.length > 0) {
+				extraPages = [...extraPages, data.activities];
 			}
+			hasMore = data.hasMore;
 		} finally {
-			uploading = false;
+			loading = false;
 		}
 	}
 
-	function removeAttachment(key: string) {
-		attachments = attachments.filter((a) => a.key !== key);
+	async function togglePrivacy(activityId: string, current: boolean) {
+		const next = !current;
+		privacyMap = { ...privacyMap, [activityId]: next };
+		openMenuId = null;
+		const res = await fetch(`/api/activities/${activityId}`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ isPrivate: next })
+		});
+		if (!res.ok) {
+			const copy = { ...privacyMap };
+			delete copy[activityId];
+			privacyMap = copy;
+		}
 	}
 
-	async function post(e: SubmitEvent) {
-		e.preventDefault();
-		const bodyText = getBodyText().trim();
-		if (!bodyText) return;
-		postError = '';
-		posting = true;
-		try {
-			const res = await fetch('/api/activities', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					body: bodyText,
-					isPrivate,
-					attachments: attachments.map((a) => ({ key: a.key, name: a.name }))
-				})
-			});
-			const result = (await res.json()) as { error?: string };
-			if (!res.ok) {
-				postError = result.error ?? 'エラーが発生しました';
-				return;
-			}
-			if (editorEl) editorEl.innerHTML = '';
-			hasContent = false;
-			isPrivate = false;
-			attachments = [];
-		} finally {
-			posting = false;
+	async function deleteActivity(activityId: string) {
+		openMenuId = null;
+		deletedIds = new Set([...deletedIds, activityId]);
+		const res = await fetch(`/api/activities/${activityId}`, { method: 'DELETE' });
+		if (!res.ok) {
+			const next = new Set(deletedIds);
+			next.delete(activityId);
+			deletedIds = next;
 		}
 	}
 
 	return {
-		get posting() {
-			return posting;
-		},
-		get postError() {
-			return postError;
-		},
-		get hasContent() {
-			return hasContent;
-		},
-		get isPrivate() {
-			return isPrivate;
-		},
-		set isPrivate(v: boolean) {
-			isPrivate = v;
-		},
-		get attachments() {
-			return attachments;
-		},
-		get uploading() {
-			return uploading;
-		},
-		get editorEl() {
-			return editorEl;
-		},
-		set editorEl(v: HTMLDivElement | undefined) {
-			editorEl = v;
-		},
-		get showDropdown() {
-			return showDropdown;
-		},
-		get filteredCustomers() {
-			return filteredCustomers;
-		},
-		handleEditorInput,
-		handleCompositionStart,
-		handleCompositionEnd,
-		handleKeydown,
-		handlePaste,
-		insertMention,
-		handleEditorBlur,
-		handleFiles,
-		removeAttachment,
-		post
+		get allActivities() { return allActivities; },
+		get openMenuId() { return openMenuId; },
+		get loading() { return loading; },
+		get hasMore() { return hasMore; },
+		openMenu,
+		closeMenu,
+		loadMore,
+		togglePrivacy,
+		deleteActivity
 	};
 }

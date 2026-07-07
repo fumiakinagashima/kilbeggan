@@ -30,7 +30,7 @@ export const actions = {
 		if (!activity) error(404);
 		if (activity.userId !== locals.user!.userId) error(403);
 		await deleteActivity(db, params.id);
-		redirect(302, '/fields');
+		redirect(302, '/');
 	},
 	update: async ({ request, platform, locals, params }) => {
 		const db = getDb(platform!.env.DB);
@@ -54,6 +54,6 @@ export const actions = {
 
 		const mentionedCustomerIds = parseMentionIds(parsed.data.body);
 		await updateActivity(db, params.id, { ...parsed.data, mentionedCustomerIds });
-		redirect(302, '/fields');
+		redirect(302, '/');
 	}
 };

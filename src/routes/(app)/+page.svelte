@@ -1,232 +1,421 @@
 <script lang="ts">
-	import { Lock, Globe } from '@lucide/svelte';
-	import { createComposeState } from './index.svelte.ts';
-	import AttachmentArea from '$lib/components/AttachmentArea.svelte';
+	import { timeAgo } from '$lib/datetime';
+	import { bodyToHtml } from '$lib/body';
+	import { Lock, X, MoreVertical } from '@lucide/svelte';
+	import { createFieldsState } from './index.svelte.ts';
 
 	let { data } = $props();
-	const state = createComposeState(() => data);
+	const feed = createFieldsState(() => data);
+
+	let lightboxSrc = $state<string | null>(null);
+	let sentinel = $state<HTMLElement | null>(null);
+
+	$effect(() => {
+		const el = sentinel;
+		if (!el) return;
+		const observer = new IntersectionObserver(
+			(entries) => { if (entries[0].isIntersecting) feed.loadMore(); },
+			{ rootMargin: '0px 0px 300px 0px' }
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	});
+
+	function mentionMap(activity: { mentions?: { customerId: string; company: string }[] }) {
+		return new Map((activity.mentions ?? []).map((m) => [m.customerId, m.company]));
+	}
+
+	function isImage(key: string) {
+		return /\.(jpg|jpeg|png|gif|webp|avif|heic|heif)$/i.test(key);
+	}
+
+	function closeLightbox() {
+		lightboxSrc = null;
+	}
 </script>
 
+<svelte:window onclick={() => feed.closeMenu()} />
+
 <div class="page">
-	<h1 class="app-title">KILBEGGAN</h1>
-	<section class="compose">
-		<form onsubmit={(e) => state.post(e)}>
-			{#if state.postError}
-				<p class="error">{state.postError}</p>
-			{/if}
-			<div class="editor-wrap">
-				<div
-					class="editor"
-					class:empty={!state.hasContent}
-					contenteditable={state.posting ? 'false' : 'true'}
-					role="textbox"
-					aria-multiline="true"
-					tabindex="0"
-					data-placeholder="活動内容を入力してください"
-					bind:this={state.editorEl}
-					oninput={() => state.handleEditorInput()}
-					onkeydown={(e) => state.handleKeydown(e)}
-					oncompositionstart={() => state.handleCompositionStart()}
-					oncompositionend={() => state.handleCompositionEnd()}
-					onpaste={(e) => state.handlePaste(e)}
-					onblur={() => state.handleEditorBlur()}
-				></div>
-				{#if state.showDropdown && state.filteredCustomers.length > 0}
-					<ul class="mention-dropdown">
-						{#each state.filteredCustomers as c (c.id)}
-							<li>
-								<button type="button" onmousedown={() => state.insertMention(c)}>
-									{c.company}
-								</button>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</div>
+	<header class="page-header">
+		<h1>活動一覧</h1>
+	</header>
 
-			<div class="compose-footer">
-				<button
-					type="button"
-					class="privacy-toggle"
-					class:private={state.isPrivate}
-					onclick={() => (state.isPrivate = !state.isPrivate)}
-				>
-					{#if state.isPrivate}
-						<Lock size={13} />
-						非対象
-					{:else}
-						<Globe size={13} />
-						要約対象
+	{#if feed.allActivities.length === 0}
+		<p class="empty">まだ活動記録がありません</p>
+	{:else}
+		<ul class="feed" id="activity-feed">
+			{#each feed.allActivities as activity (activity.id)}
+				<li class="card" class:private-card={activity.isPrivate}>
+					{#if data.user?.userId === activity.userId}
+						<div class="menu-wrapper">
+							<button
+								class="kebab-btn"
+								onclick={(e) => { e.stopPropagation(); feed.openMenu(activity.id); }}
+								aria-label="メニュー"
+							>
+								<MoreVertical size={16} />
+							</button>
+							{#if feed.openMenuId === activity.id}
+								<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+								<div class="dropdown" onclick={(e) => e.stopPropagation()}>
+									<a href="/fields/{activity.id}" class="dropdown-item">編集</a>
+									<button
+										class="dropdown-item"
+										onclick={() => feed.togglePrivacy(activity.id, activity.isPrivate)}
+									>
+										{activity.isPrivate ? '要約対象にする' : '非対象にする'}
+									</button>
+									<button
+										class="dropdown-item danger"
+										onclick={() => feed.deleteActivity(activity.id)}
+									>削除</button>
+								</div>
+							{/if}
+						</div>
 					{/if}
-				</button>
-				<button type="submit" class="btn-post" disabled={state.posting || !state.hasContent || state.uploading}>
-					{state.posting ? '送信中...' : '投稿'}
-				</button>
-			</div>
 
-			<AttachmentArea
-				attachments={state.attachments}
-				uploading={state.uploading}
-				onFiles={(files) => state.handleFiles(files)}
-				onRemove={(key) => state.removeAttachment(key)}
-			/>
-		</form>
-	</section>
+					<p class="body">{@html bodyToHtml(activity.body, mentionMap(activity))}</p>
+
+					{#if activity.tags && activity.tags.length > 0}
+						<div class="tags">
+							{#each activity.tags as tag}
+								<span class="tag">{tag}</span>
+							{/each}
+						</div>
+					{/if}
+
+					{#if activity.attachments && activity.attachments.length > 0}
+						<div class="attachments">
+							{#each activity.attachments as att (att.key)}
+								{#if isImage(att.key)}
+									<button
+										type="button"
+										class="thumb-btn"
+										onclick={() => (lightboxSrc = `/api/files/${att.key}`)}
+									>
+										<img src={`/api/files/${att.key}`} alt={att.name} />
+									</button>
+								{:else}
+									<a
+										href={`/api/files/${att.key}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="file-chip"
+									>
+										📄 {att.name}
+									</a>
+								{/if}
+							{/each}
+						</div>
+					{/if}
+
+					<div class="meta">
+						<span class="author">{activity.userName ?? ''}</span>
+						<div class="meta-right">
+							{#if activity.isPrivate}
+								<span class="private-badge"><Lock size={11} />非対象</span>
+							{/if}
+							<span>{timeAgo(new Date(activity.createdAt))}</span>
+						</div>
+					</div>
+				</li>
+			{/each}
+		</ul>
+	{/if}
+
+	{#if feed.hasMore}
+		<div bind:this={sentinel} class="sentinel" aria-hidden="true"></div>
+	{/if}
+	{#if feed.loading}
+		<p class="loading-more">読み込み中...</p>
+	{/if}
 </div>
+
+{#if lightboxSrc}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+	<div
+		class="lightbox"
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+		onclick={closeLightbox}
+		onkeydown={(e) => { if (e.key === 'Escape') closeLightbox(); }}
+	>
+		<button class="lightbox-close" onclick={closeLightbox} aria-label="閉じる">
+			<X size={24} />
+		</button>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="lightbox-content" onclick={(e) => e.stopPropagation()}>
+			<img src={lightboxSrc} alt="" />
+		</div>
+	</div>
+{/if}
 
 <style lang="scss">
 	.page {
 		max-width: 680px;
 		margin: 0 auto;
 		padding: 0 1rem 2rem;
+
 		@media (min-width: 768px) {
 			padding: 0 2rem 2rem;
 		}
 	}
 
-	.app-title {
-		text-align: center;
-		padding: 1.2rem 0 0.3rem;
-		color: var(--color-primary);
-		font-family: Georgia, 'Times New Roman', Times, serif;
-		font-size: 1.45rem;
-	}
-
-	.compose {
-		padding: 1rem 0;
+	.page-header {
+		padding: 1.25rem 0 1rem;
+		border-bottom: 1px solid var(--color-border);
 		margin-bottom: 1rem;
 
-		form {
-			display: flex;
-			flex-direction: column;
-			gap: 0;
+		h1 {
+			font-size: 1.125rem;
+			font-weight: 700;
 		}
 	}
 
-	.editor-wrap {
+	.empty {
+		color: var(--color-text-muted);
+		text-align: center;
+		padding: 3rem 0;
+		font-size: 0.9375rem;
+	}
+
+	.feed {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.card {
 		position: relative;
-		border-bottom: 1px solid var(--color-border);
-		margin-bottom: 0.625rem;
-	}
-
-	.editor {
+		background: var(--color-surface);
 		border: 1px solid var(--color-border);
-		min-height: 12rem;
-		padding: 0.55rem;
-		font-size: 1rem;
-		font-family: inherit;
-		line-height: 1.47;
-		outline: none;
-		background: transparent;
-		color: var(--color-text);
-		cursor: text;
-		white-space: pre-wrap;
-		word-break: break-word;
-		text-align: left;
+		border-radius: 12px;
+		padding: 1rem;
+
+		&.private-card {
+			background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+			border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+		}
+	}
+
+	.menu-wrapper {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+	}
+
+	.kebab-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		background: none;
+		border: none;
 		border-radius: 6px;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		padding: 0;
 
-		&[contenteditable='false'] {
-			opacity: 0.6;
-		}
-
-		&.empty:not(:focus)::before {
-			content: attr(data-placeholder);
-			color: var(--color-text-muted);
-			pointer-events: none;
+		&:hover {
+			background: var(--color-background);
+			color: var(--color-text);
 		}
 	}
 
-	:global(.inline-mention) {
-		color: var(--color-primary);
-		font-weight: 500;
-		user-select: all;
-	}
-
-	.mention-dropdown {
+	.dropdown {
 		position: absolute;
 		top: calc(100% + 4px);
-		left: 0;
 		right: 0;
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
-		border-radius: 10px;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-		list-style: none;
-		overflow: hidden;
-		z-index: 10;
-
-		li button {
-			display: block;
-			width: 100%;
-			text-align: left;
-			padding: 0.625rem 1rem;
-			font-size: 0.9375rem;
-			background: none;
-			border: none;
-			cursor: pointer;
-			color: var(--color-text);
-
-			&:hover {
-				background: var(--color-background);
-			}
-		}
-	}
-
-	.compose-footer {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
-		margin-bottom: 0.25rem;
-	}
-
-	.privacy-toggle {
-		display: flex;
-		align-items: center;
-		gap: 0.3rem;
-		padding: 0.35rem 0.7rem;
-		border: 1px solid var(--color-border);
-		border-radius: 20px;
-		background: var(--color-surface);
-		color: var(--color-text-muted);
-		font-size: 0.8125rem;
-		cursor: pointer;
-		transition:
-			color 0.15s,
-			border-color 0.15s,
-			background 0.15s;
-
-		&.private {
-			color: var(--color-primary);
-			border-color: var(--color-primary);
-			background: color-mix(in srgb, var(--color-primary) 8%, transparent);
-		}
-	}
-
-	.error {
-		font-size: 0.875rem;
-		color: var(--color-error);
-		background: var(--color-error-bg);
-		padding: 0.625rem 0.875rem;
 		border-radius: 8px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+		min-width: 140px;
+		z-index: 100;
+		overflow: hidden;
+	}
+
+	.dropdown-item {
+		display: block;
+		width: 100%;
+		padding: 0.625rem 0.875rem;
+		font-size: 0.875rem;
+		color: var(--color-text);
+		text-decoration: none;
+		background: none;
+		border: none;
+		text-align: left;
+		cursor: pointer;
+
+		&:hover {
+			background: var(--color-background);
+		}
+
+		&.danger {
+			color: var(--color-error, #e53e3e);
+		}
+	}
+
+	.body {
+		font-size: 0.9375rem;
+		line-height: 1.6;
+		white-space: pre-wrap;
+		word-break: break-word;
+		margin-bottom: 0.5rem;
+		padding-right: 2rem;
+	}
+
+	.mention {
+		color: var(--color-primary);
+		font-weight: 500;
+	}
+
+	.tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
 		margin-bottom: 0.5rem;
 	}
 
-	.btn-post {
-		padding: 0.5rem 1.25rem;
-		background: var(--color-primary);
-		color: #fff;
-		border: none;
+	.tag {
+		display: inline-block;
+		padding: 0.125rem 0.5rem;
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+		color: var(--color-primary);
 		border-radius: 20px;
-		font-size: 0.875rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: opacity 0.15s;
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+
+	.attachments {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+		margin-bottom: 0.625rem;
+	}
+
+	.thumb-btn {
+		padding: 0;
+		border: none;
+		background: none;
+		cursor: zoom-in;
+		border-radius: 8px;
+		overflow: hidden;
+		flex-shrink: 0;
+
+		img {
+			display: block;
+			width: 80px;
+			height: 80px;
+			object-fit: cover;
+			border-radius: 8px;
+			transition: opacity 0.15s;
+		}
+
+		&:hover img {
+			opacity: 0.85;
+		}
+	}
+
+	.file-chip {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.625rem;
+		background: var(--color-background);
+		border: 1px solid var(--color-border);
+		border-radius: 6px;
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+		text-decoration: none;
+		max-width: 180px;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		white-space: nowrap;
 
-		&:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
+		&:hover {
+			color: var(--color-text);
+		}
+	}
+
+	.meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+		gap: 0.5rem;
+	}
+
+	.meta-right {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.private-badge {
+		display: flex;
+		align-items: center;
+		gap: 0.2rem;
+		color: var(--color-primary);
+		font-size: 0.75rem;
+	}
+
+	.sentinel {
+		height: 1px;
+	}
+
+	.loading-more {
+		text-align: center;
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		padding: 1.25rem 0;
+	}
+
+	.lightbox {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.88);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+		cursor: zoom-out;
+	}
+
+	.lightbox-content {
+		cursor: default;
+
+		img {
+			display: block;
+			max-width: min(90vw, 960px);
+			max-height: 90vh;
+			object-fit: contain;
+			border-radius: 4px;
+		}
+	}
+
+	.lightbox-close {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		background: rgba(0, 0, 0, 0.5);
+		border: none;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		cursor: pointer;
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.75);
 		}
 	}
 </style>

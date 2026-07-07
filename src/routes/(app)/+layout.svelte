@@ -11,8 +11,8 @@
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	const navItems = [
-		{ href: '/', label: '投稿', icon: PenLine, exact: true },
-		{ href: '/fields', label: '活動', icon: List, exact: false },
+		{ href: '/post', label: '投稿', icon: PenLine, exact: true },
+		{ href: '/', label: '活動', icon: List, exact: true, prefixes: ['/fields'] },
 		{ href: '/customers', label: '顧客', icon: Users, exact: false },
 		{ href: '/settings', label: '設定', icon: Settings, exact: false }
 	];
@@ -23,8 +23,10 @@
 		navItems[3]
 	];
 
-	function isActive(href: string, exact: boolean): boolean {
-		return exact ? page.url.pathname === href : page.url.pathname.startsWith(href);
+	function isActive(item: { href: string; exact: boolean; prefixes?: string[] }): boolean {
+		const path = page.url.pathname;
+		if (item.exact ? path === item.href : path.startsWith(item.href)) return true;
+		return (item.prefixes ?? []).some((p) => path.startsWith(p));
 	}
 
 	async function signout() {
@@ -53,7 +55,7 @@
 
 		<nav class="nav">
 			{#each navItems as item (item.href)}
-				<a href={item.href} class="nav-item" class:active={isActive(item.href, item.exact)}>
+				<a href={item.href} class="nav-item" class:active={isActive(item)}>
 					<item.icon size={16} />
 					{item.label}
 				</a>
@@ -69,7 +71,7 @@
 				{/if}
 			</button>
 
-			<a href="/reminder" class="footer-item" class:active={isActive('/reminder', false)}>
+			<a href="/reminder" class="footer-item" class:active={isActive({ href: '/reminder', exact: false })}>
 				<Clock size={15} />
 				リマインダー
 			</a>
@@ -96,7 +98,7 @@
 
 	<nav class="bottom-nav">
 		{#each bottomNavItems as item (item.href)}
-			<a href={item.href} class="bottom-nav-item" class:active={isActive(item.href, item.exact)}>
+			<a href={item.href} class="bottom-nav-item" class:active={isActive(item)}>
 				<item.icon size={22} />
 				<span>{item.label}</span>
 			</a>
