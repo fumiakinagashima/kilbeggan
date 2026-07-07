@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { timeAgo } from '$lib/datetime';
 	import { bodyToHtml } from '$lib/body';
-	import { Lock, X, MoreVertical } from '@lucide/svelte';
+	import { Lock, X, MoreVertical, PenLine } from '@lucide/svelte';
 	import { createFieldsState } from './index.svelte.ts';
 
 	let { data } = $props();
@@ -14,7 +14,9 @@
 		const el = sentinel;
 		if (!el) return;
 		const observer = new IntersectionObserver(
-			(entries) => { if (entries[0].isIntersecting) feed.loadMore(); },
+			(entries) => {
+				if (entries[0].isIntersecting) feed.loadMore();
+			},
 			{ rootMargin: '0px 0px 300px 0px' }
 		);
 		observer.observe(el);
@@ -39,6 +41,10 @@
 <div class="page">
 	<header class="page-header">
 		<h1>活動一覧</h1>
+		<a href="/post" class="btn-post-link">
+			<PenLine size={14} />
+			投稿
+		</a>
 	</header>
 
 	{#if feed.allActivities.length === 0}
@@ -51,7 +57,10 @@
 						<div class="menu-wrapper">
 							<button
 								class="kebab-btn"
-								onclick={(e) => { e.stopPropagation(); feed.openMenu(activity.id); }}
+								onclick={(e) => {
+									e.stopPropagation();
+									feed.openMenu(activity.id);
+								}}
 								aria-label="メニュー"
 							>
 								<MoreVertical size={16} />
@@ -68,8 +77,8 @@
 									</button>
 									<button
 										class="dropdown-item danger"
-										onclick={() => feed.deleteActivity(activity.id)}
-									>削除</button>
+										onclick={() => feed.deleteActivity(activity.id)}>削除</button
+									>
 								</div>
 							{/if}
 						</div>
@@ -140,7 +149,9 @@
 		aria-modal="true"
 		tabindex="-1"
 		onclick={closeLightbox}
-		onkeydown={(e) => { if (e.key === 'Escape') closeLightbox(); }}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') closeLightbox();
+		}}
 	>
 		<button class="lightbox-close" onclick={closeLightbox} aria-label="閉じる">
 			<X size={24} />
@@ -164,6 +175,10 @@
 	}
 
 	.page-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
 		padding: 1.25rem 0 1rem;
 		border-bottom: 1px solid var(--color-border);
 		margin-bottom: 1rem;
@@ -172,6 +187,20 @@
 			font-size: 1.125rem;
 			font-weight: 700;
 		}
+	}
+
+	.btn-post-link {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+		padding: 0.4rem 0.9rem;
+		background: var(--color-primary);
+		color: #fff;
+		border-radius: 20px;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		text-decoration: none;
+		white-space: nowrap;
 	}
 
 	.empty {

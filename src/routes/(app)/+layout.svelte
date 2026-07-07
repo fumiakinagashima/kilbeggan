@@ -3,23 +3,24 @@
 	import type { LayoutData } from './$types';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { PenLine, List, Users, Settings, LogOut, Bell, Clock } from '@lucide/svelte';
+	import { List, Users, Settings, LogOut, Bell, Clock } from '@lucide/svelte';
 	import { notificationCenter } from '$lib/stores/notifications.svelte';
 	import { NOTIFICATION_POLL_INTERVAL_MS } from '$lib/constants';
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	const navItems = [
-		{ href: '/post', label: '投稿', icon: PenLine, exact: true },
 		{ href: '/', label: '活動', icon: List, exact: true, prefixes: ['/fields'] },
 		{ href: '/customers', label: '顧客', icon: Users, exact: false },
 		{ href: '/settings', label: '設定', icon: Settings, exact: false }
 	];
 
 	const bottomNavItems = [
-		...navItems.slice(0, 3),
+		navItems[0],
+		navItems[1],
+		{ href: '/notifications', label: '通知', icon: Bell, exact: false },
 		{ href: '/reminder', label: 'リマインダー', icon: Clock, exact: false },
-		navItems[3]
+		navItems[2]
 	];
 
 	function isActive(item: { href: string; exact: boolean; prefixes?: string[] }): boolean {
@@ -101,8 +102,13 @@
 	<nav class="bottom-nav">
 		{#each bottomNavItems as item (item.href)}
 			<a href={item.href} class="bottom-nav-item" class:active={isActive(item)}>
-				<item.icon size={22} />
-				<span>{item.label}</span>
+				<span class="icon-wrap">
+					<item.icon size={22} />
+					{#if item.href === '/notifications' && notificationCenter.unreadCount > 0}
+						<span class="bottom-nav-badge">{formatBadgeCount(notificationCenter.unreadCount)}</span>
+					{/if}
+				</span>
+				<span class="label">{item.label}</span>
 			</a>
 		{/each}
 	</nav>
@@ -303,7 +309,7 @@
 		font-size: 0.625rem;
 		font-weight: 500;
 
-		span {
+		.label {
 			max-width: 100%;
 			overflow: hidden;
 			white-space: nowrap;
@@ -313,5 +319,24 @@
 		&.active {
 			color: var(--color-primary);
 		}
+	}
+
+	.icon-wrap {
+		position: relative;
+	}
+
+	.bottom-nav-badge {
+		position: absolute;
+		top: -4px;
+		right: -8px;
+		min-width: 14px;
+		padding: 0 3px;
+		border-radius: 999px;
+		background: var(--color-primary);
+		color: #fff;
+		font-size: 0.5625rem;
+		font-weight: 700;
+		line-height: 14px;
+		text-align: center;
 	}
 </style>

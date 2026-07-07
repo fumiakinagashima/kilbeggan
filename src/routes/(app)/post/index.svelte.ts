@@ -1,4 +1,5 @@
 import type { PageData } from './$types';
+import { goto } from '$app/navigation';
 import { compressImage } from '$lib/image';
 
 type CustomerOption = { id: string; company: string };
@@ -199,6 +200,7 @@ export function createComposeState(getData: () => PageData) {
 			hasContent = false;
 			isPrivate = false;
 			attachments = [];
+			await goto('/');
 		} finally {
 			posting = false;
 		}
