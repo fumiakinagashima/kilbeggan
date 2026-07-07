@@ -1,4 +1,5 @@
 import { ask } from './client';
+import { stripCodeFence } from './json';
 
 const SYSTEM = `あなたは営業分析AIです。
 顧客との活動履歴を分析し、この顧客の「商談スコア」を1〜100の整数で評価してください。
@@ -39,7 +40,7 @@ export async function scoreCustomer(
 
 	try {
 		const raw = await ask(apiKey, SYSTEM, user);
-		const parsed = JSON.parse(raw.trim()) as unknown;
+		const parsed = JSON.parse(stripCodeFence(raw)) as unknown;
 		if (typeof parsed !== 'object' || parsed === null) return null;
 		const { score, reason } = parsed as Record<string, unknown>;
 		if (typeof score !== 'number' || score < 1 || score > 100) return null;

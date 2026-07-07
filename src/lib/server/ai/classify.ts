@@ -1,4 +1,5 @@
 import { ask } from './client';
+import { stripCodeFence } from './json';
 
 export const TAGS = ['商談', 'クレーム', '情報収集', 'フォローアップ', '納品・対応', '社内連絡', 'その他'] as const;
 export type Tag = (typeof TAGS)[number];
@@ -27,7 +28,7 @@ export async function classifyActivity(
 
 	try {
 		const raw = await ask(apiKey, SYSTEM, body);
-		const parsed = JSON.parse(raw.trim()) as unknown;
+		const parsed = JSON.parse(stripCodeFence(raw)) as unknown;
 		if (!Array.isArray(parsed)) return ['その他'];
 		return parsed.filter((t): t is Tag => TAGS.includes(t as Tag));
 	} catch {
