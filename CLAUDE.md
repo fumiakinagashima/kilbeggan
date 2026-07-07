@@ -37,6 +37,7 @@
 - **オフライン**: 投稿はオンライン前提。キャッシュ対応は後フェーズ
 - **マルチテナント**: Phase 5以降。現フェーズでは単一テナントで実装
 - **認証**: メール+パスワード方式。セッションはCF KVで管理
+- **権限**: 単一テナント内でaccounts.roleにより`admin`/`user`を区別。アカウント管理(`/accounts`: 一覧・新規追加・権限変更・削除)は管理者のみアクセス可能で、デスクトップサイドバーのみに導線を表示（モバイルのボトムナビには出さない）。新規アカウントはパスワードリセットリンクではなく、管理者が初期パスワードをその場で設定する方式（`passwordHash`はNOT NULL制約のため）
 
 ---
 
@@ -68,6 +69,10 @@ Claude API・Resendの実装パターンはMidletonを参照する。UI/UXは参
 - Claude API クライアント: `src/lib/server/ai/client.ts`
 - Resend 実装: `src/lib/server/email/providers/resend.ts`
 - 認証・セッション: `src/lib/server/auth/session.ts`
+
+### AI実装の注意点
+
+Claudeは「JSON形式のみ返す」と指示しても、` ```json ... ``` `のようにMarkdownのコードフェンスで囲んで返すことがある。`src/lib/server/ai/`配下でAIレスポンスをJSON.parseする箇所は、必ず`src/lib/server/ai/json.ts`の`stripCodeFence`を通してからパースする（`score.ts`/`classify.ts`参照）。これを怠ると、フェンス付きレスポンスが返ってきた際にパースが失敗し、無言でエラー/フォールバックになる。
 
 ---
 
