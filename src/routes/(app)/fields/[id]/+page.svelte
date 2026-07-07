@@ -15,7 +15,7 @@
 
 <div class="page">
 	<header class="page-header">
-		<a href="/" class="back">← 活動一覧</a>
+		<a href="/" class="back">← 活動履歴</a>
 		<h1>活動を修正</h1>
 	</header>
 

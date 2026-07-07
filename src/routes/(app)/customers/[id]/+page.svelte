@@ -8,7 +8,7 @@
 
 <div class="page">
 	<header class="page-header">
-		<a href="/customers" class="back">← 顧客一覧</a>
+		<a href="/customers" class="back">← 顧客管理</a>
 		<div class="page-title">
 			<h1>{data.customer.company}</h1>
 			<a href="/customers/{data.customer.id}/edit" class="edit-link">編集</a>

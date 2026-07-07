@@ -40,7 +40,7 @@
 
 <div class="page">
 	<header class="page-header">
-		<h1>活動一覧</h1>
+		<h1>活動履歴</h1>
 		<a href="/post" class="btn-post-link">
 			<PenLine size={14} />
 			投稿

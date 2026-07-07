@@ -11,8 +11,8 @@
 
 	// デスクトップ・モバイル共通のメインナビ
 	const navItems = [
-		{ href: '/', label: '活動', icon: List, exact: true, prefixes: ['/fields'] },
-		{ href: '/customers', label: '顧客', icon: Users, exact: false },
+		{ href: '/', label: '活動履歴', icon: List, exact: true, prefixes: ['/fields'] },
+		{ href: '/customers', label: '顧客管理', icon: Users, exact: false },
 		{ href: '/reminder', label: 'リマインダー', icon: Clock, exact: false },
 		{ href: '/notifications', label: '通知', icon: Bell, exact: false },
 		{ href: '/settings', label: '設定', icon: Settings, exact: false }

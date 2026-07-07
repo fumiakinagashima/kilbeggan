@@ -21,7 +21,7 @@
 
 <div class="page">
 	<header class="page-header">
-		<h1>顧客</h1>
+		<h1>顧客管理</h1>
 		<a href="/customers/new" class="btn-primary">
 			<Plus size={18} />
 			追加
