@@ -40,15 +40,15 @@
 
 <div class="page">
 	<header class="page-header">
-		<h1>活動履歴</h1>
+		<h1>Activity History</h1>
 		<a href="/post" class="btn-post-link">
 			<PenLine size={14} />
-			投稿
+			Post
 		</a>
 	</header>
 
 	{#if feed.allActivities.length === 0}
-		<p class="empty">まだ活動記録がありません</p>
+		<p class="empty">No activity records yet</p>
 	{:else}
 		<ul class="feed" id="activity-feed">
 			{#each feed.allActivities as activity (activity.id)}
@@ -61,23 +61,23 @@
 									e.stopPropagation();
 									feed.openMenu(activity.id);
 								}}
-								aria-label="メニュー"
+								aria-label="Menu"
 							>
 								<MoreVertical size={16} />
 							</button>
 							{#if feed.openMenuId === activity.id}
 								<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 								<div class="dropdown" onclick={(e) => e.stopPropagation()}>
-									<a href="/fields/{activity.id}" class="dropdown-item">編集</a>
+									<a href="/fields/{activity.id}" class="dropdown-item">Edit</a>
 									<button
 										class="dropdown-item"
 										onclick={() => feed.togglePrivacy(activity.id, activity.isPrivate)}
 									>
-										{activity.isPrivate ? '要約対象にする' : '非対象にする'}
+										{activity.isPrivate ? 'Include in summary' : 'Exclude from summary'}
 									</button>
 									<button
 										class="dropdown-item danger"
-										onclick={() => feed.deleteActivity(activity.id)}>削除</button
+										onclick={() => feed.deleteActivity(activity.id)}>Delete</button
 									>
 								</div>
 							{/if}
@@ -123,7 +123,7 @@
 						<span class="author">{activity.userName ?? ''}</span>
 						<div class="meta-right">
 							{#if activity.isPrivate}
-								<span class="private-badge"><Lock size={11} />非対象</span>
+								<span class="private-badge"><Lock size={11} />Excluded</span>
 							{/if}
 							<span>{timeAgo(new Date(activity.createdAt))}</span>
 						</div>
@@ -137,7 +137,7 @@
 		<div bind:this={sentinel} class="sentinel" aria-hidden="true"></div>
 	{/if}
 	{#if feed.loading}
-		<p class="loading-more">読み込み中...</p>
+		<p class="loading-more">Loading...</p>
 	{/if}
 </div>
 
@@ -153,7 +153,7 @@
 			if (e.key === 'Escape') closeLightbox();
 		}}
 	>
-		<button class="lightbox-close" onclick={closeLightbox} aria-label="閉じる">
+		<button class="lightbox-close" onclick={closeLightbox} aria-label="Close">
 			<X size={24} />
 		</button>
 		<!-- svelte-ignore a11y_no_static_element_interactions -->

@@ -17,7 +17,7 @@ export async function POST({ params, platform, locals }) {
 		platform?.env?.MOCK_AI
 	);
 
-	if (!result) return json({ error: 'スコアを計算できませんでした' }, { status: 422 });
+	if (!result) return json({ error: 'Could not calculate score' }, { status: 422 });
 
 	await updateCustomerScore(db, params.id, result.score);
 	return json({ score: result.score, reason: result.reason });

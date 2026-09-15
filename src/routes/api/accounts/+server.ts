@@ -18,11 +18,11 @@ export async function POST({ request, locals, platform }) {
 
 	const body = await request.json();
 	const parsed = createSchema.safeParse(body);
-	if (!parsed.success) return json({ error: '入力値が不正です' }, { status: 400 });
+	if (!parsed.success) return json({ error: 'Invalid input' }, { status: 400 });
 
 	const db = getDb(platform!.env.DB);
 	const existing = await getAccountByEmail(db, parsed.data.email);
-	if (existing) return json({ error: 'このメールアドレスは既に使用されています' }, { status: 409 });
+	if (existing) return json({ error: 'This email address is already in use' }, { status: 409 });
 
 	const passwordHash = await hashPassword(parsed.data.password);
 	const account = await createAccount(db, {

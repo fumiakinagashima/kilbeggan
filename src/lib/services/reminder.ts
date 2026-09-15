@@ -27,9 +27,9 @@ export function parseChannels(raw: string): string[] {
 
 export function resolveChannelLabels(channels: string[]): string[] {
 	return channels.map((c) => {
-		if (c === 'notification') return '通知センター';
-		if (c === 'email') return 'メール';
-		if (c === 'push') return 'プッシュ通知';
+		if (c === 'notification') return 'Notification Center';
+		if (c === 'email') return 'Email';
+		if (c === 'push') return 'Push Notification';
 		return c;
 	});
 }
@@ -99,10 +99,10 @@ export async function deleteReminder(db: Db, id: string): Promise<void> {
 }
 
 export function getReminderChannelOptions(env?: EmailEnv & PushEnv): ChannelOption[] {
-	const options: ChannelOption[] = [{ label: '通知センター', value: 'notification' }];
-	if (getEmailSetupFromEnv(env ?? {})) options.push({ label: 'メール', value: 'email' });
+	const options: ChannelOption[] = [{ label: 'Notification Center', value: 'notification' }];
+	if (getEmailSetupFromEnv(env ?? {})) options.push({ label: 'Email', value: 'email' });
 	if (env?.VAPID_PUBLIC_KEY && env?.VAPID_PRIVATE_KEY) {
-		options.push({ label: 'プッシュ通知', value: 'push' });
+		options.push({ label: 'Push Notification', value: 'push' });
 	}
 	return options;
 }

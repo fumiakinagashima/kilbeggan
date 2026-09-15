@@ -8,11 +8,11 @@
 
 <div class="page">
 	<header class="page-header">
-		<h1>通知</h1>
+		<h1>Notifications</h1>
 	</header>
 
 	{#if notificationCenter.items.length === 0}
-		<p class="empty">通知はありません</p>
+		<p class="empty">No notifications</p>
 	{:else}
 		<ul class="feed">
 			{#each notificationCenter.items as item (item.id)}
@@ -21,7 +21,7 @@
 						type="button"
 						class="delete-btn"
 						onclick={() => notificationCenter.deleteNotification(item.id)}
-						aria-label="削除"
+						aria-label="Delete"
 					>
 						<Trash2 size={15} />
 					</button>

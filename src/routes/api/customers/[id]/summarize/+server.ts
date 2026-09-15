@@ -25,7 +25,7 @@ export async function PATCH({ params, platform, locals, request }) {
 	const db = getDb(platform!.env.DB);
 	const customer = await getCustomer(db, params.id);
 	if (!customer) return json({ error: 'Not found' }, { status: 404 });
-	const { summary } = await request.json() as { summary: string };
+	const { summary } = (await request.json()) as { summary: string };
 	if (typeof summary !== 'string' || summary.trim() === '') {
 		return json({ error: 'Invalid summary' }, { status: 400 });
 	}

@@ -9,21 +9,24 @@
 
 <div class="page">
 	<header class="page-header">
-		<a href="/customers/{data.customer.id}" class="back">← 戻る</a>
-		<h1>顧客を編集</h1>
+		<a href="/customers/{data.customer.id}" class="back">← Back</a>
+		<h1>Edit customer</h1>
 	</header>
 
 	{#if form?.error}
 		<p class="error">{form.error}</p>
 	{/if}
 
-	<form method="POST" use:enhance={() => {
-		state.startSubmitting();
-		return async ({ update }) => {
-			await update();
-			state.stopSubmitting();
-		};
-	}}>
+	<form
+		method="POST"
+		use:enhance={() => {
+			state.startSubmitting();
+			return async ({ update }) => {
+				await update();
+				state.stopSubmitting();
+			};
+		}}
+	>
 		<CustomerFormFields
 			bind:company={state.company}
 			bind:phone={state.phone}
@@ -32,9 +35,13 @@
 		/>
 
 		<div class="footer">
-			<a href="/customers/{data.customer.id}" class="btn-cancel">キャンセル</a>
-			<button type="submit" class="btn-primary" disabled={state.submitting || !state.company.trim()}>
-				{state.submitting ? '保存中...' : '保存'}
+			<a href="/customers/{data.customer.id}" class="btn-cancel">Cancel</a>
+			<button
+				type="submit"
+				class="btn-primary"
+				disabled={state.submitting || !state.company.trim()}
+			>
+				{state.submitting ? 'Saving...' : 'Save'}
 			</button>
 		</div>
 	</form>

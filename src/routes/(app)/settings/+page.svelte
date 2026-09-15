@@ -9,11 +9,11 @@
 
 <div class="page">
 	<header class="page-header">
-		<h1>設定</h1>
+		<h1>Settings</h1>
 	</header>
 
 	<section class="card">
-		<h2>テーマ</h2>
+		<h2>Theme</h2>
 		<div class="theme-switcher">
 			<button
 				class="theme-btn"
@@ -21,7 +21,7 @@
 				onclick={() => (themeStore.value = 'light')}
 			>
 				<Sun size={16} />
-				ライト
+				Light
 			</button>
 			<button
 				class="theme-btn"
@@ -29,7 +29,7 @@
 				onclick={() => (themeStore.value = 'system')}
 			>
 				<Monitor size={16} />
-				システム
+				System
 			</button>
 			<button
 				class="theme-btn"
@@ -37,14 +37,14 @@
 				onclick={() => (themeStore.value = 'dark')}
 			>
 				<Moon size={16} />
-				ダーク
+				Dark
 			</button>
 		</div>
 	</section>
 
 	{#if state.pushSupported}
 		<section class="card">
-			<h2>プッシュ通知</h2>
+			<h2>Push Notifications</h2>
 
 			{#if state.pushMessage}
 				<p
@@ -56,7 +56,9 @@
 				</p>
 			{/if}
 
-			<p class="field-hint">リマインダーなどの通知をこの端末にプッシュ通知として届けます。</p>
+			<p class="field-hint">
+				Deliver notifications like reminders to this device as push notifications.
+			</p>
 			<div class="footer">
 				<button
 					class="btn-primary"
@@ -65,17 +67,17 @@
 					disabled={state.pushSubmitting}
 				>
 					{state.pushSubmitting
-						? '処理中...'
+						? 'Processing...'
 						: state.pushSubscribed
-							? 'プッシュ通知を無効にする'
-							: 'プッシュ通知を有効にする'}
+							? 'Disable Push Notifications'
+							: 'Enable Push Notifications'}
 				</button>
 			</div>
 		</section>
 	{/if}
 
 	<section class="card">
-		<h2>プロフィール</h2>
+		<h2>Profile</h2>
 
 		{#if state.profileMessage}
 			<p
@@ -88,11 +90,11 @@
 		{/if}
 
 		<div class="field">
-			<label for="profile-name">名前</label>
+			<label for="profile-name">Name</label>
 			<input id="profile-name" type="text" bind:value={state.profileName} />
 		</div>
 		<div class="field">
-			<label for="profile-email">メールアドレス</label>
+			<label for="profile-email">Email Address</label>
 			<input id="profile-email" type="email" bind:value={state.profileEmail} />
 		</div>
 		<div class="footer">
@@ -103,13 +105,13 @@
 					!state.profileName.trim() ||
 					!state.profileEmail.trim()}
 			>
-				{state.profileSubmitting ? '保存中...' : '保存'}
+				{state.profileSubmitting ? 'Saving...' : 'Save'}
 			</button>
 		</div>
 	</section>
 
 	<section class="card">
-		<h2>パスワード変更</h2>
+		<h2>Change Password</h2>
 
 		{#if state.passwordMessage}
 			<p
@@ -122,15 +124,15 @@
 		{/if}
 
 		<div class="field">
-			<label for="current-password">現在のパスワード</label>
+			<label for="current-password">Current Password</label>
 			<input id="current-password" type="password" bind:value={state.currentPassword} />
 		</div>
 		<div class="field">
-			<label for="new-password">新しいパスワード <span class="hint">（8文字以上）</span></label>
+			<label for="new-password">New Password <span class="hint">(8+ characters)</span></label>
 			<input id="new-password" type="password" bind:value={state.newPassword} />
 		</div>
 		<div class="field">
-			<label for="confirm-password">新しいパスワード（確認）</label>
+			<label for="confirm-password">New Password (Confirm)</label>
 			<input id="confirm-password" type="password" bind:value={state.confirmPassword} />
 		</div>
 		<div class="footer">
@@ -142,14 +144,14 @@
 					!state.newPassword ||
 					!state.confirmPassword}
 			>
-				{state.passwordSubmitting ? '変更中...' : '変更'}
+				{state.passwordSubmitting ? 'Changing...' : 'Change'}
 			</button>
 		</div>
 	</section>
 
 	{#if state.isAdmin}
 		<section class="card">
-			<h2>管理者設定</h2>
+			<h2>Admin Settings</h2>
 
 			{#if state.followUpMessage}
 				<p
@@ -162,7 +164,7 @@
 			{/if}
 
 			<div class="field">
-				<label for="follow-up-days">要フォローの未接触日数</label>
+				<label for="follow-up-days">Days Without Contact for "Needs Follow-up"</label>
 				<div class="input-with-unit">
 					<input
 						id="follow-up-days"
@@ -171,9 +173,11 @@
 						max="365"
 						bind:value={state.followUpDays}
 					/>
-					<span class="unit">日</span>
+					<span class="unit">days</span>
 				</div>
-				<p class="field-hint">この日数以上接触がない顧客を「要フォロー」として表示します</p>
+				<p class="field-hint">
+					Customers with no contact for this many days or more are shown as "Needs Follow-up"
+				</p>
 			</div>
 			<div class="footer">
 				<button
@@ -181,13 +185,13 @@
 					onclick={state.saveFollowUpDays}
 					disabled={state.followUpSubmitting || !state.followUpDays}
 				>
-					{state.followUpSubmitting ? '保存中...' : '保存'}
+					{state.followUpSubmitting ? 'Saving...' : 'Save'}
 				</button>
 			</div>
 		</section>
 	{/if}
 
-	<button class="btn-signout" onclick={state.signout}>ログアウト</button>
+	<button class="btn-signout" onclick={state.signout}>Sign Out</button>
 </div>
 
 <style lang="scss">

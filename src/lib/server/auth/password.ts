@@ -1,4 +1,4 @@
-// Web Crypto API (PBKDF2) — Node.js不要、CF Workers対応
+// Web Crypto API (PBKDF2) — no Node.js required, works on CF Workers
 const PBKDF2_ITERATIONS = 100_000;
 const PBKDF2_HASH = 'SHA-256';
 const KEY_LENGTH_BYTES = 32;
@@ -35,7 +35,7 @@ function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
 	return diff === 0;
 }
 
-// フォーマット: `pbkdf2:<iterations>:<saltBase64>:<hashBase64>`
+// Format: `pbkdf2:<iterations>:<saltBase64>:<hashBase64>`
 export async function hashPassword(password: string): Promise<string> {
 	const salt = crypto.getRandomValues(new Uint8Array(SALT_LENGTH_BYTES));
 	const hash = await pbkdf2(password, salt, PBKDF2_ITERATIONS);

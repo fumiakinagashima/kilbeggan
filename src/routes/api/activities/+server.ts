@@ -41,7 +41,7 @@ export async function POST({ request, platform, locals }) {
 
 	const raw = await request.json();
 	const parsed = createSchema.safeParse(raw);
-	if (!parsed.success) return json({ error: '入力値が不正です' }, { status: 400 });
+	if (!parsed.success) return json({ error: 'Invalid input' }, { status: 400 });
 
 	const mentionedCustomerIds = parseMentionIds(parsed.data.body);
 	const db = getDb(platform!.env.DB);
@@ -53,7 +53,7 @@ export async function POST({ request, platform, locals }) {
 		attachments: parsed.data.attachments
 	});
 
-	// タグ付け・スコアリングを非同期で実行（レスポンスをブロックしない）
+	// Run tagging and scoring asynchronously (don't block the response)
 	const apiKey = platform?.env?.ANTHROPIC_API_KEY;
 	if (apiKey) {
 		const mockAi = platform?.env?.MOCK_AI;

@@ -6,7 +6,7 @@ import { listActivitiesByCustomer } from '$lib/services/activity';
 export async function load({ params, platform, locals }) {
 	const db = getDb(platform!.env.DB);
 	const customer = await getCustomer(db, params.id);
-	if (!customer) error(404, '顧客が見つかりません');
+	if (!customer) error(404, 'Customer not found');
 
 	const activities = await listActivitiesByCustomer(db, params.id, locals.user?.userId);
 	return { customer, activities };

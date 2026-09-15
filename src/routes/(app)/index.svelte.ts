@@ -47,9 +47,8 @@ export function createFieldsState(getData: () => PageData) {
 		const last = allRaw[allRaw.length - 1];
 		if (!last) return;
 
-		const cursor = (last.createdAt instanceof Date
-			? last.createdAt
-			: new Date(last.createdAt)
+		const cursor = (
+			last.createdAt instanceof Date ? last.createdAt : new Date(last.createdAt)
 		).getTime();
 
 		loading = true;
@@ -94,10 +93,18 @@ export function createFieldsState(getData: () => PageData) {
 	}
 
 	return {
-		get allActivities() { return allActivities; },
-		get openMenuId() { return openMenuId; },
-		get loading() { return loading; },
-		get hasMore() { return hasMore; },
+		get allActivities() {
+			return allActivities;
+		},
+		get openMenuId() {
+			return openMenuId;
+		},
+		get loading() {
+			return loading;
+		},
+		get hasMore() {
+			return hasMore;
+		},
 		openMenu,
 		closeMenu,
 		loadMore,

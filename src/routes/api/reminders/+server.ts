@@ -15,13 +15,13 @@ export async function POST({ request, platform, locals }) {
 
 	const body = await request.json();
 	const parsed = createSchema.safeParse(body);
-	if (!parsed.success) return json({ error: '入力値が不正です' }, { status: 400 });
+	if (!parsed.success) return json({ error: 'Invalid input' }, { status: 400 });
 
 	const channels = parsed.data.channels
 		.split(',')
 		.map((c) => c.trim())
 		.filter(Boolean);
-	if (channels.length === 0) return json({ error: '入力値が不正です' }, { status: 400 });
+	if (channels.length === 0) return json({ error: 'Invalid input' }, { status: 400 });
 
 	const db = getDb(platform!.env.DB);
 	const row = await createReminderRow(db, {

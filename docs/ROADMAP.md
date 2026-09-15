@@ -1,92 +1,90 @@
 # Kilbeggan Roadmap
 
-目標: 「こういうコンセプトの製品がある」と示せるコアを、フェーズを追って実装する。
+Goal: build out, phase by phase, a core that demonstrates "a product with this concept exists."
 
 ---
 
-## Phase 1 — 活動記録コア
+## Phase 1 — Activity logging core
 
-> フィールド担当が顧客を選んでテキストを投稿し、タイムラインで確認できる最小プロダクト。
+> A minimal product where a field rep picks a customer, posts a text update, and can review it on a timeline.
 
-- [x] SvelteKitプロジェクトセットアップ
-- [x] Cloudflare/Wranglerセットアップ (D1・KV・R2バインディング、ローカル開発環境)
-- [x] DBスキーマ定義 (users, customers, activities)
-- [x] PWA設定 (manifest, Service Worker)
-- [x] 認証 (メール+パスワード、セッション管理/KV)
-- [x] 顧客マスタ (最小フィールド + 手動登録UI)
-- [x] 活動投稿UI (Twitter風フリーテキスト投稿、@メンションで顧客を選択)
-- [x] 活動フィード (タイムライン表示、@メンション青色表示)
-- [x] プライベート投稿 (非公開フラグ、フィードからトグル)
-- [x] スキーマ改訂 (customers: company必須化、users: admin/user権限、activities: 多対多メンション)
-- [x] ルーティング整理 (/ 投稿専用, /fields 活動一覧, /fields/[id] 活動編集, /customers/[id]/edit 顧客編集)
-- [x] ダークモード/ライトモード切り替え (システムがデフォルト、チラつき防止のインラインスクリプト)
-- [x] 投稿へのファイル添付・写真撮影 (R2アップロード、activities.attachmentsカラム追加)
-- [x] 投稿・表示での改行保持 (bodyToHtml/bodyToEditorHtml、レイアウトシフト対策)
-- [x] ページState管理のリファクタリング (index.svelte.tsにファクトリ関数として切り出し、+page.svelteをtemplate専用に)
-- [x] 添付ファイル改善 (元ファイル名表示、画像はinline/それ以外はdownload、iOSログイン修正)
-- [x] 活動編集での添付ファイル対応 (AttachmentAreaコンポーネント化、編集ページにファイル/カメラボタン追加)
-
----
-
-## Phase 2 — AI処理層
-
-> 投稿されたテキストをAIが自動で整理・要約する。
-
-- [x] 投稿の自動タグ付け (Claude Haikuによるカテゴリ分類: 商談/クレーム/情報収集等、ctx.waitUntilで非同期実行)
-- [x] 顧客単位のAI要約 (顧客詳細ページに要約生成ボタン、D1に保存)
-- [x] マネージャー向けチームサマリー (/dashboardページ、直近7日間の活動をAI要約、KVにキャッシュ)
-- [x] 異常検知 (30日以上未接触顧客を「要フォロー」バッジ表示、サマリーと顧客一覧に反映)
-- [x] サマリーページ名称変更 (ダッシュボード → サマリー、/dashboard → /summary)
-- [x] 顧客編集フォーム修正 (use:enhanceでSPA化、バリデーションエラーをインライン表示)
-- [x] @メンション形式をIDベースに変更 (@{id}形式で保存、表示時にactivityMentions joinで現在名を解決、旧形式後方互換あり)
+- [x] SvelteKit project setup
+- [x] Cloudflare/Wrangler setup (D1, KV, R2 bindings, local dev environment)
+- [x] DB schema (users, customers, activities)
+- [x] PWA setup (manifest, Service Worker)
+- [x] Auth (email + password, session management via KV)
+- [x] Customer master data (minimal fields + manual registration UI)
+- [x] Activity post UI (Twitter-style free-text posts, @mention to pick a customer)
+- [x] Activity feed (timeline view, @mentions shown in blue)
+- [x] Private posts (a "not shared" flag, toggleable from the feed)
+- [x] Schema revisions (customers: `company` now required; users: admin/user roles; activities: many-to-many mentions)
+- [x] Routing cleanup (`/` post-only, `/fields` activity list, `/fields/[id]` activity edit, `/customers/[id]/edit` customer edit)
+- [x] Dark/light mode toggle (system by default, inline script to avoid flash of unstyled theme)
+- [x] File attachments and photo capture on posts (R2 upload, added `activities.attachments` column)
+- [x] Preserve line breaks in posts and their display (`bodyToHtml`/`bodyToEditorHtml`, avoids layout shift)
+- [x] Refactored page state management (extracted into `index.svelte.ts` as factory functions, `+page.svelte` now template-only)
+- [x] Attachment improvements (show original filename, inline display for images vs. download for other types, fixed iOS sign-in)
+- [x] Attachment support when editing activities (extracted `AttachmentArea` component, added file/camera buttons to the edit page)
 
 ---
 
-## Phase 3 — マネージャーダッシュボード
+## Phase 2 — AI processing layer
 
-> マネージャーがチームの状況をリアルタイムで把握できる画面。
+> AI automatically organizes and summarizes posted text.
 
-- [x] 顧客スコア (1-100のAIスコアリング、顧客詳細ページで手動再計算、活動不足時のエラーメッセージ)
-- [ ] 顧客スコアの自動更新 (活動投稿時にバックグラウンドで再計算)
-- [x] AI要約の編集・フィードバック機能 (要約の手動編集+編集者/日時記録、マネージャーコメント欄、AIプロンプトを中〜長期分析に改善)
-- [x] UI改善 (活動カードのケバブメニュー化、活動詳細の削除ボタン削除、顧客詳細の活動履歴セクション削除、モバイル設定画面にログアウトボタン追加)
-- [x] サマリー画面削除 (ナビ・ルートを削除してシンプル化)
-- [x] 要フォロー設定 (管理者が「未接触日数」を設定画面から変更可能、org_settingsテーブル追加)
-- [x] 非対象活動を最終接触から除外 (isPrivate=trueは要フォロー判定に含めない)
-- [x] 顧客フォームコンポーネント化 (new/editで共通のCustomerFormFieldsコンポーネント)
-- [x] 活動フィード無限スクロール (30件単位、IntersectionObserverでセンチネル監視、カーソルベースページネーション)
-- [x] セキュリティ修正 (Safari Cookie無効時のlocalStorage SecurityError対策、titleタグをsvelte:headに移動)
-- [x] サインイン画面・サイドバーのデザイン統一 (Midleton/Boannに合わせたカードUI・タイポグラフィ・アカウント行、レスポンシブ構造は維持)
-- [x] リマインダー機能 (Midletonを参考にUI/機能を実装。日時・内容・通知先を指定して登録、一覧編集削除、Cron Trigger(1分毎)+手動実行での配信。通知先はメール(Resend)とアプリ内通知センターのみ対応、Slack連携は対象外)
-- [x] アプリ内通知センター (サイドバーのベルアイコン+未読バッジ+ドロワー、モバイルは設定画面から アクセス)
-- [x] 通知センターをドロワーからページ化 (`/notifications`、活動一覧と同じカードUI。クリックで背景色が反転する挙動を廃止し、通知ごとに削除ボタンを追加。`NotificationDrawer`コンポーネントは削除)
-- [x] プッシュ通知 (PWA + Web Push API。OneSignalから変更。VAPID鍵、Service Workerでpush/notificationclick処理、push_subscriptionsテーブル、リマインダーの通知先に「プッシュ通知」を追加。送信は@block65/webcrypto-web-push（Web Crypto APIのみで動作しCloudflare Workers互換）。本番にVAPID secrets登録済み、iPhone実機で配信確認済み。設定画面から有効/無効を切り替え可能
-- [x] 通知アイコンをPNG化 (showNotification/manifestのicon/badgeがSVG指定で一部ブラウザで非表示になる問題を修正。icon-192/512とapple-touch-iconをSVGソースからPNG再生成、Kの文字をserif体+ベージュ寄りの配色に変更)
-- [x] @vite-pwa/sveltekit撤去、SvelteKit標準のService Worker機能に移行 (本番ビルドが `injectManifest` とVite 8のclient/ssr分離ビルドの競合で失敗する既知の未解決バグ[vite-pwa/sveltekit#101]を踏み、`src/service-worker.ts`をSvelteKit標準機能に切り替え。manifest.webmanifestは`static/`に静的配置し`app.html`に直接リンク。オフラインキャッシュは未実装のまま(後フェーズ)、push/notificationclickのみ実装。iOS Safariで`datetime-local`入力がカード幅からはみ出す不具合も修正
-- [x] トップ画面を活動一覧に変更 (`/`が旧`/fields`の活動一覧、投稿画面は`/post`に移動。投稿画面ヘッダーの「KILBEGGAN」ロゴを他画面と同じページタイトル「投稿」表示に統一。活動編集(`/fields/[id]`)のURLは維持しつつ戻り先を`/`に修正)
-- [x] ナビゲーション再編 (投稿はフッター/サイドバーのメニュー項目から撤去し、活動一覧ページ上部の「投稿」ボタンから`/post`へ遷移する方式に変更。投稿完了後は活動一覧に自動遷移。通知は設定画面経由のモバイル導線を廃止し、ボトムナビ/サイドバーに常時表示する項目として昇格(未読バッジ付き))
-- [x] 投稿下書きの保持 (投稿画面の入力内容(本文・メンション・非対象フラグ・添付ファイル)を`$lib/stores/composeDraft.svelte.ts`にモジュール単位で保持。他ページへ遷移して`/post`に戻っても入力内容が復元される。投稿成功時のみ下書きをクリア。ブラウザのリロード/タブ閉じまでは保持されない(メモリ上のみ))
-- [x] デスクトップサイドバーの高さ固定 (`min-height: 100dvh` → `height: 100vh`)
-- [x] アカウント管理機能を追加 (Midletonの`/database/accounts`相当。`/accounts`ページでアカウント一覧表示・新規追加(名前・メール・初期パスワード・権限)・権限変更・削除に対応。API: `POST /api/accounts`, `PATCH`/`DELETE /api/accounts/[id]`。Midletonには無い安全策として、自分自身の権限変更・削除の禁止と、最後の管理者の降格・削除を防ぐガードを追加。新規アカウントはMidletonのようなパスワードリセットリンクでの自己アクティベーションではなく、管理者が初期パスワードをその場で設定する方式(Kilbegganの`passwordHash`はNOT NULL制約のため)。ナビゲーションには管理者権限のデスクトップサイドバーのみ表示、モバイルのボトムナビには出さない)
-- [x] ナビゲーション再々編 (デスクトップ・モバイル共通のメインナビを「活動・顧客・リマインダー・通知・設定」の5項目に統一(通知/リマインダーをサイドバー下部のフッターから主要ナビに格上げ)。デスクトップのみ下段に管理者限定の「アカウント管理」、最下部にアカウント名+サインアウトを配置。モバイルのボトムナビはこの5項目のみでアカウント管理は出さない)
-- [x] 顧客スコア・タグ付けが計算できない不具合を修正 (Claude Haikuが`{"score":...}`をMarkdownのコードフェンス` ```json ... ``` `で囲んで返すことがあり、`JSON.parse(raw.trim())`が失敗して常に「スコアを計算できませんでした」になっていた。`src/lib/server/ai/json.ts`に`stripCodeFence`ヘルパーを追加し、`score.ts`と同じ不具合を持っていた`classify.ts`(自動タグ付け、エラー時は`その他`に握りつぶされていて気づきにくかった)の両方に適用)
-- [x] メニュー・ページタイトルの表記統一 (「活動」「活動一覧」→「活動履歴」、「顧客」→「顧客管理」。ナビラベル、ページ見出し、パンくず/戻るリンクのすべてに適用)
+- [x] Auto-tagging of posts (category classification via Claude Haiku: sales / complaint / info-gathering, etc., run asynchronously via `ctx.waitUntil`)
+- [x] Per-customer AI summary (summary-generation button on the customer detail page, saved to D1)
+- [x] Team summary for managers (`/dashboard` page, AI summary of the last 7 days of activity, cached in KV)
+- [x] Anomaly detection ("needs follow-up" badge for customers untouched for 30+ days, surfaced in both the summary and customer list)
+- [x] Renamed the summary page (Dashboard → Summary, `/dashboard` → `/summary`)
+- [x] Customer edit form fix (converted to SPA via `use:enhance`, inline validation errors)
+- [x] Switched @mentions to an ID-based format (stored as `@{id}`, resolved to the current name at render time via an `activityMentions` join; the old format is still supported for backward compatibility)
 
 ---
 
-## Phase 4 — 顧客情報の自動取得
+## Phase 3 — Manager dashboard
 
-> 顧客登録の手間を最小化する。
+> A screen where managers can see the team's status in real time.
 
-- [ ] WEBクローリングによる企業情報取得
-- [ ] 名刺スキャンによる顧客登録
-- [ ] 既存CRM連携 (Salesforce / HubSpot API)
+- [x] Customer score (AI scoring from 1–100, manually recalculable from the customer detail page, error message shown when there isn't enough activity)
+- [ ] Automatic customer score refresh (recalculated in the background when a new activity is posted)
+- [x] AI summary editing / feedback (manual summary edits with editor/timestamp tracking, a manager comment field, improved the AI prompt for mid-to-long-term analysis)
+- [x] UI improvements (moved activity card actions into a kebab menu, removed the delete button from activity detail, removed the activity history section from customer detail, added a sign-out button to the mobile settings screen)
+- [x] Removed the summary screen (dropped its nav entry and route to simplify)
+- [x] "Needs follow-up" threshold setting (admins can change the "days since last contact" threshold from settings; added an `org_settings` table)
+- [x] Exclude non-shared activities from last-contact tracking (`isPrivate = true` activities no longer count toward "needs follow-up" status)
+- [x] Extracted a shared customer form component (`CustomerFormFields`, used by both new and edit)
+- [x] Infinite scroll on the activity feed (30 items per page, sentinel-based via `IntersectionObserver`, cursor-based pagination)
+- [x] Security fixes (worked around a `localStorage` `SecurityError` when Safari has cookies disabled, moved the `title` tag into `svelte:head`)
+- [x] Unified the sign-in screen and sidebar design (card UI, typography, and account row matched to Midleton/Boann, while keeping the responsive structure)
+- [x] Reminders (UI/functionality modeled on Midleton — schedule with a date/time, content, and delivery channel; list/edit/delete; delivered via a Cron Trigger running every minute plus manual runs. Delivery channels are email (Resend) and the in-app notification center only — no Slack integration)
+- [x] In-app notification center (bell icon + unread badge + drawer in the sidebar; accessible from the settings screen on mobile)
+- [x] Turned the notification center from a drawer into a page (`/notifications`, same card UI as the activity list; dropped the "click toggles background color" behavior in favor of a per-notification delete button; removed the `NotificationDrawer` component)
+- [x] Push notifications (PWA + Web Push API, replacing OneSignal. VAPID keys; push/notificationclick handling in the Service Worker; a `push_subscriptions` table; added "push notification" as a reminder delivery channel. Sending goes through `@block65/webcrypto-web-push`, which runs on the Web Crypto API alone and is Cloudflare Workers–compatible. VAPID secrets are registered in production and delivery has been verified on a physical iPhone. Can be toggled on/off from settings)
+- [x] Switched notification icons to PNG (fixed `showNotification`/manifest icon/badge not showing in some browsers when pointed at SVG; regenerated `icon-192`/`512` and `apple-touch-icon` as PNGs from the SVG source, restyled the "K" mark in a serif face with a more beige-leaning palette)
+- [x] Dropped `@vite-pwa/sveltekit` in favor of SvelteKit's built-in Service Worker support (worked around an unresolved known bug [vite-pwa/sveltekit#101] where production builds fail due to a conflict between `injectManifest` and Vite 8's client/ssr build split, by switching `src/service-worker.ts` to SvelteKit's native mechanism. `manifest.webmanifest` is now served statically from `static/` and linked directly from `app.html`. Offline caching is still unimplemented — later phase — only push/notificationclick are handled. Also fixed a `datetime-local` input overflowing its card on iOS Safari)
+- [x] Made the activity list the home screen (`/` is now the former `/fields` activity list, the post screen moved to `/post`. Unified the post screen header — it used to show the "KILBEGGAN" logo, now shows "Post" like every other page's title. Kept the activity edit URL at `/fields/[id]` but fixed its back-navigation target to `/`)
+- [x] Navigation reorganization (removed "Post" from the footer/sidebar menu items; the top of the activity list now has a "Post" button that navigates to `/post` instead. Posting now auto-navigates back to the activity list on success. Removed the mobile route to notifications via settings; notifications are now a permanent bottom-nav/sidebar item with an unread badge)
+- [x] Added account management (equivalent to Midleton's `/database/accounts`. The `/accounts` page supports listing accounts, creating new ones (name, email, initial password, role), changing roles, and deleting. API: `POST /api/accounts`, `PATCH`/`DELETE /api/accounts/[id]`. Added safeguards not present in Midleton: you can't change your own role or delete yourself, and the last remaining admin can't be demoted or deleted. New accounts don't self-activate via a password-reset link like Midleton's — an admin sets the initial password directly on creation (Kilbeggan's `passwordHash` is `NOT NULL`). The nav entry only shows in the admin's desktop sidebar, not in the mobile bottom nav)
+- [x] Further navigation reorganization (unified the main nav — desktop and mobile alike — into five items: Activities, Customers, Reminders, Notifications, Settings, promoting Notifications/Reminders out of the sidebar footer into the primary nav. Desktop-only: an admin-only "Account Management" item below that, and the account name + sign-out at the very bottom. The mobile bottom nav shows only those five items, with no Account Management)
+- [x] Fixed a bug where customer scoring and tagging couldn't be computed (Claude Haiku sometimes wraps `{"score":...}` in a Markdown code fence — ` ```json ... ``` ` — which broke `JSON.parse(raw.trim())` and always resulted in "Failed to compute score." Added a `stripCodeFence` helper in `src/lib/server/ai/json.ts` and applied it to both `score.ts` and `classify.ts`, which had the same bug in auto-tagging — masked there because failures silently fell back to "Other," making it hard to notice)
+- [x] Unified menu/page title wording ("Activities"/"Activity List" → "Activity History", "Customers" → "Customer Management"), applied consistently across nav labels, page headings, and breadcrumb/back links
 
 ---
 
-## Phase 5 — OEM対応 *(現フェーズ対象外)*
+## Phase 4 — Automated customer data enrichment
 
-- [ ] マルチテナント設計
-- [ ] ホワイトラベル (ロゴ・カラー設定)
-- [ ] 顧客ごとのカスタムフィールド
-- [ ] 外部CRMへのエクスポートAPI
+> Minimize the effort of registering customers.
+
+- [ ] Company info lookup via web crawling
+- [ ] Customer registration via business card scanning
+- [ ] Existing CRM integration (Salesforce / HubSpot API)
+
+---
+
+## Phase 5 — OEM support _(out of scope for the current phase)_
+
+- [ ] Multi-tenant design
+- [ ] White-labeling (logo / color settings)
+- [ ] Per-customer custom fields
+- [ ] Export API to external CRMs

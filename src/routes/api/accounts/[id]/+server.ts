@@ -17,19 +17,19 @@ export async function PATCH({ params, request, locals, platform }) {
 
 	const body = await request.json();
 	const parsed = patchSchema.safeParse(body);
-	if (!parsed.success) return json({ error: '入力値が不正です' }, { status: 400 });
+	if (!parsed.success) return json({ error: 'Invalid input' }, { status: 400 });
 
 	const db = getDb(platform!.env.DB);
 	const target = await getAccountById(db, params.id);
 	if (!target) return json({ error: 'Not found' }, { status: 404 });
 
 	if (params.id === locals.user.userId) {
-		return json({ error: '自分自身の権限は変更できません' }, { status: 400 });
+		return json({ error: 'You cannot change your own role' }, { status: 400 });
 	}
 	if (target.role === 'admin' && parsed.data.role === 'user') {
 		const adminCount = await countAdmins(db);
 		if (adminCount <= 1) {
-			return json({ error: '最後の管理者の権限は変更できません' }, { status: 400 });
+			return json({ error: 'Cannot change the role of the last admin' }, { status: 400 });
 		}
 	}
 
@@ -47,12 +47,12 @@ export async function DELETE({ params, locals, platform }) {
 	if (!target) return json({ error: 'Not found' }, { status: 404 });
 
 	if (params.id === locals.user.userId) {
-		return json({ error: '自分自身のアカウントは削除できません' }, { status: 400 });
+		return json({ error: 'You cannot delete your own account' }, { status: 400 });
 	}
 	if (target.role === 'admin') {
 		const adminCount = await countAdmins(db);
 		if (adminCount <= 1) {
-			return json({ error: '最後の管理者は削除できません' }, { status: 400 });
+			return json({ error: 'Cannot delete the last admin' }, { status: 400 });
 		}
 	}
 

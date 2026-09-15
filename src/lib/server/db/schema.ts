@@ -70,7 +70,7 @@ export const reminders = sqliteTable('reminders', {
 		.references(() => accounts.id),
 	remindAt: integer('remind_at', { mode: 'timestamp' }).notNull(),
 	content: text('content').notNull(),
-	// JSON配列: 'notification' | 'email'
+	// JSON array: 'notification' | 'email'
 	channels: text('channels').notNull().default('[]'),
 	status: text('status', { enum: ['pending', 'sent', 'failed'] })
 		.notNull()

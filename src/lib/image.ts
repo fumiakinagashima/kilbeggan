@@ -18,7 +18,10 @@ export async function compressImage(file: File): Promise<File> {
 			canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
 			canvas.toBlob(
 				(blob) => {
-					if (!blob) { resolve(file); return; }
+					if (!blob) {
+						resolve(file);
+						return;
+					}
 					const name = file.name.replace(/\.[^.]+$/, '.jpg');
 					const compressed = new File([blob], name, { type: 'image/jpeg' });
 					resolve(compressed.size < file.size ? compressed : file);
@@ -27,7 +30,10 @@ export async function compressImage(file: File): Promise<File> {
 				JPEG_QUALITY
 			);
 		};
-		img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			resolve(file);
+		};
 		img.src = url;
 	});
 }

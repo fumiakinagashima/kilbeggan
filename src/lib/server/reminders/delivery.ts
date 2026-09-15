@@ -36,7 +36,7 @@ async function deliverToChannel(
 ): Promise<void> {
 	if (channel === 'notification') {
 		await createNotification(db, {
-			title: 'リマインダー',
+			title: 'Reminder',
 			body: reminder.content,
 			userId: reminder.userId
 		});
@@ -47,15 +47,15 @@ async function deliverToChannel(
 		const setup = getEmailSetupFromEnv(env ?? {});
 		if (!setup)
 			throw new Error(
-				'メール送信が設定されていません（EMAIL_PROVIDER等の環境変数を確認してください）'
+				'Email sending is not configured (check EMAIL_PROVIDER and other environment variables)'
 			);
 		const account = await getAccountById(db, reminder.userId);
-		if (!account) throw new Error('アカウントが見つかりません');
+		if (!account) throw new Error('Account not found');
 		await sendEmail(setup.providerConfig, {
 			from: setup.from,
 			fromName: setup.fromName,
 			to: account.email,
-			subject: 'リマインダー',
+			subject: 'Reminder',
 			text: reminder.content
 		});
 		return;
@@ -67,7 +67,7 @@ async function deliverToChannel(
 			try {
 				await sendPushNotification(
 					subscription,
-					{ title: 'リマインダー', body: reminder.content, url: '/reminder' },
+					{ title: 'Reminder', body: reminder.content, url: '/reminder' },
 					env ?? {}
 				);
 			} catch (e) {
@@ -81,7 +81,7 @@ async function deliverToChannel(
 		return;
 	}
 
-	throw new Error(`未対応の通知先です: ${channel}`);
+	throw new Error(`Unsupported notification channel: ${channel}`);
 }
 
 export async function deliverReminder(

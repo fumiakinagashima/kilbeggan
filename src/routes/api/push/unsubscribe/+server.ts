@@ -10,7 +10,7 @@ export async function POST({ request, platform, locals }) {
 
 	const body = await request.json();
 	const parsed = schema.safeParse(body);
-	if (!parsed.success) return json({ error: '入力値が不正です' }, { status: 400 });
+	if (!parsed.success) return json({ error: 'Invalid input' }, { status: 400 });
 
 	const db = getDb(platform!.env.DB);
 	await deletePushSubscription(db, parsed.data.endpoint);

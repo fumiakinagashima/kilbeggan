@@ -7,18 +7,18 @@
 	const state = createReminderPageState(() => data);
 
 	const STATUS_LABELS: Record<string, string> = {
-		pending: '未送信',
-		sent: '送信済み',
-		failed: '送信失敗'
+		pending: 'Pending',
+		sent: 'Sent',
+		failed: 'Failed'
 	};
 </script>
 
 <div class="page">
 	<header class="page-header">
-		<h1>リマインダー</h1>
+		<h1>Reminder</h1>
 		<button class="btn-secondary" onclick={state.runDelivery} disabled={state.running}>
 			<Play size={16} />
-			{state.running ? '実行中...' : '今すぐ配信'}
+			{state.running ? 'Running...' : 'Deliver Now'}
 		</button>
 	</header>
 
@@ -27,7 +27,7 @@
 	{/if}
 
 	<section class="card">
-		<h2>{state.editingId ? 'リマインダーを編集' : 'リマインダーを登録'}</h2>
+		<h2>{state.editingId ? 'Edit Reminder' : 'New Reminder'}</h2>
 
 		<form onsubmit={(e) => state.submit(e)}>
 			{#if state.error}
@@ -35,7 +35,7 @@
 			{/if}
 
 			<div class="field">
-				<label for="remind-at">日時</label>
+				<label for="remind-at">Date & Time</label>
 				<input
 					id="remind-at"
 					class="input-date"
@@ -47,7 +47,7 @@
 			</div>
 
 			<div class="field">
-				<label for="content">内容</label>
+				<label for="content">Content</label>
 				<textarea
 					id="content"
 					rows="6"
@@ -57,7 +57,7 @@
 			</div>
 
 			<div class="field">
-				<span class="field-label">通知先</span>
+				<span class="field-label">Notify Via</span>
 				<div class="channel-options">
 					{#each state.channelOptions as option (option.value)}
 						<label class="channel-option">
@@ -75,21 +75,21 @@
 
 			<div class="footer">
 				{#if state.editingId}
-					<button type="button" class="btn-text" onclick={state.cancelEdit}>キャンセル</button>
+					<button type="button" class="btn-text" onclick={state.cancelEdit}>Cancel</button>
 				{/if}
 				<button
 					type="submit"
 					class="btn-primary"
 					disabled={state.submitting || !state.content.trim()}
 				>
-					{state.submitting ? '保存中...' : state.editingId ? '更新' : '登録'}
+					{state.submitting ? 'Saving...' : state.editingId ? 'Update' : 'Register'}
 				</button>
 			</div>
 		</form>
 	</section>
 
 	{#if state.rows.length === 0}
-		<p class="empty">リマインダーが登録されていません</p>
+		<p class="empty">No reminders registered</p>
 	{:else}
 		<ul class="list">
 			{#each state.rows as row (row.id)}
@@ -104,9 +104,9 @@
 					</div>
 					<div class="actions">
 						{#if row.status === 'pending'}
-							<button class="btn-text" onclick={() => state.startEdit(row)}>編集</button>
+							<button class="btn-text" onclick={() => state.startEdit(row)}>Edit</button>
 						{/if}
-						<button class="btn-text danger" onclick={() => state.deleteRow(row.id)}>削除</button>
+						<button class="btn-text danger" onclick={() => state.deleteRow(row.id)}>Delete</button>
 					</div>
 				</li>
 			{/each}
@@ -138,7 +138,7 @@
 			font-weight: 700;
 		}
 	}
-	
+
 	.btn-secondary {
 		display: flex;
 		align-items: center;

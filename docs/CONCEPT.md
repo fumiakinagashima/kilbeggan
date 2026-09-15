@@ -1,107 +1,107 @@
-## コンセプト
+## Concept
 
-既存のCRMは「現場が入力しない」という根本的な課題を解決できていない。AI-native CRMになっても同様。
-Kilbegganはその問題を逆から解く——**現場の入力コストをゼロに近づけ、構造化はAIが担う**。
+Existing CRMs haven't solved their core problem: field staff don't enter data. AI-native CRMs run into the same wall.
+Kilbeggan attacks the problem from the other direction — **drive the field's input cost toward zero, and let AI own the structuring.**
 
-### 逆CRMという思想
+### The "reverse CRM" idea
 
-| 従来のCRM | Kilbeggan |
-|---|---|
-| 構造化された入力フォームに記録 | SNS的なテキスト投稿で記録 |
-| 現場がデータを構造化する | AIがデータを構造化する |
-| 顧客情報が中心 | 活動履歴が中心 |
-| 入力負荷が高く形骸化しやすい | 投稿するだけで続けられる |
+| Traditional CRM                            | Kilbeggan                                 |
+| ------------------------------------------ | ----------------------------------------- |
+| Records go into structured input forms     | Records are SNS-style free-text posts     |
+| The field staff structures the data        | AI structures the data                    |
+| Customer records are the center of gravity | Activity history is the center of gravity |
+| Heavy input burden, adoption stalls        | Just posting is enough to keep it going   |
 
-### 役割分担
+### Division of roles
 
-- **フィールド担当**: 顧客を選んでテキストを投稿するだけ
-- **AI**: 投稿を要約・構造化・分析
-- **マネージャー**: AIが整理した情報を確認・判断
-- **顧客情報**: WEBクローリングまたは既存CRM連携で自動取得、不足分は内勤が補正
-
----
-
-## ターゲット
-
-### 刺さる課題を持つ企業
-
-- CRMを導入しているが現場が入力しない
-- マネージャーが現場の状況をリアルタイムで把握できない
-- 外回りが多く、PCを開く時間がない職種（製造外販・不動産・保険・医療機器等）
-
-### ビジネスモデル
-
-**OEM/ホワイトラベル**として展開を検討しつつ、**SaaS運営**も視野に入れる。
-
-- 業界特化SaaS企業への組み込み
-- 既存CRM（Salesforce / HubSpot等）のアドオンとして供給
-- SNS発信 → 興味を持ったプレイヤーからのインバウンド
+- **Field Rep**: Just picks a customer and posts a text update
+- **AI**: Summarizes, structures, and analyzes the posts
+- **Manager**: Reviews and acts on the information AI has organized
+- **Customer data**: Acquired automatically via web crawling or existing CRM integration, with office staff filling any gaps
 
 ---
 
-## 技術スタック
+## Target
 
-| 領域 | 技術 |
-|---|---|
-| フロントエンド | SvelteKit (TypeScript) |
-| スタイル | SCSS |
-| バリデーション | Zod |
-| ORM | DrizzleORM |
-| インフラ | Cloudflare (Workers, D1, R2, KV) |
-| AI | Claude API (Anthropic) |
-| プッシュ通知 | OneSignal |
-| メール | Resend |
-| モバイル | PWA (vite-plugin-pwa + @vite-pwa/sveltekit) |
+### Companies with the right pain points
 
-### 設計方針
+- Already have a CRM, but the field doesn't enter data
+- Managers can't get a real-time read on what's happening in the field
+- Field-heavy roles with little time at a desk (manufacturing sales, real estate, insurance, medical devices, etc.)
 
-- **モバイルファースト**: 現場担当者がスマートフォンから使うことを前提に設計
-- **PWA**: ネイティブアプリ不要、ホーム画面追加でネイティブに近いUX
-- **オフライン考慮**: 投稿はオンライン前提、キャッシュは後フェーズで対応
-- **OEM対応**: テナント分離・ホワイトラベル対応を初期から設計に組み込む
+### Business model
+
+Considering **OEM / white-label** distribution, while also keeping **running it as a SaaS** on the table.
+
+- Embedded into industry-specific SaaS products
+- Supplied as an add-on to existing CRMs (Salesforce / HubSpot, etc.)
+- Inbound interest generated via social media presence
 
 ---
 
-## ロードマップ
+## Tech Stack
 
-### Phase 1 — 活動記録コア
+| Area               | Technology                                  |
+| ------------------ | ------------------------------------------- |
+| Frontend           | SvelteKit (TypeScript)                      |
+| Styling            | SCSS                                        |
+| Validation         | Zod                                         |
+| ORM                | DrizzleORM                                  |
+| Infrastructure     | Cloudflare (Workers, D1, R2, KV)            |
+| AI                 | Claude API (Anthropic)                      |
+| Push notifications | OneSignal                                   |
+| Email              | Resend                                      |
+| Mobile             | PWA (vite-plugin-pwa + @vite-pwa/sveltekit) |
 
-- [ ] プロジェクトセットアップ（SvelteKit + Cloudflare + DrizzleORM）
-- [ ] PWA設定（manifest, Service Worker）
-- [ ] 認証（セッション / KV）
-- [ ] 顧客マスタ（最小限のフィールド + 手動登録）
-- [ ] 活動投稿UI（顧客選択 + テキスト入力 + 送信）
-- [ ] 活動フィード表示（タイムライン）
+### Design principles
 
-### Phase 2 — AI処理層
-
-- [ ] 投稿の自動タグ付け（AIによるカテゴリ分類: 商談/クレーム/情報収集等）
-- [ ] 顧客単位のAI要約（直近の活動サマリー）
-- [ ] マネージャー向けチームサマリー（日次/週次）
-- [ ] 異常検知（長期未接触顧客のアラート等）
-
-### Phase 3 — マネージャーダッシュボード
-
-- [ ] チームの活動状況一覧
-- [ ] 顧客ごとの温度感ビジュアライズ
-- [ ] AI要約の確認・フィードバック機能
-- [ ] プッシュ通知（OneSignal）
-
-### Phase 4 — 顧客情報の自動取得
-
-- [ ] WEBクローリングによる企業情報取得
-- [ ] 既存CRM連携（Salesforce / HubSpot API）
-- [ ] 名刺スキャンによる顧客登録
-
-### Phase 5 — OEM対応
-
-- [ ] マルチテナント設計
-- [ ] ホワイトラベル（ロゴ・カラー設定）
-- [ ] 顧客ごとのカスタムフィールド
-- [ ] 外部CRMへのエクスポートAPI
+- **Mobile-first**: Designed on the assumption that field reps use it from a smartphone
+- **PWA**: No native app needed — adding to the home screen gets close to a native UX
+- **Offline awareness**: Posting assumes an online connection; caching is handled in a later phase
+- **OEM-ready**: Tenant isolation and white-labeling are designed in from the start
 
 ---
 
-## 関連プロダクト
+## Roadmap
 
-- **Midleton**: AI-native CRM（OSS化予定）。Kilbegganの開発基盤・実績として位置づけ
+### Phase 1 — Activity logging core
+
+- [ ] Project setup (SvelteKit + Cloudflare + DrizzleORM)
+- [ ] PWA setup (manifest, Service Worker)
+- [ ] Auth (session / KV)
+- [ ] Customer master data (minimal fields + manual entry)
+- [ ] Activity posting UI (pick customer + enter text + submit)
+- [ ] Activity feed (timeline view)
+
+### Phase 2 — AI processing layer
+
+- [ ] Auto-tagging posts (AI category classification: deal / complaint / info-gathering, etc.)
+- [ ] Per-customer AI summary (recent activity summary)
+- [ ] Team summary for managers (daily / weekly)
+- [ ] Anomaly detection (e.g. alerts for long-untouched customers)
+
+### Phase 3 — Manager dashboard
+
+- [ ] Team activity overview
+- [ ] Per-customer temperature visualization
+- [ ] AI summary review / feedback
+- [ ] Push notifications (OneSignal)
+
+### Phase 4 — Automated customer data enrichment
+
+- [ ] Company info lookup via web crawling
+- [ ] Existing CRM integration (Salesforce / HubSpot API)
+- [ ] Customer registration via business card scanning
+
+### Phase 5 — OEM support
+
+- [ ] Multi-tenant design
+- [ ] White-labeling (logo / color settings)
+- [ ] Per-customer custom fields
+- [ ] Export API to external CRMs
+
+---
+
+## Related products
+
+- **Midleton**: an AI-native CRM (planned for open-source release). Serves as Kilbeggan's development foundation and track record.

@@ -46,7 +46,7 @@ export function createAccountsState(getData: () => PageData) {
 			});
 			const result = (await res.json()) as { account?: Account; error?: string };
 			if (!res.ok || !result.account) {
-				addError = result.error ?? 'エラーが発生しました';
+				addError = result.error ?? 'An error occurred';
 				return;
 			}
 			accounts = [...accounts, result.account];
@@ -71,7 +71,7 @@ export function createAccountsState(getData: () => PageData) {
 			if (!res.ok) {
 				const result = (await res.json()) as { error?: string };
 				accounts = previous;
-				rowError = { id, text: result.error ?? 'エラーが発生しました' };
+				rowError = { id, text: result.error ?? 'An error occurred' };
 			}
 		} finally {
 			roleSubmittingId = null;
@@ -79,14 +79,14 @@ export function createAccountsState(getData: () => PageData) {
 	}
 
 	async function deleteAccount(id: string) {
-		if (!confirm('このアカウントを削除しますか？')) return;
+		if (!confirm('Delete this account?')) return;
 		deletingId = id;
 		rowError = null;
 		try {
 			const res = await fetch(`/api/accounts/${id}`, { method: 'DELETE' });
 			if (!res.ok) {
 				const result = (await res.json()) as { error?: string };
-				rowError = { id, text: result.error ?? 'エラーが発生しました' };
+				rowError = { id, text: result.error ?? 'An error occurred' };
 				return;
 			}
 			accounts = accounts.filter((a) => a.id !== id);

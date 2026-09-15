@@ -9,7 +9,7 @@
 
 <div class="page">
 	<header class="page-header">
-		<h1>投稿</h1>
+		<h1>Post</h1>
 	</header>
 	<section class="compose">
 		<form onsubmit={(e) => state.post(e)}>
@@ -24,7 +24,7 @@
 					role="textbox"
 					aria-multiline="true"
 					tabindex="0"
-					data-placeholder="活動内容を入力してください"
+					data-placeholder="Enter activity details"
 					bind:this={state.editorEl}
 					oninput={() => state.handleEditorInput()}
 					onkeydown={(e) => state.handleKeydown(e)}
@@ -55,14 +55,18 @@
 				>
 					{#if state.isPrivate}
 						<Lock size={13} />
-						非対象
+						Excluded
 					{:else}
 						<Globe size={13} />
-						要約対象
+						Included in Summary
 					{/if}
 				</button>
-				<button type="submit" class="btn-post" disabled={state.posting || !state.hasContent || state.uploading}>
-					{state.posting ? '送信中...' : '投稿'}
+				<button
+					type="submit"
+					class="btn-post"
+					disabled={state.posting || !state.hasContent || state.uploading}
+				>
+					{state.posting ? 'Posting...' : 'Post'}
 				</button>
 			</div>
 

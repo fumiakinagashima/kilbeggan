@@ -6,10 +6,10 @@
 
 <div class="signin-page">
 	<form class="signin-card" onsubmit={(e) => state.submit(e)}>
-		<h1>サインイン</h1>
+		<h1>Sign in</h1>
 
 		<div class="field">
-			<label for="email">メールアドレス</label>
+			<label for="email">Email Address</label>
 			<input
 				id="email"
 				type="email"
@@ -21,7 +21,7 @@
 		</div>
 
 		<div class="field">
-			<label for="password">パスワード</label>
+			<label for="password">Password</label>
 			<input
 				id="password"
 				type="password"
@@ -41,7 +41,7 @@
 			class="submit-btn"
 			disabled={state.loading || !state.email || !state.password}
 		>
-			{state.loading ? 'ログイン中...' : 'ログイン'}
+			{state.loading ? 'Signing in...' : 'Sign in'}
 		</button>
 	</form>
 </div>

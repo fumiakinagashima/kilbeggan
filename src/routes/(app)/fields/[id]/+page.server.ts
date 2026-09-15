@@ -7,12 +7,10 @@ import { parseMentionIds } from '$lib/body';
 
 export async function load({ params, platform, locals }) {
 	const db = getDb(platform!.env.DB);
-	const [activity, customers] = await Promise.all([
-		getActivity(db, params.id),
-		listCustomers(db)
-	]);
-	if (!activity) error(404, '活動が見つかりません');
-	if (activity.userId !== locals.user!.userId) error(403, '編集権限がありません');
+	const [activity, customers] = await Promise.all([getActivity(db, params.id), listCustomers(db)]);
+	if (!activity) error(404, 'Activity not found');
+	if (activity.userId !== locals.user!.userId)
+		error(403, 'You do not have permission to edit this');
 	return { activity, customers };
 }
 
@@ -50,7 +48,7 @@ export const actions = {
 			isPrivate: formData.get('isPrivate') === 'true',
 			attachments: attachmentsParsed
 		});
-		if (!parsed.success) return { error: '入力値が不正です' };
+		if (!parsed.success) return { error: 'Invalid input' };
 
 		const mentionedCustomerIds = parseMentionIds(parsed.data.body);
 		await updateActivity(db, params.id, { ...parsed.data, mentionedCustomerIds });

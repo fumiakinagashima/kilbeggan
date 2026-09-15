@@ -6,7 +6,7 @@ import { getCustomer, updateCustomer } from '$lib/services/customer';
 export async function load({ params, platform }) {
 	const db = getDb(platform!.env.DB);
 	const customer = await getCustomer(db, params.id);
-	if (!customer) error(404, '顧客が見つかりません');
+	if (!customer) error(404, 'Customer not found');
 	return { customer };
 }
 
@@ -32,9 +32,11 @@ export const actions = {
 		};
 		const parsed = updateSchema.safeParse(raw);
 		if (!parsed.success) {
-			const details = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+			const details = parsed.error.issues
+				.map((i) => `${i.path.join('.')}: ${i.message}`)
+				.join('; ');
 			console.error('[customer edit] validation failed:', JSON.stringify(raw), details);
-			return { error: `入力値が不正です (${details})` };
+			return { error: `Invalid input (${details})` };
 		}
 
 		await updateCustomer(db, params.id, parsed.data);

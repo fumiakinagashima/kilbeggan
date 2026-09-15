@@ -8,10 +8,10 @@
 
 <div class="page">
 	<header class="page-header">
-		<a href="/customers" class="back">← 顧客管理</a>
+		<a href="/customers" class="back">← Customer Management</a>
 		<div class="page-title">
 			<h1>{data.customer.company}</h1>
-			<a href="/customers/{data.customer.id}/edit" class="edit-link">編集</a>
+			<a href="/customers/{data.customer.id}/edit" class="edit-link">Edit</a>
 		</div>
 	</header>
 
@@ -23,7 +23,9 @@
 					<span class="score-max">/100</span>
 				</div>
 				<div class="score-meta">
-					<span class="score-level {state.scoreLabel(state.score)}">{state.scoreLevelText(state.score)}</span>
+					<span class="score-level {state.scoreLabel(state.score)}"
+						>{state.scoreLevelText(state.score)}</span
+					>
 					{#if state.scoreReason}
 						<span class="score-reason">{state.scoreReason}</span>
 					{/if}
@@ -31,11 +33,11 @@
 			{:else if state.scoreError}
 				<span class="score-empty score-error">{state.scoreError}</span>
 			{:else}
-				<span class="score-empty">スコア未算出</span>
+				<span class="score-empty">Score not calculated</span>
 			{/if}
 		</div>
 		<button class="btn-action" onclick={state.recalcScore} disabled={state.scoring}>
-			{state.scoring ? '計算中...' : state.score !== null ? '再計算' : 'スコアを計算'}
+			{state.scoring ? 'Calculating...' : state.score !== null ? 'Recalculate' : 'Calculate score'}
 		</button>
 	</div>
 
@@ -43,13 +45,13 @@
 		<section class="contact-info">
 			{#if data.customer.phone}
 				<a href="tel:{data.customer.phone}" class="contact-item">
-					<span class="contact-label">電話</span>
+					<span class="contact-label">Phone</span>
 					<span>{data.customer.phone}</span>
 				</a>
 			{/if}
 			{#if data.customer.email}
 				<a href="mailto:{data.customer.email}" class="contact-item">
-					<span class="contact-label">メール</span>
+					<span class="contact-label">Email</span>
 					<span>{data.customer.email}</span>
 				</a>
 			{/if}
@@ -57,27 +59,31 @@
 	{/if}
 
 	{#if data.customer.notes}
-	<section class="contact-info">
-		<p class="contact-label">備考</p>
-		<p class="notes">{data.customer.notes}</p>
-	</section>
+		<section class="contact-info">
+			<p class="contact-label">Notes</p>
+			<p class="notes">{data.customer.notes}</p>
+		</section>
 	{/if}
 
 	<section class="ai-summary" class:generating={state.generating}>
 		<div class="section-header">
 			<div class="section-title-row">
-				<h2>AI要約</h2>
+				<h2>AI summary</h2>
 				{#if state.summaryEditedBy}
-					<span class="edit-badge">手動編集: {state.summaryEditedBy} · {state.summaryEditedAt ? formatDate(state.summaryEditedAt) : ''}</span>
+					<span class="edit-badge"
+						>Manually edited: {state.summaryEditedBy} · {state.summaryEditedAt
+							? formatDate(state.summaryEditedAt)
+							: ''}</span
+					>
 				{/if}
 			</div>
 			<div class="section-actions">
 				{#if !state.editingSummary}
 					{#if state.summary}
-						<button class="btn-text" onclick={state.startEditSummary}>編集</button>
+						<button class="btn-text" onclick={state.startEditSummary}>Edit</button>
 					{/if}
 					<button class="btn-action" onclick={state.generateSummary} disabled={state.generating}>
-						{state.generating ? '生成中...' : state.summary ? '再生成' : '要約を生成'}
+						{state.generating ? 'Generating...' : state.summary ? 'Regenerate' : 'Generate summary'}
 					</button>
 				{/if}
 			</div>
@@ -88,34 +94,39 @@
 				class="edit-textarea"
 				bind:value={state.editSummaryText}
 				rows="5"
-				placeholder="要約を入力..."
-			></textarea>
+				placeholder="Enter summary..."></textarea>
 			<div class="edit-actions">
 				<button class="btn-action" onclick={state.saveSummary} disabled={state.savingSummary}>
-					{state.savingSummary ? '保存中...' : '保存'}
+					{state.savingSummary ? 'Saving...' : 'Save'}
 				</button>
 				<button class="btn-cancel" onclick={state.cancelEditSummary} disabled={state.savingSummary}>
-					キャンセル
+					Cancel
 				</button>
 			</div>
 		{:else if state.summary}
 			<p class="summary-text">{state.summary}</p>
 		{:else}
-			<p class="summary-empty">「要約を生成」ボタンを押すと、活動履歴からAIが分析を作成します。</p>
+			<p class="summary-empty">
+				Press "Generate summary" to have AI create an analysis from the activity history.
+			</p>
 		{/if}
 	</section>
 
 	<section class="manager-comment">
 		<div class="section-header">
 			<div class="section-title-row">
-				<h2>マネージャーコメント</h2>
+				<h2>Manager comment</h2>
 				{#if state.managerCommentEditedBy}
-					<span class="edit-badge">{state.managerCommentEditedBy} · {state.managerCommentEditedAt ? formatDate(state.managerCommentEditedAt) : ''}</span>
+					<span class="edit-badge"
+						>{state.managerCommentEditedBy} · {state.managerCommentEditedAt
+							? formatDate(state.managerCommentEditedAt)
+							: ''}</span
+					>
 				{/if}
 			</div>
 			{#if !state.editingComment}
 				<button class="btn-text" onclick={state.startEditComment}>
-					{state.managerComment ? '編集' : '追加'}
+					{state.managerComment ? 'Edit' : 'Add'}
 				</button>
 			{/if}
 		</div>
@@ -125,23 +136,21 @@
 				class="edit-textarea"
 				bind:value={state.editCommentText}
 				rows="4"
-				placeholder="短期目標や担当へのアドバイスを入力..."
-			></textarea>
+				placeholder="Enter short-term goals or advice for the rep..."></textarea>
 			<div class="edit-actions">
 				<button class="btn-action" onclick={state.saveComment} disabled={state.savingComment}>
-					{state.savingComment ? '保存中...' : '保存'}
+					{state.savingComment ? 'Saving...' : 'Save'}
 				</button>
 				<button class="btn-cancel" onclick={state.cancelEditComment} disabled={state.savingComment}>
-					キャンセル
+					Cancel
 				</button>
 			</div>
 		{:else if state.managerComment}
 			<p class="comment-text">{state.managerComment}</p>
 		{:else}
-			<p class="summary-empty">短期目標や担当営業へのアドバイスを記録できます。</p>
+			<p class="summary-empty">Record short-term goals or advice for the sales rep here.</p>
 		{/if}
 	</section>
-
 </div>
 
 <style lang="scss">
@@ -227,16 +236,32 @@
 			color: var(--color-text-muted);
 		}
 
-		&.hot .score-number { color: #16a34a; }
-		&.warm .score-number { color: #2563eb; }
-		&.neutral .score-number { color: #d97706; }
-		&.cold .score-number { color: #6b7280; }
+		&.hot .score-number {
+			color: #16a34a;
+		}
+		&.warm .score-number {
+			color: #2563eb;
+		}
+		&.neutral .score-number {
+			color: #d97706;
+		}
+		&.cold .score-number {
+			color: #6b7280;
+		}
 
 		:global([data-theme='dark']) {
-			&.hot .score-number { color: #4ade80; }
-			&.warm .score-number { color: #60a5fa; }
-			&.neutral .score-number { color: #fbbf24; }
-			&.cold .score-number { color: #9ca3af; }
+			&.hot .score-number {
+				color: #4ade80;
+			}
+			&.warm .score-number {
+				color: #60a5fa;
+			}
+			&.neutral .score-number {
+				color: #fbbf24;
+			}
+			&.cold .score-number {
+				color: #9ca3af;
+			}
 		}
 	}
 
@@ -251,10 +276,18 @@
 		font-size: 0.8125rem;
 		font-weight: 600;
 
-		&.hot { color: #16a34a; }
-		&.warm { color: #2563eb; }
-		&.neutral { color: #d97706; }
-		&.cold { color: #6b7280; }
+		&.hot {
+			color: #16a34a;
+		}
+		&.warm {
+			color: #2563eb;
+		}
+		&.neutral {
+			color: #d97706;
+		}
+		&.cold {
+			color: #6b7280;
+		}
 	}
 
 	.score-reason {
@@ -453,6 +486,4 @@
 		color: var(--color-text-muted);
 		line-height: 1.6;
 	}
-
-
 </style>

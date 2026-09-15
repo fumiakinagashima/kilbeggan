@@ -57,14 +57,13 @@ export async function updateCustomer(
 		notes?: string | null;
 	}
 ) {
-	await db.update(customers).set({ ...data, updatedAt: new Date() }).where(eq(customers.id, id));
+	await db
+		.update(customers)
+		.set({ ...data, updatedAt: new Date() })
+		.where(eq(customers.id, id));
 }
 
-export async function updateCustomerSummary(
-	db: Db,
-	id: string,
-	summary: string
-): Promise<void> {
+export async function updateCustomerSummary(db: Db, id: string, summary: string): Promise<void> {
 	await db
 		.update(customers)
 		.set({ aiSummary: summary, aiSummaryUpdatedAt: new Date() })
@@ -99,15 +98,8 @@ export async function updateManagerComment(
 		.where(eq(customers.id, id));
 }
 
-export async function updateCustomerScore(
-	db: Db,
-	id: string,
-	score: number
-): Promise<void> {
-	await db
-		.update(customers)
-		.set({ score, scoreUpdatedAt: new Date() })
-		.where(eq(customers.id, id));
+export async function updateCustomerScore(db: Db, id: string, score: number): Promise<void> {
+	await db.update(customers).set({ score, scoreUpdatedAt: new Date() }).where(eq(customers.id, id));
 }
 
 export async function createCustomer(

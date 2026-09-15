@@ -45,7 +45,7 @@ export function createReminderPageState(getData: () => PageData) {
 	async function submit(e: SubmitEvent) {
 		e.preventDefault();
 		if (selectedChannels.length === 0) {
-			error = '通知先を1つ以上選択してください';
+			error = 'Please select at least one notification channel';
 			return;
 		}
 		submitting = true;
@@ -69,7 +69,7 @@ export function createReminderPageState(getData: () => PageData) {
 					});
 			const data = (await res.json()) as ReminderListRow & { error?: string };
 			if (!res.ok) {
-				error = data.error ?? 'エラーが発生しました';
+				error = data.error ?? 'An error occurred';
 				return;
 			}
 			const row = {
@@ -86,7 +86,7 @@ export function createReminderPageState(getData: () => PageData) {
 	}
 
 	async function deleteRow(id: string) {
-		if (!confirm('このリマインダーを削除しますか？')) return;
+		if (!confirm('Delete this reminder?')) return;
 		await fetch(`/api/reminders/${id}`, { method: 'DELETE' });
 		rows = rows.filter((r) => r.id !== id);
 		if (editingId === id) resetForm();
@@ -99,16 +99,16 @@ export function createReminderPageState(getData: () => PageData) {
 		try {
 			const res = await fetch('/api/reminders/run', { method: 'POST' });
 			if (!res.ok) {
-				runMessage = '配信の実行に失敗しました';
+				runMessage = 'Delivery failed to run';
 				return;
 			}
 			const { results } = (await res.json()) as { results: ReminderDeliveryResult[] };
 			if (results.length === 0) {
-				runMessage = '配信対象のリマインダーはありませんでした';
+				runMessage = 'No reminders were due for delivery';
 			} else {
 				const sent = results.filter((r) => r.status === 'sent').length;
 				const failed = results.filter((r) => r.status === 'failed').length;
-				runMessage = `送信完了: ${sent}件${failed > 0 ? ` / 失敗: ${failed}件` : ''}`;
+				runMessage = `Sent: ${sent}${failed > 0 ? ` / Failed: ${failed}` : ''}`;
 				const statusById = new Map(results.map((r) => [r.id, r.status]));
 				rows = rows.map((row) =>
 					statusById.has(row.id) ? { ...row, status: statusById.get(row.id)! } : row

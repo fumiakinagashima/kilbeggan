@@ -12,7 +12,7 @@ export type PushEnv = {
 
 export type PushPayload = { title: string; body: string; url?: string };
 
-// 410 Gone / 404 Not Found はブラウザ側で購読が失効している合図。呼び出し側で該当購読を削除する
+// 410 Gone / 404 Not Found indicates the subscription has expired on the browser side. The caller should delete the corresponding subscription.
 export class PushSubscriptionExpiredError extends Error {}
 
 export async function sendPushNotification(
@@ -21,7 +21,7 @@ export async function sendPushNotification(
 	env: PushEnv
 ): Promise<void> {
 	if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY || !env.VAPID_SUBJECT) {
-		throw new Error('プッシュ通知が設定されていません（VAPID_*環境変数を確認してください）');
+		throw new Error('Push notifications are not configured (check VAPID_* environment variables)');
 	}
 
 	const target: WebPushSubscription = {
@@ -36,13 +36,13 @@ export async function sendPushNotification(
 		privateKey: env.VAPID_PRIVATE_KEY
 	});
 
-	// @cloudflare/workers-typesのRequestInit型定義がUint8ArrayをBodyInitとして
-	// 認識しないため、ランタイムには問題ない値をアサーションで通す
+	// @cloudflare/workers-types' RequestInit type definition doesn't recognize
+	// Uint8Array as a BodyInit, so we pass a value that's fine at runtime via a type assertion
 	const res = await fetch(subscription.endpoint, init as RequestInit);
 	if (res.status === 404 || res.status === 410) {
-		throw new PushSubscriptionExpiredError(`購読が失効しています (${res.status})`);
+		throw new PushSubscriptionExpiredError(`Subscription has expired (${res.status})`);
 	}
 	if (!res.ok) {
-		throw new Error(`Push送信エラー ${res.status}: ${await res.text()}`);
+		throw new Error(`Push send error ${res.status}: ${await res.text()}`);
 	}
 }

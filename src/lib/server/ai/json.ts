@@ -1,5 +1,6 @@
-// ClaudeはJSON形式のみ返すよう指示しても、```json ... ``` のようにMarkdownコードフェンスで
-// 囲んで返すことがある。そのままJSON.parseすると失敗するため、パース前にフェンスを取り除く。
+// Even when instructed to return only JSON, Claude sometimes wraps the response in a
+// Markdown code fence like ```json ... ```. Parsing that directly with JSON.parse would
+// fail, so strip the fence before parsing.
 export function stripCodeFence(raw: string): string {
 	const trimmed = raw.trim();
 	const match = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);

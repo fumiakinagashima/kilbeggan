@@ -7,8 +7,8 @@
 
 <div class="page">
 	<header class="page-header">
-		<a href="/customers" class="back">← 戻る</a>
-		<h1>顧客を追加</h1>
+		<a href="/customers" class="back">← Back</a>
+		<h1>Add customer</h1>
 	</header>
 
 	<form onsubmit={(e) => state.submit(e)}>
@@ -25,7 +25,7 @@
 		/>
 
 		<button type="submit" class="btn-primary" disabled={state.loading}>
-			{state.loading ? '保存中...' : '保存'}
+			{state.loading ? 'Saving...' : 'Save'}
 		</button>
 	</form>
 </div>

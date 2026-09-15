@@ -9,13 +9,13 @@
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	// デスクトップ・モバイル共通のメインナビ
+	// Main nav shared between desktop and mobile
 	const navItems = [
-		{ href: '/', label: '活動履歴', icon: List, exact: true, prefixes: ['/fields'] },
-		{ href: '/customers', label: '顧客管理', icon: Users, exact: false },
-		{ href: '/reminder', label: 'リマインダー', icon: Clock, exact: false },
-		{ href: '/notifications', label: '通知', icon: Bell, exact: false },
-		{ href: '/settings', label: '設定', icon: Settings, exact: false }
+		{ href: '/', label: 'Activity History', icon: List, exact: true, prefixes: ['/fields'] },
+		{ href: '/customers', label: 'Customer Management', icon: Users, exact: false },
+		{ href: '/reminder', label: 'Reminder', icon: Clock, exact: false },
+		{ href: '/notifications', label: 'Notification', icon: Bell, exact: false },
+		{ href: '/settings', label: 'Settings', icon: Settings, exact: false }
 	];
 
 	function isActive(item: { href: string; exact: boolean; prefixes?: string[] }): boolean {
@@ -70,14 +70,14 @@
 					class:active={isActive({ href: '/accounts', exact: false })}
 				>
 					<UserCog size={16} />
-					アカウント管理
+					Account Management
 				</a>
 			{/if}
 
 			{#if data.user}
 				<div class="account-row">
 					<span class="account-name">{data.user.name}</span>
-					<button class="signout-btn" onclick={signout} title="ログアウト" aria-label="ログアウト">
+					<button class="signout-btn" onclick={signout} title="Sign out" aria-label="Sign out">
 						<LogOut size={15} />
 					</button>
 				</div>

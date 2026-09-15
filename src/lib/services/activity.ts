@@ -9,9 +9,7 @@ export type Attachment = { key: string; name: string };
 function parseAttachments(json: string | null): Attachment[] {
 	if (!json) return [];
 	const parsed = JSON.parse(json) as Array<string | Attachment>;
-	return parsed.map((a) =>
-		typeof a === 'string' ? { key: a, name: a.split('/').pop() ?? a } : a
-	);
+	return parsed.map((a) => (typeof a === 'string' ? { key: a, name: a.split('/').pop() ?? a } : a));
 }
 
 function parseTags(json: string | null): string[] {
@@ -236,7 +234,12 @@ export async function updateActivityTags(db: Db, id: string, tags: string[]): Pr
 export async function updateActivity(
 	db: Db,
 	id: string,
-	data: { body: string; isPrivate: boolean; mentionedCustomerIds: string[]; attachments?: Attachment[] }
+	data: {
+		body: string;
+		isPrivate: boolean;
+		mentionedCustomerIds: string[];
+		attachments?: Attachment[];
+	}
 ): Promise<void> {
 	const attachmentsJson =
 		data.attachments && data.attachments.length > 0 ? JSON.stringify(data.attachments) : null;

@@ -8,10 +8,10 @@
 
 <div class="page">
 	<header class="page-header">
-		<h1>アカウント管理</h1>
+		<h1>Account Management</h1>
 		<button type="button" class="btn-add" onclick={() => state.toggleAddForm()}>
 			<Plus size={14} />
-			追加
+			Add
 		</button>
 	</header>
 
@@ -21,15 +21,15 @@
 				<p class="error">{state.addError}</p>
 			{/if}
 			<div class="field">
-				<label for="add-name">名前</label>
+				<label for="add-name">Name</label>
 				<input id="add-name" type="text" bind:value={state.addName} required />
 			</div>
 			<div class="field">
-				<label for="add-email">メールアドレス</label>
+				<label for="add-email">Email address</label>
 				<input id="add-email" type="email" bind:value={state.addEmail} required />
 			</div>
 			<div class="field">
-				<label for="add-password">初期パスワード <span class="hint">（8文字以上）</span></label>
+				<label for="add-password">Initial password <span class="hint">(8+ characters)</span></label>
 				<input
 					id="add-password"
 					type="password"
@@ -39,10 +39,10 @@
 				/>
 			</div>
 			<div class="field">
-				<label for="add-role">権限</label>
+				<label for="add-role">Role</label>
 				<select id="add-role" bind:value={state.addRole}>
-					<option value="user">一般</option>
-					<option value="admin">管理者</option>
+					<option value="user">User</option>
+					<option value="admin">Admin</option>
 				</select>
 			</div>
 			<div class="footer">
@@ -54,7 +54,7 @@
 						!state.addEmail.trim() ||
 						state.addPassword.length < 8}
 				>
-					{state.addSubmitting ? '作成中...' : '作成'}
+					{state.addSubmitting ? 'Creating...' : 'Create'}
 				</button>
 			</div>
 		</form>
@@ -66,7 +66,7 @@
 			<li class="card">
 				<div class="info">
 					<div class="name">
-						{account.name}{#if isSelf}<span class="self-tag">（自分）</span>{/if}
+						{account.name}{#if isSelf}<span class="self-tag">(You)</span>{/if}
 					</div>
 					<div class="email">{account.email}</div>
 				</div>
@@ -80,15 +80,15 @@
 						onchange={(e) =>
 							state.changeRole(account.id, e.currentTarget.value as 'admin' | 'user')}
 					>
-						<option value="user">一般</option>
-						<option value="admin">管理者</option>
+						<option value="user">User</option>
+						<option value="admin">Admin</option>
 					</select>
 					<button
 						type="button"
 						class="delete-btn"
 						disabled={isSelf || state.deletingId === account.id}
 						onclick={() => state.deleteAccount(account.id)}
-						aria-label="削除"
+						aria-label="Delete"
 					>
 						<Trash2 size={15} />
 					</button>

@@ -2,9 +2,7 @@
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "kilbeggan",
 	"compatibility_date": "2026-06-22",
-	"compatibility_flags": [
-		"nodejs_als"
-	],
+	"compatibility_flags": ["nodejs_als"],
 	"main": "worker.ts",
 	"assets": {
 		"binding": "ASSETS",
@@ -12,7 +10,7 @@
 	},
 	"workers_dev": true,
 	"preview_urls": true,
-	// リマインダー配信: pending なリマインダーを1分ごとにチェックし、remind_atに達したものを送信する
+	// Reminder delivery: checks for pending reminders every minute and sends any that have reached remind_at
 	"triggers": {
 		"crons": ["* * * * *"]
 	},
@@ -20,20 +18,20 @@
 		{
 			"binding": "DB",
 			"database_name": "kilbeggan",
-			"database_id": "e436547d-8090-4c75-b911-e40c5830a525",
+			"database_id": "YOUR_D1_DATABASE_ID",
 			"migrations_dir": "drizzle"
 		}
 	],
 	"kv_namespaces": [
 		{
 			"binding": "kilbeggan",
-			"id": "d85bc1306743468a9380a3292e7245f4"
+			"id": "YOUR_KV_NAMESPACE_ID"
 		}
 	],
 	"r2_buckets": [
 		{
 			"binding": "R2",
-			"bucket_name": "kilbeggan"
+			"bucket_name": "your-r2-bucket-name"
 		}
 	]
 }

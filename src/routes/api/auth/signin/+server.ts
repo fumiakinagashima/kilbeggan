@@ -16,7 +16,7 @@ export async function POST({ request, platform, cookies, url }) {
 	const parsed = schema.safeParse(body);
 
 	if (!parsed.success) {
-		return json({ error: '入力値が不正です' }, { status: 400 });
+		return json({ error: 'Invalid input' }, { status: 400 });
 	}
 
 	const { email, password } = parsed.data;
@@ -25,7 +25,7 @@ export async function POST({ request, platform, cookies, url }) {
 	const user = await db.select().from(accounts).where(eq(accounts.email, email)).get();
 
 	if (!user || !(await verifyPassword(password, user.passwordHash))) {
-		return json({ error: 'メールアドレスまたはパスワードが正しくありません' }, { status: 401 });
+		return json({ error: 'Invalid email or password' }, { status: 401 });
 	}
 
 	const sessionId = await createSession(platform!.env.kilbeggan, {

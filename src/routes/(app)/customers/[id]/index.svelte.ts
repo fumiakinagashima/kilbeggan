@@ -13,7 +13,9 @@ export function createCustomerDetailState(getData: () => PageData) {
 	// manager comment
 	let managerComment = $state(getData().customer.managerComment ?? '');
 	let managerCommentEditedBy = $state(getData().customer.managerCommentEditedBy ?? '');
-	let managerCommentEditedAt = $state<Date | null>(getData().customer.managerCommentEditedAt ?? null);
+	let managerCommentEditedAt = $state<Date | null>(
+		getData().customer.managerCommentEditedAt ?? null
+	);
 	let editingComment = $state(false);
 	let editCommentText = $state('');
 	let savingComment = $state(false);
@@ -32,10 +34,10 @@ export function createCustomerDetailState(getData: () => PageData) {
 	}
 
 	function scoreLevelText(s: number): string {
-		if (s >= 80) return 'ホット';
-		if (s >= 60) return 'ウォーム';
-		if (s >= 40) return 'ニュートラル';
-		return 'コールド';
+		if (s >= 80) return 'Hot';
+		if (s >= 60) return 'Warm';
+		if (s >= 40) return 'Neutral';
+		return 'Cold';
 	}
 
 	async function generateSummary() {
@@ -128,7 +130,8 @@ export function createCustomerDetailState(getData: () => PageData) {
 				score = result.score;
 				scoreReason = result.reason;
 			} else if (res.status === 422) {
-				scoreError = '現在の活動履歴ではスコアを計測できません。具体的な活動履歴を登録してください。';
+				scoreError =
+					'A score cannot be calculated from the current activity history. Please log more specific activity records.';
 			}
 		} finally {
 			scoring = false;
@@ -140,25 +143,63 @@ export function createCustomerDetailState(getData: () => PageData) {
 	}
 
 	return {
-		get summary() { return summary; },
-		get summaryEditedBy() { return summaryEditedBy; },
-		get summaryEditedAt() { return summaryEditedAt; },
-		get generating() { return generating; },
-		get editingSummary() { return editingSummary; },
-		get editSummaryText() { return editSummaryText; },
-		set editSummaryText(v: string) { editSummaryText = v; },
-		get savingSummary() { return savingSummary; },
-		get managerComment() { return managerComment; },
-		get managerCommentEditedBy() { return managerCommentEditedBy; },
-		get managerCommentEditedAt() { return managerCommentEditedAt; },
-		get editingComment() { return editingComment; },
-		get editCommentText() { return editCommentText; },
-		set editCommentText(v: string) { editCommentText = v; },
-		get savingComment() { return savingComment; },
-		get score() { return score; },
-		get scoreReason() { return scoreReason; },
-		get scoreError() { return scoreError; },
-		get scoring() { return scoring; },
+		get summary() {
+			return summary;
+		},
+		get summaryEditedBy() {
+			return summaryEditedBy;
+		},
+		get summaryEditedAt() {
+			return summaryEditedAt;
+		},
+		get generating() {
+			return generating;
+		},
+		get editingSummary() {
+			return editingSummary;
+		},
+		get editSummaryText() {
+			return editSummaryText;
+		},
+		set editSummaryText(v: string) {
+			editSummaryText = v;
+		},
+		get savingSummary() {
+			return savingSummary;
+		},
+		get managerComment() {
+			return managerComment;
+		},
+		get managerCommentEditedBy() {
+			return managerCommentEditedBy;
+		},
+		get managerCommentEditedAt() {
+			return managerCommentEditedAt;
+		},
+		get editingComment() {
+			return editingComment;
+		},
+		get editCommentText() {
+			return editCommentText;
+		},
+		set editCommentText(v: string) {
+			editCommentText = v;
+		},
+		get savingComment() {
+			return savingComment;
+		},
+		get score() {
+			return score;
+		},
+		get scoreReason() {
+			return scoreReason;
+		},
+		get scoreError() {
+			return scoreError;
+		},
+		get scoring() {
+			return scoring;
+		},
 		scoreLabel,
 		scoreLevelText,
 		generateSummary,

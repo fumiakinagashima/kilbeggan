@@ -21,15 +21,15 @@
 
 <div class="page">
 	<header class="page-header">
-		<h1>顧客管理</h1>
+		<h1>Customer Management</h1>
 		<a href="/customers/new" class="btn-primary">
 			<Plus size={18} />
-			追加
+			Add
 		</a>
 	</header>
 
 	{#if data.customers.length === 0}
-		<p class="empty">顧客がまだいません</p>
+		<p class="empty">No customers yet</p>
 	{:else}
 		<ul class="list">
 			{#each data.customers as customer (customer.id)}
@@ -42,13 +42,13 @@
 									<span class="score-badge {scoreLabel(customer.score)}">{customer.score}</span>
 								{/if}
 								{#if !customer.lastActivityAt || isStale(customer.lastActivityAt)}
-									<span class="alert-badge">要フォロー</span>
+									<span class="alert-badge">Needs Follow-up</span>
 								{/if}
 							</div>
 							<span class="last-contact">
 								{customer.lastActivityAt
-									? `最終接触: ${timeAgo(new Date(customer.lastActivityAt))}`
-									: '接触記録なし'}
+									? `Last contact: ${timeAgo(new Date(customer.lastActivityAt))}`
+									: 'No contact recorded'}
 							</span>
 						</div>
 						<ChevronRight size={20} class="chevron" />
@@ -158,25 +158,33 @@
 			background: color-mix(in srgb, #22c55e 12%, transparent);
 			color: #15803d;
 			border-color: color-mix(in srgb, #22c55e 35%, transparent);
-			:global([data-theme='dark']) & { color: #4ade80; }
+			:global([data-theme='dark']) & {
+				color: #4ade80;
+			}
 		}
 		&.warm {
 			background: color-mix(in srgb, #3b82f6 10%, transparent);
 			color: #1d4ed8;
 			border-color: color-mix(in srgb, #3b82f6 30%, transparent);
-			:global([data-theme='dark']) & { color: #60a5fa; }
+			:global([data-theme='dark']) & {
+				color: #60a5fa;
+			}
 		}
 		&.neutral {
 			background: color-mix(in srgb, #f59e0b 10%, transparent);
 			color: #b45309;
 			border-color: color-mix(in srgb, #f59e0b 30%, transparent);
-			:global([data-theme='dark']) & { color: #fbbf24; }
+			:global([data-theme='dark']) & {
+				color: #fbbf24;
+			}
 		}
 		&.cold {
 			background: color-mix(in srgb, #6b7280 10%, transparent);
 			color: #4b5563;
 			border-color: color-mix(in srgb, #6b7280 25%, transparent);
-			:global([data-theme='dark']) & { color: #9ca3af; }
+			:global([data-theme='dark']) & {
+				color: #9ca3af;
+			}
 		}
 	}
 

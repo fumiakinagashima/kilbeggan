@@ -2,9 +2,9 @@
 /// <reference lib="esnext" />
 /// <reference lib="webworker" />
 
-// SvelteKitがsrc/service-worker.tsを自動検出しビルド・登録する（vite-plugin-pwaは使わない。
-// @vite-pwa/sveltekitのinjectManifestはVite 8のclient/ssr環境分離ビルドと競合し
-// 本番ビルドが失敗するため: https://github.com/vite-pwa/sveltekit/issues/101）
+// SvelteKit auto-detects and builds/registers src/service-worker.ts (vite-plugin-pwa is not used;
+// @vite-pwa/sveltekit's injectManifest conflicts with Vite 8's separate client/ssr environment
+// builds and breaks production builds: https://github.com/vite-pwa/sveltekit/issues/101)
 declare const self: ServiceWorkerGlobalScope;
 
 self.skipWaiting();
@@ -12,8 +12,8 @@ self.addEventListener('activate', (event) => {
 	event.waitUntil(self.clients.claim());
 });
 
-// オフラインキャッシュ対応は後フェーズ。fetchハンドラはPWAインストール条件を満たすための
-// pass-through（respondWithを呼ばないのでリクエストは通常通りネットワークに流れる）
+// Offline cache support is a later-phase feature. The fetch handler is just a
+// pass-through to satisfy the PWA install criteria (it never calls respondWith, so requests flow to the network as usual)
 self.addEventListener('fetch', () => {});
 
 type PushPayload = { title: string; body: string; url?: string };

@@ -18,7 +18,7 @@ export function createSignInState() {
 			});
 			const data = (await res.json()) as { error?: string };
 			if (!res.ok) {
-				error = data.error ?? 'エラーが発生しました';
+				error = data.error ?? 'An error occurred';
 				return;
 			}
 			await goto('/');

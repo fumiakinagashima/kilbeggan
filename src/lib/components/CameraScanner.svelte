@@ -46,7 +46,9 @@
 		const canvas = document.createElement('canvas');
 		canvas.width = outW;
 		canvas.height = outH;
-		canvas.getContext('2d')!.drawImage(videoEl, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, outW, outH);
+		canvas
+			.getContext('2d')!
+			.drawImage(videoEl, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, outW, outH);
 		return canvas;
 	}
 
@@ -110,11 +112,11 @@
 			scanState = 'error';
 			const name = e instanceof Error ? e.name : '';
 			if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-				errorMsg = 'カメラの使用が許可されていません。';
+				errorMsg = 'Camera access was not granted.';
 			} else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
-				errorMsg = 'カメラが見つかりません。';
+				errorMsg = 'No camera found.';
 			} else {
-				errorMsg = 'カメラの起動に失敗しました。';
+				errorMsg = 'Failed to start the camera.';
 			}
 		}
 	}
@@ -122,31 +124,37 @@
 	function shutter() {
 		if (scanState !== 'live' || !videoEl.videoWidth) return;
 		const canvas = captureFrame();
-		canvas.toBlob((blob) => { if (blob) onCapture(blob); }, 'image/jpeg', 0.9);
+		canvas.toBlob(
+			(blob) => {
+				if (blob) onCapture(blob);
+			},
+			'image/jpeg',
+			0.9
+		);
 	}
 </script>
 
 <div class="scanner">
 	{#if scanState === 'init'}
 		<div class="placeholder">
-			<button class="start-btn" onclick={startCamera}>カメラを起動</button>
+			<button class="start-btn" onclick={startCamera}>Start Camera</button>
 		</div>
 	{:else if scanState === 'starting'}
 		<div class="placeholder">
-			<p class="hint">カメラを起動しています…</p>
+			<p class="hint">Starting camera…</p>
 		</div>
 	{:else if scanState === 'error'}
 		<div class="placeholder">
 			<p class="error-text">{errorMsg}</p>
-			<button class="start-btn" onclick={startCamera}>再試行</button>
+			<button class="start-btn" onclick={startCamera}>Retry</button>
 		</div>
 	{/if}
 
 	<div class="viewport" bind:this={viewportEl} class:hidden={scanState !== 'live'}>
 		<video bind:this={videoEl} playsinline muted autoplay></video>
 		<canvas bind:this={overlayCanvas} class="overlay"></canvas>
-		<p class="status">シャッター（または Space キー）で撮影</p>
-		<button class="shutter" onclick={shutter} aria-label="撮影"></button>
+		<p class="status">Tap the shutter (or press Space) to capture</p>
+		<button class="shutter" onclick={shutter} aria-label="Capture"></button>
 	</div>
 </div>
 
@@ -189,7 +197,9 @@
 		font-weight: 600;
 		cursor: pointer;
 		transition: opacity 0.15s;
-		&:hover { opacity: 0.88; }
+		&:hover {
+			opacity: 0.88;
+		}
 	}
 
 	.viewport {
@@ -200,7 +210,9 @@
 		overflow: hidden;
 		border-radius: 8px;
 
-		&.hidden { display: none; }
+		&.hidden {
+			display: none;
+		}
 
 		video {
 			width: 100%;
@@ -244,6 +256,8 @@
 		border: 4px solid rgba(255, 255, 255, 0.6);
 		cursor: pointer;
 		transition: opacity 0.15s;
-		&:hover { opacity: 0.88; }
+		&:hover {
+			opacity: 0.88;
+		}
 	}
 </style>

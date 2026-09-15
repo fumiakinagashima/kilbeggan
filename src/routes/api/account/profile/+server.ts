@@ -12,18 +12,18 @@ const schema = z.object({
 });
 
 export async function PATCH({ request, platform, locals, cookies }) {
-	if (!locals.user) return json({ error: '未認証' }, { status: 401 });
+	if (!locals.user) return json({ error: 'Unauthorized' }, { status: 401 });
 
 	const body = await request.json();
 	const parsed = schema.safeParse(body);
-	if (!parsed.success) return json({ error: '入力値が不正です' }, { status: 400 });
+	if (!parsed.success) return json({ error: 'Invalid input' }, { status: 400 });
 
 	const { name, email } = parsed.data;
 	const db = getDb(platform!.env.DB);
 
 	if (email !== locals.user.email) {
 		const existing = await db.select().from(accounts).where(eq(accounts.email, email)).get();
-		if (existing) return json({ error: 'このメールアドレスは既に使用されています' }, { status: 409 });
+		if (existing) return json({ error: 'This email address is already in use' }, { status: 409 });
 	}
 
 	await updateAccountProfile(db, locals.user.userId, { name, email });

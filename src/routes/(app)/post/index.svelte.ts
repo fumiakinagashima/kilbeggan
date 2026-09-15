@@ -206,7 +206,7 @@ export function createComposeState(getData: () => PageData) {
 			});
 			const result = (await res.json()) as { error?: string };
 			if (!res.ok) {
-				postError = result.error ?? 'エラーが発生しました';
+				postError = result.error ?? 'An error occurred';
 				return;
 			}
 			if (editorEl) editorEl.innerHTML = '';

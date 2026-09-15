@@ -7,7 +7,7 @@ export async function POST({ params, platform, locals, request }) {
 	const db = getDb(platform!.env.DB);
 	const customer = await getCustomer(db, params.id);
 	if (!customer) return json({ error: 'Not found' }, { status: 404 });
-	const { comment } = await request.json() as { comment: string };
+	const { comment } = (await request.json()) as { comment: string };
 	if (typeof comment !== 'string') {
 		return json({ error: 'Invalid comment' }, { status: 400 });
 	}

@@ -60,7 +60,7 @@
 			class="attach-btn"
 			onclick={() => fileInputEl?.click()}
 			disabled={uploading}
-			title="ファイルを添付"
+			title="Attach file"
 		>
 			<Paperclip size={16} />
 		</button>
@@ -69,7 +69,7 @@
 			class="attach-btn"
 			onclick={handleCameraClick}
 			disabled={uploading}
-			title="写真を撮影"
+			title="Take photo"
 		>
 			<Camera size={16} />
 		</button>
@@ -80,11 +80,7 @@
 			{#each attachments as item (item.key)}
 				<div class="attachment-item">
 					{#if isImage(item.mimeType)}
-						<button
-							type="button"
-							class="thumb-btn"
-							onclick={() => (lightboxSrc = item.url)}
-						>
+						<button type="button" class="thumb-btn" onclick={() => (lightboxSrc = item.url)}>
 							<img src={item.url} alt={item.name} />
 						</button>
 					{:else}
@@ -106,9 +102,11 @@
 		aria-modal="true"
 		tabindex="-1"
 		onclick={() => (lightboxSrc = null)}
-		onkeydown={(e) => { if (e.key === 'Escape') lightboxSrc = null; }}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') lightboxSrc = null;
+		}}
 	>
-		<button class="lightbox-close" onclick={() => (lightboxSrc = null)} aria-label="閉じる">
+		<button class="lightbox-close" onclick={() => (lightboxSrc = null)} aria-label="Close">
 			<X size={24} />
 		</button>
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -126,10 +124,12 @@
 		aria-modal="true"
 		tabindex="-1"
 		onclick={() => (showCameraModal = false)}
-		onkeydown={(e) => { if (e.key === 'Escape') showCameraModal = false; }}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') showCameraModal = false;
+		}}
 	>
 		<div class="camera-modal-inner" role="document" onclick={(e) => e.stopPropagation()}>
-			<button class="modal-close" onclick={() => (showCameraModal = false)} aria-label="閉じる">
+			<button class="modal-close" onclick={() => (showCameraModal = false)} aria-label="Close">
 				<X size={20} />
 			</button>
 			<CameraScanner onCapture={handleCapture} autoStart />
@@ -161,7 +161,9 @@
 		background: var(--color-surface);
 		color: var(--color-text-muted);
 		cursor: pointer;
-		transition: color 0.15s, border-color 0.15s;
+		transition:
+			color 0.15s,
+			border-color 0.15s;
 
 		&:hover {
 			color: var(--color-text);

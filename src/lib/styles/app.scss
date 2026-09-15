@@ -3,82 +3,82 @@
 // ─────────────────────────────────────────
 
 :root {
-  --color-success:       #16a34a;
-  --color-success-bg:    #dcfce7;
-  --color-success-hover: #15803d;
-  --color-warning:       #ca8a04;
-  --color-error:         #dc2626;
-  --color-error-bg:      #fee2e2;
-  --color-info:          #2563eb;
-  --color-info-bg:       #dbeafe;
-  --color-neutral:       #6b7280;
-  --color-neutral-bg:    #f3f4f6;
+	--color-success: #16a34a;
+	--color-success-bg: #dcfce7;
+	--color-success-hover: #15803d;
+	--color-warning: #ca8a04;
+	--color-error: #dc2626;
+	--color-error-bg: #fee2e2;
+	--color-info: #2563eb;
+	--color-info-bg: #dbeafe;
+	--color-neutral: #6b7280;
+	--color-neutral-bg: #f3f4f6;
 }
 
 // ─────────────────────────────────────────
 // Color tokens
-// システムがデフォルト。ライトを基準値とし、
-// ダークはメディアクエリ + 明示指定で上書きする。
+// System preference is the default. Light is the baseline,
+// and dark overrides it via media query + explicit setting.
 // ─────────────────────────────────────────
 
 // Light — base / system light / [data-theme='light']
 :root,
 [data-theme='light'] {
-  color-scheme: light;
-  --color-background:  #f3f3f3;
-  --color-surface:     #eaeaea;
-  --color-border:      #e0e0e0;
-  --color-text:        #1a1a1a;
-  --color-text-muted:  #6b7280;
-  --color-primary:     #6a3f28;
-  --color-danger:      #a92222;
+	color-scheme: light;
+	--color-background: #f3f3f3;
+	--color-surface: #eaeaea;
+	--color-border: #e0e0e0;
+	--color-text: #1a1a1a;
+	--color-text-muted: #6b7280;
+	--color-primary: #6a3f28;
+	--color-danger: #a92222;
 
-  --sidebar-bg:        #f5f5f5;
-  --sidebar-text:      #1a1a1a;
-  --sidebar-text-muted:#6b7280;
-  --sidebar-hover:     rgba(0, 0, 0, 0.05);
-  --sidebar-active:    rgba(0, 0, 0, 0.09);
-  --sidebar-border:    rgba(0, 0, 0, 0.08);
+	--sidebar-bg: #f5f5f5;
+	--sidebar-text: #1a1a1a;
+	--sidebar-text-muted: #6b7280;
+	--sidebar-hover: rgba(0, 0, 0, 0.05);
+	--sidebar-active: rgba(0, 0, 0, 0.09);
+	--sidebar-border: rgba(0, 0, 0, 0.08);
 }
 
-// Dark — system dark (ライト明示指定の場合は除外)
+// Dark — system dark (excluded when light is explicitly set)
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    color-scheme: dark;
-    --color-background:  #1e1e1e;
-    --color-surface:     #252525;
-    --color-border:      #464646;
-    --color-text:        #fff0f0;
-    --color-text-muted:  #9ca3af;
-    --color-primary:     #907466;
-    --color-danger:      #f87171;
+	:root:not([data-theme='light']) {
+		color-scheme: dark;
+		--color-background: #1e1e1e;
+		--color-surface: #252525;
+		--color-border: #464646;
+		--color-text: #fff0f0;
+		--color-text-muted: #9ca3af;
+		--color-primary: #907466;
+		--color-danger: #f87171;
 
-    --sidebar-bg:        #2f2f2f;
-    --sidebar-text:      #ececec;
-    --sidebar-text-muted:#a9a9a9;
-    --sidebar-hover:     rgba(255, 255, 255, 0.07);
-    --sidebar-active:    rgba(255, 255, 255, 0.12);
-    --sidebar-border:    rgba(255, 255, 255, 0.08);
-  }
+		--sidebar-bg: #2f2f2f;
+		--sidebar-text: #ececec;
+		--sidebar-text-muted: #a9a9a9;
+		--sidebar-hover: rgba(255, 255, 255, 0.07);
+		--sidebar-active: rgba(255, 255, 255, 0.12);
+		--sidebar-border: rgba(255, 255, 255, 0.08);
+	}
 }
 
 // Dark — forced ([data-theme='dark'])
 [data-theme='dark'] {
-  color-scheme: dark;
-  --color-background:  #1e1e1e;
-  --color-surface:     #252525;
-  --color-border:      #464646;
-  --color-text:        #fff0f0;
-  --color-text-muted:  #9ca3af;
-  --color-primary:     #907466;
-  --color-danger:      #f87171;
+	color-scheme: dark;
+	--color-background: #1e1e1e;
+	--color-surface: #252525;
+	--color-border: #464646;
+	--color-text: #fff0f0;
+	--color-text-muted: #9ca3af;
+	--color-primary: #907466;
+	--color-danger: #f87171;
 
-  --sidebar-bg:        #2f2f2f;
-  --sidebar-text:      #ececec;
-  --sidebar-text-muted:#a9a9a9;
-  --sidebar-hover:     rgba(255, 255, 255, 0.07);
-  --sidebar-active:    rgba(255, 255, 255, 0.12);
-  --sidebar-border:    rgba(255, 255, 255, 0.08);
+	--sidebar-bg: #2f2f2f;
+	--sidebar-text: #ececec;
+	--sidebar-text-muted: #a9a9a9;
+	--sidebar-hover: rgba(255, 255, 255, 0.07);
+	--sidebar-active: rgba(255, 255, 255, 0.12);
+	--sidebar-border: rgba(255, 255, 255, 0.08);
 }
 
 // ─────────────────────────────────────────
@@ -86,8 +86,8 @@
 // ─────────────────────────────────────────
 
 :root {
-  --nav-height-mobile: 56px;
-  --sidebar-width: 240px;
+	--nav-height-mobile: 56px;
+	--sidebar-width: 240px;
 }
 
 // ─────────────────────────────────────────
@@ -95,14 +95,14 @@
 // ─────────────────────────────────────────
 
 * {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 *,
 *::before,
 *::after {
-  margin: 0;
-  padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 // ─────────────────────────────────────────
@@ -110,32 +110,32 @@
 // ─────────────────────────────────────────
 
 html {
-  height: 100%;
-  // スクロールバーの出現によるレイアウトシフトを防ぐ
-  scrollbar-gutter: stable;
+	height: 100%;
+	// Prevent layout shift caused by the scrollbar appearing
+	scrollbar-gutter: stable;
 }
 
 body {
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  background: var(--color-background);
-  color: var(--color-text);
-  -webkit-font-smoothing: antialiased;
+	height: 100%;
+	font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+	font-size: 16px;
+	line-height: 1.5;
+	background: var(--color-background);
+	color: var(--color-text);
+	-webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: inherit;
+	color: inherit;
 }
 
 button {
-  font-family: inherit;
+	font-family: inherit;
 }
 
 input,
 textarea,
 select {
-  font-family: inherit;
-  font-size: inherit;
+	font-family: inherit;
+	font-size: inherit;
 }

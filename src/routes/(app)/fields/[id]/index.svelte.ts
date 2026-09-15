@@ -7,9 +7,14 @@ type AttachmentItem = { key: string; url: string; name: string; mimeType: string
 function mimeFromKey(key: string): string {
 	const ext = key.split('.').pop()?.toLowerCase() ?? '';
 	const imageExts: Record<string, string> = {
-		jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
-		gif: 'image/gif', webp: 'image/webp', avif: 'image/avif',
-		heic: 'image/heic', heif: 'image/heif'
+		jpg: 'image/jpeg',
+		jpeg: 'image/jpeg',
+		png: 'image/png',
+		gif: 'image/gif',
+		webp: 'image/webp',
+		avif: 'image/avif',
+		heic: 'image/heic',
+		heif: 'image/heif'
 	};
 	return imageExts[ext] ?? 'application/octet-stream';
 }
@@ -193,7 +198,7 @@ export function createActivityEditState(getData: () => PageData) {
 	}
 
 	function handleDelete() {
-		if (!window.confirm('この活動を削除しますか？削除した活動は元に戻せません。')) return;
+		if (!window.confirm('Delete this activity? This cannot be undone.')) return;
 		deleting = true;
 		const form = document.getElementById('delete-form') as HTMLFormElement | null;
 		form?.submit();
@@ -203,9 +208,13 @@ export function createActivityEditState(getData: () => PageData) {
 		const formEl = e.target as HTMLFormElement;
 		const bodyInput = formEl.querySelector('input[name="body"]') as HTMLInputElement;
 		bodyInput.value = getBodyText();
-		const attachmentsInput = formEl.querySelector('input[name="attachments"]') as HTMLInputElement | null;
+		const attachmentsInput = formEl.querySelector(
+			'input[name="attachments"]'
+		) as HTMLInputElement | null;
 		if (attachmentsInput) {
-			attachmentsInput.value = JSON.stringify(attachments.map((a) => ({ key: a.key, name: a.name })));
+			attachmentsInput.value = JSON.stringify(
+				attachments.map((a) => ({ key: a.key, name: a.name }))
+			);
 		}
 		submitting = true;
 	}

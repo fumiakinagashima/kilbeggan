@@ -28,7 +28,7 @@ export function createSettingsState(getData: () => PageData) {
 	async function togglePush() {
 		const vapidPublicKey = getData().vapidPublicKey;
 		if (!vapidPublicKey) {
-			pushMessage = { type: 'error', text: 'プッシュ通知が設定されていません' };
+			pushMessage = { type: 'error', text: 'Push notifications are not configured' };
 			return;
 		}
 		pushSubmitting = true;
@@ -37,21 +37,21 @@ export function createSettingsState(getData: () => PageData) {
 			if (pushSubscribed) {
 				await unsubscribeFromPush();
 				pushSubscribed = false;
-				pushMessage = { type: 'success', text: 'プッシュ通知を無効にしました' };
+				pushMessage = { type: 'success', text: 'Push notifications disabled' };
 			} else {
 				if (Notification.permission === 'denied') {
 					pushMessage = {
 						type: 'error',
-						text: 'ブラウザの通知が拒否されています。ブラウザの設定から許可してください'
+						text: 'Browser notifications are blocked. Please allow them in your browser settings'
 					};
 					return;
 				}
 				await subscribeToPush(vapidPublicKey);
 				pushSubscribed = true;
-				pushMessage = { type: 'success', text: 'プッシュ通知を有効にしました' };
+				pushMessage = { type: 'success', text: 'Push notifications enabled' };
 			}
 		} catch {
-			pushMessage = { type: 'error', text: 'エラーが発生しました' };
+			pushMessage = { type: 'error', text: 'An error occurred' };
 		} finally {
 			pushSubmitting = false;
 		}
@@ -86,12 +86,12 @@ export function createSettingsState(getData: () => PageData) {
 			});
 			const data = (await res.json()) as { ok?: boolean; error?: string };
 			if (res.ok) {
-				profileMessage = { type: 'success', text: 'プロフィールを保存しました' };
+				profileMessage = { type: 'success', text: 'Profile saved' };
 			} else {
-				profileMessage = { type: 'error', text: data.error ?? 'エラーが発生しました' };
+				profileMessage = { type: 'error', text: data.error ?? 'An error occurred' };
 			}
 		} catch {
-			profileMessage = { type: 'error', text: 'エラーが発生しました' };
+			profileMessage = { type: 'error', text: 'An error occurred' };
 		} finally {
 			profileSubmitting = false;
 		}
@@ -99,7 +99,7 @@ export function createSettingsState(getData: () => PageData) {
 
 	async function savePassword() {
 		if (newPassword !== confirmPassword) {
-			passwordMessage = { type: 'error', text: '新しいパスワードが一致しません' };
+			passwordMessage = { type: 'error', text: 'New passwords do not match' };
 			return;
 		}
 		passwordSubmitting = true;
@@ -112,15 +112,15 @@ export function createSettingsState(getData: () => PageData) {
 			});
 			const data = (await res.json()) as { ok?: boolean; error?: string };
 			if (res.ok) {
-				passwordMessage = { type: 'success', text: 'パスワードを変更しました' };
+				passwordMessage = { type: 'success', text: 'Password changed' };
 				currentPassword = '';
 				newPassword = '';
 				confirmPassword = '';
 			} else {
-				passwordMessage = { type: 'error', text: data.error ?? 'エラーが発生しました' };
+				passwordMessage = { type: 'error', text: data.error ?? 'An error occurred' };
 			}
 		} catch {
-			passwordMessage = { type: 'error', text: 'エラーが発生しました' };
+			passwordMessage = { type: 'error', text: 'An error occurred' };
 		} finally {
 			passwordSubmitting = false;
 		}
@@ -128,7 +128,7 @@ export function createSettingsState(getData: () => PageData) {
 
 	async function saveFollowUpDays() {
 		if (!followUpDays || followUpDays < 1) {
-			followUpMessage = { type: 'error', text: '1以上の数値を入力してください' };
+			followUpMessage = { type: 'error', text: 'Please enter a number of 1 or greater' };
 			return;
 		}
 		followUpSubmitting = true;
@@ -141,12 +141,12 @@ export function createSettingsState(getData: () => PageData) {
 			});
 			const data = (await res.json()) as { ok?: boolean; error?: string };
 			if (res.ok) {
-				followUpMessage = { type: 'success', text: '保存しました' };
+				followUpMessage = { type: 'success', text: 'Saved' };
 			} else {
-				followUpMessage = { type: 'error', text: data.error ?? 'エラーが発生しました' };
+				followUpMessage = { type: 'error', text: data.error ?? 'An error occurred' };
 			}
 		} catch {
-			followUpMessage = { type: 'error', text: 'エラーが発生しました' };
+			followUpMessage = { type: 'error', text: 'An error occurred' };
 		} finally {
 			followUpSubmitting = false;
 		}

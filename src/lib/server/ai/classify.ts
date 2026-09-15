@@ -1,37 +1,45 @@
 import { ask } from './client';
 import { stripCodeFence } from './json';
 
-export const TAGS = ['商談', 'クレーム', '情報収集', 'フォローアップ', '納品・対応', '社内連絡', 'その他'] as const;
+export const TAGS = [
+	'Sales',
+	'Complaint',
+	'Information Gathering',
+	'Follow-up',
+	'Delivery & Support',
+	'Internal Communication',
+	'Other'
+] as const;
 export type Tag = (typeof TAGS)[number];
 
-const SYSTEM = `あなたは営業活動の分類AIです。
-与えられた活動記録テキストを読み、以下のカテゴリのうち最も適切なものを1〜3個選んでください。
+const SYSTEM = `You are an AI that classifies sales activities.
+Read the given activity record text and choose the 1-3 most appropriate categories from the list below.
 
-カテゴリ:
-- 商談: 提案・見積・契約・交渉など商談に関する活動
-- クレーム: 苦情・問題報告・クレーム対応
-- 情報収集: ヒアリング・調査・情報共有
-- フォローアップ: 定期訪問・確認・関係維持
-- 納品・対応: 製品納品・工事・サポート・技術対応
-- 社内連絡: 社内会議・報告・引き継ぎ
-- その他: 上記に当てはまらない活動
+Categories:
+- Sales: Activities related to deals, such as proposals, quotes, contracts, or negotiations
+- Complaint: Complaints, issue reports, or complaint handling
+- Information Gathering: Interviews, research, or information sharing
+- Follow-up: Regular visits, check-ins, or relationship maintenance
+- Delivery & Support: Product delivery, installation work, support, or technical assistance
+- Internal Communication: Internal meetings, reports, or handovers
+- Other: Activities that do not fit any of the above
 
-必ずJSON配列のみを返してください。説明文は不要です。
-例: ["商談", "フォローアップ"]`;
+Return only a JSON array, with no other text.
+Example: ["Sales", "Follow-up"]`;
 
 export async function classifyActivity(
 	apiKey: string,
 	body: string,
 	mockAi?: string
 ): Promise<Tag[]> {
-	if (mockAi) return ['その他'];
+	if (mockAi) return ['Other'];
 
 	try {
 		const raw = await ask(apiKey, SYSTEM, body);
 		const parsed = JSON.parse(stripCodeFence(raw)) as unknown;
-		if (!Array.isArray(parsed)) return ['その他'];
+		if (!Array.isArray(parsed)) return ['Other'];
 		return parsed.filter((t): t is Tag => TAGS.includes(t as Tag));
 	} catch {
-		return ['その他'];
+		return ['Other'];
 	}
 }

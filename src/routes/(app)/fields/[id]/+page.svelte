@@ -15,8 +15,8 @@
 
 <div class="page">
 	<header class="page-header">
-		<a href="/" class="back">← 活動履歴</a>
-		<h1>活動を修正</h1>
+		<a href="/" class="back">← Activity History</a>
+		<h1>Edit Activity</h1>
 	</header>
 
 	{#if form?.error}
@@ -35,7 +35,7 @@
 				contenteditable={edit.submitting ? 'false' : 'true'}
 				role="textbox"
 				aria-multiline="true"
-				data-placeholder="活動内容を入力してください"
+				data-placeholder="Enter activity details"
 				bind:this={edit.editorEl}
 				oninput={() => edit.handleEditorInput()}
 				onkeydown={(e) => edit.handleKeydown(e)}
@@ -44,7 +44,9 @@
 				onpaste={(e) => edit.handlePaste(e)}
 				onblur={() => edit.handleEditorBlur()}
 				tabindex="0"
-			>{@html initialEditorHtml}</div>
+			>
+				{@html initialEditorHtml}
+			</div>
 			{#if edit.showDropdown && edit.filteredCustomers.length > 0}
 				<ul class="mention-dropdown">
 					{#each edit.filteredCustomers as c (c.id)}
@@ -67,16 +69,20 @@
 			>
 				{#if edit.isPrivate}
 					<Lock size={13} />
-					非対象
+					Excluded
 				{:else}
 					<Globe size={13} />
-					要約対象
+					Included in Summary
 				{/if}
 			</button>
 			<div class="actions">
-				<a href="/" class="btn-cancel">キャンセル</a>
-				<button type="submit" class="btn-save" disabled={edit.submitting || !edit.hasContent || edit.uploading}>
-					保存
+				<a href="/" class="btn-cancel">Cancel</a>
+				<button
+					type="submit"
+					class="btn-save"
+					disabled={edit.submitting || !edit.hasContent || edit.uploading}
+				>
+					Save
 				</button>
 			</div>
 		</div>
@@ -216,7 +222,10 @@
 		color: var(--color-text-muted);
 		font-size: 0.8125rem;
 		cursor: pointer;
-		transition: color 0.15s, border-color 0.15s, background 0.15s;
+		transition:
+			color 0.15s,
+			border-color 0.15s,
+			background 0.15s;
 
 		&.private {
 			color: var(--color-primary);

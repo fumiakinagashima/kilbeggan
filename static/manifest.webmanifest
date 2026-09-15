@@ -1,7 +1,7 @@
 {
 	"name": "Kilbeggan",
 	"short_name": "Kilbeggan",
-	"description": "活動記録をもっとシンプルに",
+	"description": "Simpler activity logging",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#f3f3f3",

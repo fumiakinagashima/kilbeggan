@@ -25,7 +25,7 @@ export function createCustomerNewState() {
 			});
 			const data = (await res.json()) as { id?: string; error?: string };
 			if (!res.ok) {
-				error = data.error ?? 'エラーが発生しました';
+				error = data.error ?? 'An error occurred';
 				return;
 			}
 			goto(`/customers/${data.id}`);

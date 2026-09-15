@@ -18,18 +18,21 @@ export async function PATCH({ params, request, platform, locals }) {
 	if (!reminder) return json({ error: 'Not found' }, { status: 404 });
 	if (reminder.userId !== locals.user.userId) return json({ error: 'Forbidden' }, { status: 403 });
 	if (reminder.status !== 'pending') {
-		return json({ error: '送信済みのリマインダーは編集できません' }, { status: 400 });
+		return json(
+			{ error: 'Reminders that have already been sent cannot be edited' },
+			{ status: 400 }
+		);
 	}
 
 	const body = await request.json();
 	const parsed = updateSchema.safeParse(body);
-	if (!parsed.success) return json({ error: '入力値が不正です' }, { status: 400 });
+	if (!parsed.success) return json({ error: 'Invalid input' }, { status: 400 });
 
 	const channels = parsed.data.channels
 		.split(',')
 		.map((c) => c.trim())
 		.filter(Boolean);
-	if (channels.length === 0) return json({ error: '入力値が不正です' }, { status: 400 });
+	if (channels.length === 0) return json({ error: 'Invalid input' }, { status: 400 });
 
 	const row = await updateReminder(db, params.id, {
 		remindAt: parseJstDatetime(parsed.data.remind_at),

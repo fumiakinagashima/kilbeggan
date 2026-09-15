@@ -7,26 +7,32 @@
 		disabled?: boolean;
 	}
 
-	let { company = $bindable(), phone = $bindable(), email = $bindable(), notes = $bindable(), disabled = false }: Props = $props();
+	let {
+		company = $bindable(),
+		phone = $bindable(),
+		email = $bindable(),
+		notes = $bindable(),
+		disabled = false
+	}: Props = $props();
 </script>
 
 <div class="field">
-	<label for="company">会社名 <span class="required">*</span></label>
+	<label for="company">Company Name <span class="required">*</span></label>
 	<input id="company" name="company" type="text" bind:value={company} required {disabled} />
 </div>
 
 <div class="field">
-	<label for="phone">電話番号</label>
+	<label for="phone">Phone Number</label>
 	<input id="phone" name="phone" type="tel" bind:value={phone} {disabled} />
 </div>
 
 <div class="field">
-	<label for="email">メール</label>
+	<label for="email">Email</label>
 	<input id="email" name="email" type="email" bind:value={email} {disabled} />
 </div>
 
 <div class="field">
-	<label for="notes">備考</label>
+	<label for="notes">Notes</label>
 	<textarea id="notes" name="notes" rows="6" bind:value={notes} {disabled}></textarea>
 </div>
 
